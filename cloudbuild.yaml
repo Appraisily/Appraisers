@@ -5,11 +5,9 @@ steps:
       - build
       - '-t'
       - 'gcr.io/$PROJECT_ID/appraisers-frontend:$COMMIT_SHA'
-      - '--build-arg'
-      - 'REACT_APP_BACKEND_URL=https://backend-856401495068.us-central1.run.app'
       - '.'
 
-  # Step 2: Push the Docker image
+  # Step 2: Push the Docker image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - push
