@@ -1,5 +1,5 @@
 steps:
-  # Tus pasos de compilación existentes
+  # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - build
@@ -9,6 +9,13 @@ steps:
       - 'REACT_APP_BACKEND_URL=https://backend-856401495068.us-central1.run.app'
       - '.'
 
+  # Step 2: Push the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - push
+      - 'gcr.io/$PROJECT_ID/appraisers-frontend:$COMMIT_SHA'
+
+  # Step 3: Deploy to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'run'
@@ -17,7 +24,7 @@ steps:
       - '--image'
       - 'gcr.io/$PROJECT_ID/appraisers-frontend:$COMMIT_SHA'
       - '--region'
-      - 'us-central1'
+      - 'us-central1'  # Replace with your region
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
