@@ -1,4 +1,5 @@
 steps:
+  # Tus pasos de compilación existentes
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - build
@@ -8,7 +9,6 @@ steps:
       - 'REACT_APP_BACKEND_URL=https://backend-856401495068.us-central1.run.app'
       - '.'
 
-  # Opcional: Despliegue a Cloud Run después de la compilación
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'run'
@@ -17,10 +17,13 @@ steps:
       - '--image'
       - 'gcr.io/$PROJECT_ID/appraisers-frontend:$COMMIT_SHA'
       - '--region'
-      - 'us-central1'  # Cambia esto a tu región preferida
+      - 'us-central1'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
 
 images:
   - 'gcr.io/$PROJECT_ID/appraisers-frontend:$COMMIT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
