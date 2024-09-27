@@ -1,0 +1,11 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - build
+    - '--build-arg'
+    - 'REACT_APP_BACKEND_URL=https://your-backend-url'
+    - '-t'
+    - 'gcr.io/$PROJECT_ID/appraisers-frontend:$COMMIT_SHA'
+    - '.'
+images:
+- 'gcr.io/$PROJECT_ID/appraisers-frontend:$COMMIT_SHA'
