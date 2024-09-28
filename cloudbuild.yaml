@@ -1,3 +1,5 @@
+# cloudbuild.yaml
+
 steps:
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
@@ -32,14 +34,14 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
 
-  # Debug Step: Print Nginx Configuration
+  # Step 4: Debug Step - Verify Nginx Configuration
   - name: 'gcr.io/cloud-builders/docker'
     id: Debug
     entrypoint: 'sh'
     args:
       - '-c'
       - |
-        docker run --rm us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/appraisers-frontend:$SHORT_SHA cat /etc/nginx/conf.d/default.conf
+        docker run --rm -e PORT=8080 us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/appraisers-frontend:$SHORT_SHA cat /etc/nginx/conf.d/default.conf
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/appraisers-frontend:$SHORT_SHA'
