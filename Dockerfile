@@ -1,5 +1,3 @@
-# Dockerfile
-
 # Stage 1: Build the React app
 FROM node:16-alpine AS build
 
@@ -40,4 +38,4 @@ COPY default.conf.template /etc/nginx/conf.d/default.conf.template
 EXPOSE 8080
 
 # Start Nginx with port substitution
-CMD ["/bin/sh", "-c", "envsubst '$PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "envsubst '${PORT}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
