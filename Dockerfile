@@ -37,5 +37,8 @@ COPY default.conf.template /etc/nginx/conf.d/default.conf.template
 # Expose port 8080 (Cloud Run expects this)
 EXPOSE 8080
 
+# Set the default PORT environment variable
+ENV PORT=8080
+
 # Start Nginx with port substitution
-CMD ["/bin/sh", "-c", "envsubst '${PORT}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "envsubst '$PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
