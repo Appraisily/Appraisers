@@ -2,19 +2,25 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Welcome from './Welcome'; // Import the Welcome component
+import './App.css'; // Optional: For additional styling
 
 function App() {
   const [appraisals, setAppraisals] = useState([]);
   const [inputs, setInputs] = useState({});
+  const [loading, setLoading] = useState(true); // New state for loading
+  const [error, setError] = useState(null); // New state for errors
 
   // Fetch pending appraisals from the backend
   const fetchAppraisals = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/appraisals`);
       setAppraisals(response.data);
+      setLoading(false); // Data fetched successfully
     } catch (error) {
       console.error('Error fetching appraisals:', error);
-      alert('Error fetching appraisals.');
+      setError('Error fetching appraisals. Please try again later.');
+      setLoading(false); // Stop loading even if there's an error
     }
   };
 
@@ -53,6 +59,20 @@ function App() {
       alert('Error updating appraisal.');
     }
   };
+
+  // Conditional Rendering based on loading and error states
+  if (loading) {
+    return <Welcome />;
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <h1>Oops!</h1>
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="App">
