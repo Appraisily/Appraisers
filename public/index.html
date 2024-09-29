@@ -5,8 +5,176 @@
   <head>
     <meta charset="utf-8" />
     <title>Appraisers Frontend</title>
+    <!-- Cargar la biblioteca de Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+      /* Estilos básicos para centrar el contenido */
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+      }
+      #appraisals {
+        margin-top: 20px;
+        width: 80%;
+        max-width: 800px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+      }
+      th {
+        background-color: #f4f4f4;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <h1>Appraisers Dashboard</h1>
+
+    <!-- Botón de Google Sign-In -->
+    <div id="g_id_onload"
+         data-client_id="856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin"
+         data-type="standard"
+         data-shape="rectangular"
+         data-theme="outline"
+         data-text="sign_in_with"
+         data-size="large"
+         data-logo_alignment="left">
+    </div>
+
+    <!-- Contenedor para las evaluaciones -->
+    <div id="appraisals"></div>
+
+    <script>
+      // Función para manejar la respuesta del ID Token
+      function handleCredentialResponse(response) {
+        const idToken = response.credential;
+        console.log("ID Token:", idToken);
+        
+        // Enviar el ID token al backend para su validación y obtener el JWT
+        fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ idToken })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Guardar el JWT en el almacenamiento local
+            localStorage.setItem('jwtToken', data.token);
+            // Proceder a cargar las evaluaciones
+            loadAppraisals();
+          } else {
+            // Manejar el fallo de autenticación
+            alert('Autenticación fallida.');
+          }
+        })
+        .catch(err => {
+          console.error('Error durante la autenticación:', err);
+        });
+      }
+
+      // Función para cargar las evaluaciones desde el backend
+      function loadAppraisals() {
+        const jwtToken = localStorage.getItem('jwtToken');
+        
+        fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals', {
+          headers: {
+            'Authorization': `Bearer ${jwtToken}`
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          // Renderizar la lista de evaluaciones en el frontend
+          const appraisalsDiv = document.getElementById('appraisals');
+          if (data.length === 0) {
+            appraisalsDiv.innerHTML = '<p>No hay evaluaciones pendientes.</p>';
+            return;
+          }
+
+          let tableHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Fecha</th>
+                  <th>Tipo de Evaluación</th>
+                  <th>Identificador</th>
+                  <th>Email</th>
+                  <th>Categoría</th>
+                  <th>Estado</th>
+                  <th>URL</th>
+                  <th>Descripción Actual</th>
+                  <th>Descripción Humana</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          data.forEach(appraisal => {
+            tableHTML += `
+              <tr>
+                <td>${appraisal.id}</td>
+                <td>${appraisal.date}</td>
+                <td>${appraisal.appraisalType}</td>
+                <td>${appraisal.identifier}</td>
+                <td>${appraisal.email}</td>
+                <td>${appraisal.category}</td>
+                <td>${appraisal.status}</td>
+                <td><a href="${appraisal.url}" target="_blank">Enlace</a></td>
+                <td>${appraisal.currentDescription}</td>
+                <td>${appraisal.humanDescription}</td>
+              </tr>
+            `;
+          });
+
+          tableHTML += `
+              </tbody>
+            </table>
+          `;
+
+          appraisalsDiv.innerHTML = tableHTML;
+        })
+        .catch(err => {
+          console.error('Error al obtener las evaluaciones:', err);
+          alert('Error al obtener las evaluaciones.');
+        });
+      }
+
+      // Función para cerrar sesión
+      function logout() {
+        localStorage.removeItem('jwtToken');
+        location.reload();
+      }
+
+      // Agregar botón de cerrar sesión si el usuario está autenticado
+      window.onload = () => {
+        const jwtToken = localStorage.getItem('jwtToken');
+        if (jwtToken) {
+          const logoutButton = document.createElement('button');
+          logoutButton.textContent = 'Cerrar Sesión';
+          logoutButton.style.marginTop = '20px';
+          logoutButton.onclick = logout;
+          document.body.appendChild(logoutButton);
+
+          // Cargar las evaluaciones al cargar la página
+          loadAppraisals();
+        }
+      };
+    </script>
   </body>
 </html>
+
