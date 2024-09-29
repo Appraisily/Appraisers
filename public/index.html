@@ -5,17 +5,17 @@
   <head>
     <meta charset="utf-8" />
     <title>Appraisers Frontend</title>
-    <!-- Cargar la biblioteca de Google Identity Services -->
+    <!-- Load Google Identity Services Library -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-      /* Reset de márgenes y paddings */
+      /* Reset margins and paddings */
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
 
-      /* Estilos del cuerpo */
+      /* Body Styles */
       body {
         font-family: 'Arial', sans-serif;
         background-color: #f9f9f9;
@@ -28,10 +28,10 @@
         padding: 20px;
       }
 
-      /* Contenedor principal */
+      /* Main Container */
       .container {
-        max-width: 800px; /* Aumentado para mejor visualización de la tabla */
         width: 100%;
+        max-width: 800px;
         background-color: #ffffff;
         border-radius: 8px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -50,20 +50,20 @@
         height: auto;
       }
 
-      /* Título */
+      /* Title */
       .title {
         font-size: 24px;
         color: #333333;
         margin-bottom: 20px;
       }
 
-      /* Botón de Google Sign-In */
+      /* Sign-In Button */
       .g_id_signin {
         display: inline-block;
         margin-top: 20px;
       }
 
-      /* Botón de Cerrar Sesión */
+      /* Logout Button */
       #logout-button {
         margin-top: 30px;
         padding: 12px 24px;
@@ -97,7 +97,7 @@
         100% { transform: rotate(360deg); }
       }
 
-      /* Mensajes de Error/Éxito */
+      /* Success/Error Messages */
       #message {
         margin-top: 20px;
         padding: 15px 20px;
@@ -118,7 +118,7 @@
         border: 1px solid #f5c6cb;
       }
 
-      /* Tabla de Evaluaciones */
+      /* Appraisals Table */
       #appraisals {
         margin-top: 30px;
         width: 100%;
@@ -145,22 +145,6 @@
 
       tr:nth-child(even) {
         background-color: #f9f9f9;
-      }
-
-      /* Botón de Acción en la Tabla */
-      .action-button {
-        padding: 8px 16px;
-        background-color: #007bff;
-        color: #ffffff;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.3s ease;
-      }
-
-      .action-button:hover {
-        background-color: #0056b3;
       }
 
       /* Responsive Table */
@@ -219,6 +203,23 @@
       .footer a:hover {
         text-decoration: underline;
       }
+
+      /* Action Button */
+      .action-button {
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+      }
+
+      .action-button:hover {
+        background-color: #0056b3;
+      }
     </style>
   </head>
   <body>
@@ -230,13 +231,13 @@
         </a>
       </div>
 
-      <!-- Título -->
-      <div class="title">Bienvenido al Appraisers Dashboard</div>
+      <!-- Title -->
+      <div class="title">Welcome to the Appraisers Dashboard</div>
 
-      <!-- Mensajes de Error/Éxito -->
+      <!-- Success/Error Messages -->
       <div id="message"></div>
 
-      <!-- Botón de Google Sign-In -->
+      <!-- Google Sign-In Button -->
       <div id="g_id_onload"
            data-client_id="856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
            data-callback="handleCredentialResponse"
@@ -254,23 +255,23 @@
       <!-- Loader -->
       <div id="loader"></div>
 
-      <!-- Contenedor para las evaluaciones -->
+      <!-- Appraisals Table -->
       <div id="appraisals"></div>
 
-      <!-- Botón de Cerrar Sesión -->
-      <button id="logout-button" style="display: none;">Cerrar Sesión</button>
+      <!-- Logout Button -->
+      <button id="logout-button" style="display: none;">Logout</button>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      © <span id="current-year"></span> Appraisily. Todos los derechos reservados.
+      © <span id="current-year"></span> Appraisily. All rights reserved.
     </div>
 
     <script>
-      // Actualizar el año en el footer
+      // Update the current year in the footer
       document.getElementById('current-year').textContent = new Date().getFullYear();
 
-      // Función para mostrar mensajes
+      // Function to show messages
       function showMessage(type, text) {
         const messageDiv = document.getElementById('message');
         messageDiv.className = type === 'success' ? 'success' : 'error';
@@ -278,22 +279,22 @@
         messageDiv.style.display = 'block';
       }
 
-      // Función para ocultar mensajes
+      // Function to hide messages
       function hideMessage() {
         const messageDiv = document.getElementById('message');
         messageDiv.style.display = 'none';
       }
 
-      // Función para manejar la respuesta del ID Token
+      // Function to handle the ID Token response from Google
       function handleCredentialResponse(response) {
         const idToken = response.credential;
         console.log("ID Token:", idToken);
         
-        // Mostrar el loader mientras se realiza la autenticación
+        // Show the loader while authenticating
         document.getElementById('loader').style.display = 'block';
         hideMessage();
         
-        // Enviar el ID token al backend para su validación y obtener el JWT
+        // Send the ID token to the backend for validation and to get a JWT
         fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
           method: 'POST',
           headers: {
@@ -303,43 +304,43 @@
         })
         .then(res => res.json())
         .then(data => {
-          // Ocultar el loader después de recibir la respuesta
+          // Hide the loader after receiving the response
           document.getElementById('loader').style.display = 'none';
           
-          if (data.success && data.token) {
-            // Guardar el JWT en el almacenamiento local
+          if (data.success) {
+            // Store the JWT in localStorage
             localStorage.setItem('jwtToken', data.token);
-            // Mostrar el botón de cerrar sesión
+            // Show the logout button
             document.getElementById('logout-button').style.display = 'block';
-            // Ocultar el botón de login
+            // Hide the sign-in button
             document.querySelector('.g_id_signin').style.display = 'none';
-            // Mostrar mensaje de éxito
-            showMessage('success', 'Autenticación exitosa. Cargando evaluaciones...');
-            // Proceder a cargar las evaluaciones
+            // Show a success message
+            showMessage('success', 'Authentication successful. Loading appraisals...');
+            // Load the appraisals
             loadAppraisals();
           } else {
-            // Manejar el fallo de autenticación
-            showMessage('error', 'Autenticación fallida. Por favor, intenta nuevamente.');
+            // Handle authentication failure
+            showMessage('error', 'Authentication failed. Please try again.');
           }
         })
         .catch(err => {
-          // Ocultar el loader en caso de error
+          // Hide the loader in case of error
           document.getElementById('loader').style.display = 'none';
-          console.error('Error durante la autenticación:', err);
-          showMessage('error', 'Error durante la autenticación. Por favor, intenta nuevamente.');
+          console.error('Authentication Error:', err);
+          showMessage('error', 'Error during authentication. Please try again.');
         });
       }
 
-      // Función para cargar las evaluaciones desde el backend
+      // Function to load appraisals from the backend
       function loadAppraisals() {
         const jwtToken = localStorage.getItem('jwtToken');
         
         if (!jwtToken) {
-          showMessage('error', 'No estás autenticado. Por favor, inicia sesión.');
+          showMessage('error', 'You are not authenticated. Please log in.');
           return;
         }
 
-        // Mostrar el loader mientras se cargan las evaluaciones
+        // Show the loader while fetching appraisals
         document.getElementById('loader').style.display = 'block';
         hideMessage();
 
@@ -349,22 +350,22 @@
           }
         })
         .then(res => {
-          // Ocultar el loader después de recibir la respuesta
+          // Hide the loader after receiving the response
           document.getElementById('loader').style.display = 'none';
           
           if (res.status === 401) {
-            throw new Error('No autorizado. Por favor, inicia sesión nuevamente.');
+            throw new Error('Unauthorized. Please log in again.');
           } else if (res.status === 403) {
-            throw new Error('Acceso prohibido. No tienes permisos para ver este contenido.');
+            throw new Error('Forbidden. You do not have permission to view this content.');
           }
           return res.json();
         })
         .then(data => {
-          // Renderizar la lista de evaluaciones en el frontend
+          // Render the appraisals table
           const appraisalsDiv = document.getElementById('appraisals');
           if (data.length === 0) {
-            appraisalsDiv.innerHTML = '<p>No hay evaluaciones pendientes.</p>';
-            showMessage('success', 'No hay evaluaciones pendientes para mostrar.');
+            appraisalsDiv.innerHTML = '<p>No pending appraisals.</p>';
+            showMessage('success', 'No pending appraisals to display.');
             return;
           }
 
@@ -372,11 +373,11 @@
             <table>
               <thead>
                 <tr>
-                  <th>Fecha</th>
-                  <th>Tipo de Evaluación</th>
-                  <th>Número de Evaluación</th>
-                  <th>Estado</th>
-                  <th>Acción</th>
+                  <th>Date</th>
+                  <th>Appraisal Type</th>
+                  <th>Appraisal Number</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -385,12 +386,12 @@
           data.forEach(appraisal => {
             tableHTML += `
               <tr>
-                <td data-label="Fecha">${appraisal.date}</td>
-                <td data-label="Tipo de Evaluación">${appraisal.appraisalType}</td>
-                <td data-label="Número de Evaluación">${appraisal.identifier}</td>
-                <td data-label="Estado">${appraisal.status}</td>
-                <td data-label="Acción">
-                  <button class="action-button" onclick="openAppraisal(${appraisal.id})">Completar</button>
+                <td data-label="Date">${appraisal.date}</td>
+                <td data-label="Appraisal Type">${appraisal.appraisalType}</td>
+                <td data-label="Appraisal Number">${appraisal.identifier}</td>
+                <td data-label="Status">${appraisal.status}</td>
+                <td data-label="Action">
+                  <a href="appraisal.html?id=${appraisal.id}" class="action-button">Complete</a>
                 </td>
               </tr>
             `;
@@ -402,73 +403,67 @@
           `;
 
           appraisalsDiv.innerHTML = tableHTML;
-          showMessage('success', 'Evaluaciones cargadas exitosamente.');
+          showMessage('success', 'Appraisals loaded successfully.');
         })
         .catch(err => {
-          // Ocultar el loader en caso de error
+          // Hide the loader in case of error
           document.getElementById('loader').style.display = 'none';
-          console.error('Error al obtener las evaluaciones:', err);
-          showMessage('error', err.message || 'Error al obtener las evaluaciones.');
+          console.error('Error fetching appraisals:', err);
+          showMessage('error', err.message || 'Error fetching appraisals.');
         });
       }
 
-      // Función para abrir la página de completar evaluación
-      function openAppraisal(id) {
-        // Redireccionar a una nueva página con el ID de la evaluación como parámetro
-        window.location.href = `appraisal.html?id=${id}`;
-      }
-
-      // Función para cerrar sesión
+      // Function to handle logout
       function logout() {
-        // Mostrar el loader mientras se realiza el cierre de sesión
+        // Show the loader while logging out
         document.getElementById('loader').style.display = 'block';
         hideMessage();
 
         fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
-          method: 'POST'
-          // No se requieren credenciales ya que el backend no usa cookies
+          method: 'POST',
+          credentials: 'include' // Include cookies in the request
         })
         .then(res => res.json())
         .then(data => {
-          // Ocultar el loader después de recibir la respuesta
+          // Hide the loader after receiving the response
           document.getElementById('loader').style.display = 'none';
           
           if (data.success) {
-            // Eliminar el JWT del almacenamiento local
+            // Remove the JWT from localStorage
             localStorage.removeItem('jwtToken');
-            // Mostrar el botón de login
+            // Show the sign-in button
             document.querySelector('.g_id_signin').style.display = 'block';
-            // Ocultar el botón de cerrar sesión
+            // Hide the logout button
             document.getElementById('logout-button').style.display = 'none';
-            // Limpiar las evaluaciones
+            // Clear the appraisals table
             document.getElementById('appraisals').innerHTML = '';
-            // Mostrar mensaje de éxito
-            showMessage('success', 'Has cerrado sesión exitosamente.');
+            // Show a success message
+            showMessage('success', 'You have been logged out successfully.');
           } else {
-            // Manejar el fallo al cerrar sesión
-            showMessage('error', 'Error al cerrar sesión. Por favor, intenta nuevamente.');
+            // Handle logout failure
+            showMessage('error', 'Error during logout. Please try again.');
           }
         })
         .catch(err => {
-          // Ocultar el loader en caso de error
+          // Hide the loader in case of error
           document.getElementById('loader').style.display = 'none';
-          console.error('Error al cerrar sesión:', err);
-          showMessage('error', 'Error al cerrar sesión. Por favor, intenta nuevamente.');
+          console.error('Logout Error:', err);
+          showMessage('error', 'Error during logout. Please try again.');
         });
       }
 
-      // Agregar evento al botón de cerrar sesión
+      // Add event listener to the logout button
       document.getElementById('logout-button').addEventListener('click', logout);
 
-      // Verificar si el usuario ya está autenticado al cargar la página
+      // Check if the user is already authenticated on page load
       window.onload = () => {
         const jwtToken = localStorage.getItem('jwtToken');
         if (jwtToken) {
-          // Mostrar el botón de cerrar sesión
+          // Show the logout button
           document.getElementById('logout-button').style.display = 'block';
-          // Ocultar el botón de login
+          // Hide the sign-in button
           document.querySelector('.g_id_signin').style.display = 'none';
-          // Cargar las evaluaciones
+          // Load the appraisals
           loadAppraisals();
         }
       };
