@@ -285,51 +285,49 @@
         messageDiv.style.display = 'none';
       }
 
-      // Function to handle the ID Token response from Google
-      function handleCredentialResponse(response) {
-        const idToken = response.credential;
-        console.log("ID Token:", idToken);
-        
-        // Show the loader while authenticating
-        document.getElementById('loader').style.display = 'block';
-        hideMessage();
-        
-        // Send the ID token to the backend for validation and to get a JWT
-        fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ idToken })
-        })
-        .then(res => res.json())
-        .then(data => {
-          // Hide the loader after receiving the response
-          document.getElementById('loader').style.display = 'none';
-          
-          if (data.success) {
-            // Store the JWT in localStorage
-            localStorage.setItem('jwtToken', data.token);
-            // Show the logout button
-            document.getElementById('logout-button').style.display = 'block';
-            // Hide the sign-in button
-            document.querySelector('.g_id_signin').style.display = 'none';
-            // Show a success message
-            showMessage('success', 'Authentication successful. Loading appraisals...');
-            // Load the appraisals
-            loadAppraisals();
-          } else {
-            // Handle authentication failure
-            showMessage('error', 'Authentication failed. Please try again.');
-          }
-        })
-        .catch(err => {
-          // Hide the loader in case of error
-          document.getElementById('loader').style.display = 'none';
-          console.error('Authentication Error:', err);
-          showMessage('error', 'Error during authentication. Please try again.');
-        });
-      }
+ function handleCredentialResponse(response) {
+  const idToken = response.credential;
+  console.log("ID Token:", idToken);
+  
+  // Show loader while authenticating
+  document.getElementById('loader').style.display = 'block';
+  hideMessage();
+  
+  // Send ID token to backend for validation and JWT creation
+  fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ idToken }),
+    credentials: 'include' // Include cookies in the request
+  })
+  .then(res => res.json())
+  .then(data => {
+    // Hide loader after response
+    document.getElementById('loader').style.display = 'none';
+    
+    if (data.success) {
+      // Authentication successful
+      showMessage('success', 'Authentication successful. Loading appraisals...');
+      // Hide sign-in button and show logout button
+      document.querySelector('.g_id_signin').style.display = 'none';
+      document.getElementById('logout-button').style.display = 'block';
+      // Load appraisals
+      loadAppraisals();
+    } else {
+      // Authentication failed
+      showMessage('error', 'Authentication failed. Please try again.');
+    }
+  })
+  .catch(err => {
+    // Hide loader on error
+    document.getElementById('loader').style.display = 'none';
+    console.error('Error during authentication:', err);
+    showMessage('error', 'Error during authentication. Please try again.');
+  });
+}
+
 
       // Function to load appraisals from the backend
       function loadAppraisals() {
