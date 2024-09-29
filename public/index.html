@@ -30,7 +30,7 @@
 
       /* Contenedor principal */
       .container {
-        max-width: 800px;
+        max-width: 800px; /* Aumentado para mejor visualización de la tabla */
         width: 100%;
         background-color: #ffffff;
         border-radius: 8px;
@@ -147,7 +147,7 @@
         background-color: #f9f9f9;
       }
 
-      /* Botón en la tabla */
+      /* Botón de Acción en la Tabla */
       .action-button {
         padding: 8px 16px;
         background-color: #007bff;
@@ -155,9 +155,8 @@
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        font-size: 14px;
         transition: background-color 0.3s ease;
-        text-decoration: none;
-        display: inline-block;
       }
 
       .action-button:hover {
@@ -307,7 +306,7 @@
           // Ocultar el loader después de recibir la respuesta
           document.getElementById('loader').style.display = 'none';
           
-          if (data.success) {
+          if (data.success && data.token) {
             // Guardar el JWT en el almacenamiento local
             localStorage.setItem('jwtToken', data.token);
             // Mostrar el botón de cerrar sesión
@@ -376,7 +375,7 @@
                   <th>Fecha</th>
                   <th>Tipo de Evaluación</th>
                   <th>Número de Evaluación</th>
-                  <th>Estatus</th>
+                  <th>Estado</th>
                   <th>Acción</th>
                 </tr>
               </thead>
@@ -389,9 +388,9 @@
                 <td data-label="Fecha">${appraisal.date}</td>
                 <td data-label="Tipo de Evaluación">${appraisal.appraisalType}</td>
                 <td data-label="Número de Evaluación">${appraisal.identifier}</td>
-                <td data-label="Estatus">${appraisal.status}</td>
+                <td data-label="Estado">${appraisal.status}</td>
                 <td data-label="Acción">
-                  <a href="appraisal.html?id=${appraisal.identifier}" class="action-button">Completar</a>
+                  <button class="action-button" onclick="openAppraisal(${appraisal.id})">Completar</button>
                 </td>
               </tr>
             `;
@@ -413,6 +412,12 @@
         });
       }
 
+      // Función para abrir la página de completar evaluación
+      function openAppraisal(id) {
+        // Redireccionar a una nueva página con el ID de la evaluación como parámetro
+        window.location.href = `appraisal.html?id=${id}`;
+      }
+
       // Función para cerrar sesión
       function logout() {
         // Mostrar el loader mientras se realiza el cierre de sesión
@@ -420,8 +425,8 @@
         hideMessage();
 
         fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
-          method: 'POST',
-          credentials: 'include' // Incluir las cookies en la solicitud
+          method: 'POST'
+          // No se requieren credenciales ya que el backend no usa cookies
         })
         .then(res => res.json())
         .then(data => {
