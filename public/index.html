@@ -1,7 +1,7 @@
 <!-- public/index.html -->
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="utf-8" />
     <title>Appraisers Frontend</title>
@@ -16,22 +16,101 @@
         justify-content: center;
         height: 100vh;
         font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f9f9f9;
+      }
+      h1 {
+        margin-bottom: 20px;
       }
       #appraisals {
         margin-top: 20px;
-        width: 80%;
-        max-width: 800px;
+        width: 90%;
+        max-width: 1000px;
+        overflow-x: auto;
       }
       table {
         width: 100%;
         border-collapse: collapse;
+        background-color: #fff;
       }
       th, td {
-        padding: 8px 12px;
-        border: 1px solid #ccc;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: left;
       }
       th {
         background-color: #f4f4f4;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      #logout-button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #d9534f;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      #logout-button:hover {
+        background-color: #c9302c;
+      }
+      /* Loader Styles */
+      #loader {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #3498db;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin-top: 20px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Responsive Table */
+      @media screen and (max-width: 600px) {
+        table, thead, tbody, th, td, tr {
+          display: block;
+        }
+        th {
+          position: absolute;
+          top: -9999px;
+          left: -9999px;
+        }
+        tr {
+          margin-bottom: 1rem;
+        }
+        td {
+          border: none;
+          position: relative;
+          padding-left: 50%;
+        }
+        td:before {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          width: 45%;
+          padding-right: 10px;
+          white-space: nowrap;
+          font-weight: bold;
+        }
+        /* Label each cell with the corresponding header */
+        td:nth-of-type(1):before { content: "ID"; }
+        td:nth-of-type(2):before { content: "Fecha"; }
+        td:nth-of-type(3):before { content: "Tipo de Evaluación"; }
+        td:nth-of-type(4):before { content: "Identificador"; }
+        td:nth-of-type(5):before { content: "Email"; }
+        td:nth-of-type(6):before { content: "Categoría"; }
+        td:nth-of-type(7):before { content: "Estado"; }
+        td:nth-of-type(8):before { content: "URL"; }
+        td:nth-of-type(9):before { content: "Descripción Actual"; }
+        td:nth-of-type(10):before { content: "Descripción Humana"; }
       }
     </style>
   </head>
@@ -53,14 +132,23 @@
          data-logo_alignment="left">
     </div>
 
+    <!-- Contenedor para el Loader -->
+    <div id="loader" style="display: none;"></div>
+
     <!-- Contenedor para las evaluaciones -->
     <div id="appraisals"></div>
+
+    <!-- Botón de Cerrar Sesión -->
+    <button id="logout-button" style="display: none;">Cerrar Sesión</button>
 
     <script>
       // Función para manejar la respuesta del ID Token
       function handleCredentialResponse(response) {
         const idToken = response.credential;
         console.log("ID Token:", idToken);
+        
+        // Mostrar el loader mientras se realiza la autenticación
+        document.getElementById('loader').style.display = 'block';
         
         // Enviar el ID token al backend para su validación y obtener el JWT
         fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
@@ -72,9 +160,16 @@
         })
         .then(res => res.json())
         .then(data => {
+          // Ocultar el loader después de recibir la respuesta
+          document.getElementById('loader').style.display = 'none';
+          
           if (data.success) {
             // Guardar el JWT en el almacenamiento local
             localStorage.setItem('jwtToken', data.token);
+            // Mostrar el botón de cerrar sesión
+            document.getElementById('logout-button').style.display = 'block';
+            // Ocultar el botón de login
+            document.querySelector('.g_id_signin').style.display = 'none';
             // Proceder a cargar las evaluaciones
             loadAppraisals();
           } else {
@@ -83,7 +178,10 @@
           }
         })
         .catch(err => {
+          // Ocultar el loader en caso de error
+          document.getElementById('loader').style.display = 'none';
           console.error('Error durante la autenticación:', err);
+          alert('Error durante la autenticación.');
         });
       }
 
@@ -91,12 +189,27 @@
       function loadAppraisals() {
         const jwtToken = localStorage.getItem('jwtToken');
         
+        if (!jwtToken) {
+          alert('No estás autenticado. Por favor, inicia sesión.');
+          return;
+        }
+
+        // Mostrar el loader mientras se cargan las evaluaciones
+        document.getElementById('loader').style.display = 'block';
+
         fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals', {
           headers: {
             'Authorization': `Bearer ${jwtToken}`
           }
         })
-        .then(res => res.json())
+        .then(res => {
+          // Ocultar el loader después de recibir la respuesta
+          document.getElementById('loader').style.display = 'none';
+          if (res.status === 401) {
+            throw new Error('No autorizado. Por favor, inicia sesión nuevamente.');
+          }
+          return res.json();
+        })
         .then(data => {
           // Renderizar la lista de evaluaciones en el frontend
           const appraisalsDiv = document.getElementById('appraisals');
@@ -149,32 +262,40 @@
           appraisalsDiv.innerHTML = tableHTML;
         })
         .catch(err => {
+          // Ocultar el loader en caso de error
+          document.getElementById('loader').style.display = 'none';
           console.error('Error al obtener las evaluaciones:', err);
-          alert('Error al obtener las evaluaciones.');
+          alert(err.message || 'Error al obtener las evaluaciones.');
         });
       }
 
       // Función para cerrar sesión
       function logout() {
         localStorage.removeItem('jwtToken');
-        location.reload();
+        // Mostrar el botón de login
+        document.querySelector('.g_id_signin').style.display = 'block';
+        // Ocultar el botón de cerrar sesión
+        document.getElementById('logout-button').style.display = 'none';
+        // Limpiar las evaluaciones
+        document.getElementById('appraisals').innerHTML = '';
+        alert('Has cerrado sesión exitosamente.');
       }
 
-      // Agregar botón de cerrar sesión si el usuario está autenticado
+      // Agregar evento al botón de cerrar sesión
+      document.getElementById('logout-button').addEventListener('click', logout);
+
+      // Verificar si el usuario ya está autenticado al cargar la página
       window.onload = () => {
         const jwtToken = localStorage.getItem('jwtToken');
         if (jwtToken) {
-          const logoutButton = document.createElement('button');
-          logoutButton.textContent = 'Cerrar Sesión';
-          logoutButton.style.marginTop = '20px';
-          logoutButton.onclick = logout;
-          document.body.appendChild(logoutButton);
-
-          // Cargar las evaluaciones al cargar la página
+          // Mostrar el botón de cerrar sesión
+          document.getElementById('logout-button').style.display = 'block';
+          // Ocultar el botón de login
+          document.querySelector('.g_id_signin').style.display = 'none';
+          // Cargar las evaluaciones
           loadAppraisals();
         }
       };
     </script>
   </body>
 </html>
-
