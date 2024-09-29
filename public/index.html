@@ -14,7 +14,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100vh;
+        min-height: 100vh;
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 20px;
@@ -71,6 +71,24 @@
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+      }
+
+      /* Mensajes de Error/Información */
+      #message {
+        margin-top: 20px;
+        padding: 10px 20px;
+        border-radius: 4px;
+        display: none;
+      }
+      #message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      #message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
       }
 
       /* Responsive Table */
@@ -135,6 +153,9 @@
     <!-- Contenedor para el Loader -->
     <div id="loader" style="display: none;"></div>
 
+    <!-- Contenedor para mensajes de error o éxito -->
+    <div id="message"></div>
+
     <!-- Contenedor para las evaluaciones -->
     <div id="appraisals"></div>
 
@@ -142,6 +163,20 @@
     <button id="logout-button" style="display: none;">Cerrar Sesión</button>
 
     <script>
+      // Función para mostrar mensajes
+      function showMessage(type, text) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.className = type === 'success' ? 'success' : 'error';
+        messageDiv.innerText = text;
+        messageDiv.style.display = 'block';
+      }
+
+      // Función para ocultar mensajes
+      function hideMessage() {
+        const messageDiv = document.getElementById('message');
+        messageDiv.style.display = 'none';
+      }
+
       // Función para manejar la respuesta del ID Token
       function handleCredentialResponse(response) {
         const idToken = response.credential;
@@ -149,6 +184,7 @@
         
         // Mostrar el loader mientras se realiza la autenticación
         document.getElementById('loader').style.display = 'block';
+        hideMessage();
         
         // Enviar el ID token al backend para su validación y obtener el JWT
         fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
@@ -170,18 +206,20 @@
             document.getElementById('logout-button').style.display = 'block';
             // Ocultar el botón de login
             document.querySelector('.g_id_signin').style.display = 'none';
+            // Mostrar mensaje de éxito
+            showMessage('success', 'Autenticación exitosa. Cargando evaluaciones...');
             // Proceder a cargar las evaluaciones
             loadAppraisals();
           } else {
             // Manejar el fallo de autenticación
-            alert('Autenticación fallida.');
+            showMessage('error', 'Autenticación fallida. Por favor, intenta nuevamente.');
           }
         })
         .catch(err => {
           // Ocultar el loader en caso de error
           document.getElementById('loader').style.display = 'none';
           console.error('Error durante la autenticación:', err);
-          alert('Error durante la autenticación.');
+          showMessage('error', 'Error durante la autenticación. Por favor, intenta nuevamente.');
         });
       }
 
@@ -190,12 +228,13 @@
         const jwtToken = localStorage.getItem('jwtToken');
         
         if (!jwtToken) {
-          alert('No estás autenticado. Por favor, inicia sesión.');
+          showMessage('error', 'No estás autenticado. Por favor, inicia sesión.');
           return;
         }
 
         // Mostrar el loader mientras se cargan las evaluaciones
         document.getElementById('loader').style.display = 'block';
+        hideMessage();
 
         fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals', {
           headers: {
@@ -205,8 +244,11 @@
         .then(res => {
           // Ocultar el loader después de recibir la respuesta
           document.getElementById('loader').style.display = 'none';
+          
           if (res.status === 401) {
             throw new Error('No autorizado. Por favor, inicia sesión nuevamente.');
+          } else if (res.status === 403) {
+            throw new Error('Acceso prohibido. No tienes permisos para ver este contenido.');
           }
           return res.json();
         })
@@ -215,6 +257,7 @@
           const appraisalsDiv = document.getElementById('appraisals');
           if (data.length === 0) {
             appraisalsDiv.innerHTML = '<p>No hay evaluaciones pendientes.</p>';
+            showMessage('success', 'No hay evaluaciones pendientes para mostrar.');
             return;
           }
 
@@ -260,25 +303,53 @@
           `;
 
           appraisalsDiv.innerHTML = tableHTML;
+          showMessage('success', 'Evaluaciones cargadas exitosamente.');
         })
         .catch(err => {
           // Ocultar el loader en caso de error
           document.getElementById('loader').style.display = 'none';
           console.error('Error al obtener las evaluaciones:', err);
-          alert(err.message || 'Error al obtener las evaluaciones.');
+          showMessage('error', err.message || 'Error al obtener las evaluaciones.');
         });
       }
 
       // Función para cerrar sesión
       function logout() {
-        localStorage.removeItem('jwtToken');
-        // Mostrar el botón de login
-        document.querySelector('.g_id_signin').style.display = 'block';
-        // Ocultar el botón de cerrar sesión
-        document.getElementById('logout-button').style.display = 'none';
-        // Limpiar las evaluaciones
-        document.getElementById('appraisals').innerHTML = '';
-        alert('Has cerrado sesión exitosamente.');
+        // Mostrar el loader mientras se realiza el cierre de sesión
+        document.getElementById('loader').style.display = 'block';
+        hideMessage();
+
+        fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
+          method: 'POST',
+          credentials: 'include' // Incluir las cookies en la solicitud
+        })
+        .then(res => res.json())
+        .then(data => {
+          // Ocultar el loader después de recibir la respuesta
+          document.getElementById('loader').style.display = 'none';
+          
+          if (data.success) {
+            // Eliminar el JWT del almacenamiento local
+            localStorage.removeItem('jwtToken');
+            // Mostrar el botón de login
+            document.querySelector('.g_id_signin').style.display = 'block';
+            // Ocultar el botón de cerrar sesión
+            document.getElementById('logout-button').style.display = 'none';
+            // Limpiar las evaluaciones
+            document.getElementById('appraisals').innerHTML = '';
+            // Mostrar mensaje de éxito
+            showMessage('success', 'Has cerrado sesión exitosamente.');
+          } else {
+            // Manejar el fallo al cerrar sesión
+            showMessage('error', 'Error al cerrar sesión. Por favor, intenta nuevamente.');
+          }
+        })
+        .catch(err => {
+          // Ocultar el loader en caso de error
+          document.getElementById('loader').style.display = 'none';
+          console.error('Error al cerrar sesión:', err);
+          showMessage('error', 'Error al cerrar sesión. Por favor, intenta nuevamente.');
+        });
       }
 
       // Agregar evento al botón de cerrar sesión
