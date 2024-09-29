@@ -30,7 +30,7 @@
 
       /* Contenedor principal */
       .container {
-        max-width: 600px;
+        max-width: 800px;
         width: 100%;
         background-color: #ffffff;
         border-radius: 8px;
@@ -145,6 +145,23 @@
 
       tr:nth-child(even) {
         background-color: #f9f9f9;
+      }
+
+      /* Botón en la tabla */
+      .action-button {
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .action-button:hover {
+        background-color: #0056b3;
       }
 
       /* Responsive Table */
@@ -356,16 +373,11 @@
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Fecha</th>
                   <th>Tipo de Evaluación</th>
-                  <th>Identificador</th>
-                  <th>Email</th>
-                  <th>Categoría</th>
-                  <th>Estado</th>
-                  <th>URL</th>
-                  <th>Descripción Actual</th>
-                  <th>Descripción Humana</th>
+                  <th>Número de Evaluación</th>
+                  <th>Estatus</th>
+                  <th>Acción</th>
                 </tr>
               </thead>
               <tbody>
@@ -374,16 +386,13 @@
           data.forEach(appraisal => {
             tableHTML += `
               <tr>
-                <td data-label="ID">${appraisal.id}</td>
                 <td data-label="Fecha">${appraisal.date}</td>
                 <td data-label="Tipo de Evaluación">${appraisal.appraisalType}</td>
-                <td data-label="Identificador">${appraisal.identifier}</td>
-                <td data-label="Email">${appraisal.email}</td>
-                <td data-label="Categoría">${appraisal.category}</td>
-                <td data-label="Estado">${appraisal.status}</td>
-                <td data-label="URL"><a href="${appraisal.url}" target="_blank">Enlace</a></td>
-                <td data-label="Descripción Actual">${appraisal.currentDescription}</td>
-                <td data-label="Descripción Humana">${appraisal.humanDescription}</td>
+                <td data-label="Número de Evaluación">${appraisal.identifier}</td>
+                <td data-label="Estatus">${appraisal.status}</td>
+                <td data-label="Acción">
+                  <a href="appraisal.html?id=${appraisal.identifier}" class="action-button">Completar</a>
+                </td>
               </tr>
             `;
           });
