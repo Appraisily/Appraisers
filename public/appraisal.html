@@ -4,7 +4,7 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <title>Completar Evaluación - Appraisers Frontend</title>
+    <title>Completar Evaluación</title>
     <style>
       /* Reset de márgenes y paddings */
       * {
@@ -55,43 +55,35 @@
         margin-bottom: 20px;
       }
 
-      /* Descripción IA */
-      .ia-description {
-        text-align: left;
-        margin-bottom: 20px;
-        font-size: 16px;
-        line-height: 1.5;
-      }
-
       /* Formulario */
-      .form-group {
-        text-align: left;
-        margin-bottom: 15px;
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
       }
 
-      .form-group label {
-        display: block;
-        margin-bottom: 5px;
+      label {
+        margin-bottom: 8px;
         font-weight: bold;
       }
 
-      .form-group input[type="number"],
-      .form-group textarea {
+      input[type="number"],
+      textarea {
         width: 100%;
         padding: 10px;
-        border: 1px solid #ccc;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
         border-radius: 4px;
         font-size: 16px;
       }
 
-      .form-group textarea {
+      textarea {
         resize: vertical;
-        height: 100px;
+        min-height: 100px;
       }
 
       /* Botón de Enviar */
-      #submit-button {
-        margin-top: 20px;
+      .submit-button {
         padding: 12px 24px;
         background-color: #28a745;
         color: #ffffff;
@@ -102,7 +94,7 @@
         transition: background-color 0.3s ease;
       }
 
-      #submit-button:hover {
+      .submit-button:hover {
         background-color: #218838;
       }
 
@@ -162,10 +154,10 @@
         text-decoration: underline;
       }
 
-      /* Responsive Form */
+      /* Responsive */
       @media screen and (max-width: 600px) {
         .container {
-          padding: 30px 20px;
+          padding: 20px 15px;
         }
       }
     </style>
@@ -185,24 +177,15 @@
       <!-- Mensajes de Error/Éxito -->
       <div id="message"></div>
 
-      <!-- Descripción IA -->
-      <div class="ia-description" id="ia-description">
-        <!-- Se llenará dinámicamente con la descripción IA -->
-      </div>
+      <!-- Formulario para Completar Evaluación -->
+      <form id="appraisal-form">
+        <label for="numericalField">Campo Numérico:</label>
+        <input type="number" id="numericalField" name="numericalField" required />
 
-      <!-- Formulario -->
-      <form id="completion-form">
-        <div class="form-group">
-          <label for="numeric-field">Campo Numérico</label>
-          <input type="number" id="numeric-field" name="numericField" required min="0" />
-        </div>
+        <label for="textField">Campo de Texto:</label>
+        <textarea id="textField" name="textField" required></textarea>
 
-        <div class="form-group">
-          <label for="text-field">Campo de Texto</label>
-          <textarea id="text-field" name="textField" placeholder="Escribe tus comentarios aquí..." required></textarea>
-        </div>
-
-        <button type="submit" id="submit-button">Enviar Evaluación</button>
+        <button type="submit" class="submit-button">Enviar</button>
       </form>
 
       <!-- Loader -->
@@ -218,6 +201,15 @@
       // Actualizar el año en el footer
       document.getElementById('current-year').textContent = new Date().getFullYear();
 
+      // Obtener el ID de la evaluación desde los parámetros de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const appraisalId = urlParams.get('id');
+
+      if (!appraisalId) {
+        alert('ID de evaluación no proporcionado.');
+        window.location.href = 'index.html';
+      }
+
       // Función para mostrar mensajes
       function showMessage(type, text) {
         const messageDiv = document.getElementById('message');
@@ -232,35 +224,27 @@
         messageDiv.style.display = 'none';
       }
 
-      // Obtener el ID de la evaluación desde los parámetros de la URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const appraisalId = urlParams.get('id');
-
-      if (!appraisalId) {
-        showMessage('error', 'No se proporcionó un ID de evaluación válido.');
-        document.getElementById('completion-form').style.display = 'none';
-      } else {
-        // Cargar los detalles de la evaluación
-        loadAppraisalDetails(appraisalId);
-      }
-
       // Función para cargar los detalles de la evaluación
-      function loadAppraisalDetails(id) {
-        // Mostrar el loader mientras se carga la evaluación
+      function loadAppraisalDetails() {
+        // Mostrar el loader mientras se cargan los detalles
         document.getElementById('loader').style.display = 'block';
         hideMessage();
 
-        // Realizar una solicitud al backend para obtener los detalles de la evaluación
-        fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${id}`, {
+        const jwtToken = localStorage.getItem('jwtToken');
+        if (!jwtToken) {
+          showMessage('error', 'No estás autenticado. Por favor, inicia sesión.');
+          return;
+        }
+
+        fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
           headers: {
-            // Si usas cookies para autenticación, incluye credentials
-            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+            'Authorization': `Bearer ${jwtToken}`
           }
         })
         .then(res => {
           // Ocultar el loader después de recibir la respuesta
           document.getElementById('loader').style.display = 'none';
-          
+
           if (res.status === 401) {
             throw new Error('No autorizado. Por favor, inicia sesión nuevamente.');
           } else if (res.status === 403) {
@@ -271,44 +255,49 @@
           return res.json();
         })
         .then(data => {
-          // Mostrar la descripción IA en la página
-          document.getElementById('ia-description').innerText = data.iaDescription;
+          // Mostrar la descripción IA en el formulario o en otro lugar
+          const form = document.getElementById('appraisal-form');
+
+          // Puedes mostrar la descripción IA como un párrafo antes del formulario
+          const iaDescription = document.createElement('p');
+          iaDescription.innerText = `Descripción IA: ${data.iaDescription}`;
+          iaDescription.style.marginBottom = '20px';
+          form.parentNode.insertBefore(iaDescription, form);
+
+          showMessage('success', 'Detalles de la evaluación cargados exitosamente.');
         })
         .catch(err => {
-          console.error('Error al cargar los detalles de la evaluación:', err);
-          showMessage('error', err.message || 'Error al cargar los detalles de la evaluación.');
-          document.getElementById('completion-form').style.display = 'none';
+          console.error('Error al obtener detalles de la evaluación:', err);
+          showMessage('error', err.message || 'Error al obtener detalles de la evaluación.');
         });
       }
 
-      // Manejar el envío del formulario
-      document.getElementById('completion-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Evitar el comportamiento por defecto del formulario
+      // Función para manejar el envío del formulario
+      document.getElementById('appraisal-form').addEventListener('submit', function(event) {
+        event.preventDefault();
 
-        const numericField = document.getElementById('numeric-field').value;
-        const textField = document.getElementById('text-field').value;
+        const numericalField = document.getElementById('numericalField').value;
+        const textField = document.getElementById('textField').value;
 
-        // Validar los campos (opcional, ya que HTML5 ya lo hace)
-        if (!numericField || !textField) {
-          showMessage('error', 'Por favor, completa todos los campos.');
-          return;
-        }
+        // Validar los campos si es necesario
 
-        // Mostrar el loader mientras se envía la evaluación
+        // Mostrar el loader mientras se envía la solicitud
         document.getElementById('loader').style.display = 'block';
         hideMessage();
 
-        // Enviar los datos al backend
-        fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/complete`, {
+        const jwtToken = localStorage.getItem('jwtToken');
+        if (!jwtToken) {
+          showMessage('error', 'No estás autenticado. Por favor, inicia sesión.');
+          return;
+        }
+
+        fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+            'Authorization': `Bearer ${jwtToken}`
           },
-          body: JSON.stringify({
-            numericField: numericField,
-            textField: textField
-          })
+          body: JSON.stringify({ numericalField, textField })
         })
         .then(res => res.json())
         .then(data => {
@@ -317,21 +306,26 @@
           
           if (data.success) {
             showMessage('success', 'Evaluación completada exitosamente.');
-            // Opcional: Redirigir al dashboard después de un tiempo
+            // Opcional: Redireccionar de vuelta al dashboard
             setTimeout(() => {
               window.location.href = 'index.html';
             }, 2000);
           } else {
-            showMessage('error', 'Error al completar la evaluación. Por favor, intenta nuevamente.');
+            showMessage('error', data.message || 'Error al completar la evaluación.');
           }
         })
         .catch(err => {
           // Ocultar el loader en caso de error
           document.getElementById('loader').style.display = 'none';
-          console.error('Error al enviar la evaluación:', err);
-          showMessage('error', 'Error al enviar la evaluación. Por favor, intenta nuevamente.');
+          console.error('Error al completar la evaluación:', err);
+          showMessage('error', 'Error al completar la evaluación. Por favor, intenta nuevamente.');
         });
       });
+
+      // Cargar los detalles de la evaluación al cargar la página
+      window.onload = () => {
+        loadAppraisalDetails();
+      };
     </script>
   </body>
 </html>
