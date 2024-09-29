@@ -8,56 +8,79 @@
     <!-- Cargar la biblioteca de Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-      /* Estilos básicos para centrar el contenido */
+      /* Reset de márgenes y paddings */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Estilos del cuerpo */
       body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f9f9f9;
+        color: #333333;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         min-height: 100vh;
-        font-family: Arial, sans-serif;
-        margin: 0;
         padding: 20px;
-        background-color: #f9f9f9;
       }
-      h1 {
+
+      /* Contenedor principal */
+      .container {
+        max-width: 600px;
+        width: 100%;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 40px 30px;
+        text-align: center;
+        margin-top: 50px;
+      }
+
+      /* Logo */
+      .logo {
         margin-bottom: 20px;
       }
-      #appraisals {
+
+      .logo img {
+        width: 150px;
+        height: auto;
+      }
+
+      /* Título */
+      .title {
+        font-size: 24px;
+        color: #333333;
+        margin-bottom: 20px;
+      }
+
+      /* Botón de Google Sign-In */
+      .g_id_signin {
+        display: inline-block;
         margin-top: 20px;
-        width: 90%;
-        max-width: 1000px;
-        overflow-x: auto;
       }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        background-color: #fff;
-      }
-      th, td {
-        padding: 12px 15px;
-        border: 1px solid #ddd;
-        text-align: left;
-      }
-      th {
-        background-color: #f4f4f4;
-      }
-      tr:nth-child(even) {
-        background-color: #f9f9f9;
-      }
+
+      /* Botón de Cerrar Sesión */
       #logout-button {
-        margin-top: 20px;
-        padding: 10px 20px;
+        margin-top: 30px;
+        padding: 12px 24px;
         background-color: #d9534f;
-        color: #fff;
+        color: #ffffff;
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
       }
+
       #logout-button:hover {
         background-color: #c9302c;
       }
-      /* Loader Styles */
+
+      /* Loader */
       #loader {
         border: 8px solid #f3f3f3;
         border-top: 8px solid #3498db;
@@ -65,7 +88,8 @@
         width: 60px;
         height: 60px;
         animation: spin 1s linear infinite;
-        margin-top: 20px;
+        margin: 20px auto;
+        display: none;
       }
 
       @keyframes spin {
@@ -73,22 +97,54 @@
         100% { transform: rotate(360deg); }
       }
 
-      /* Mensajes de Error/Información */
+      /* Mensajes de Error/Éxito */
       #message {
         margin-top: 20px;
-        padding: 10px 20px;
+        padding: 15px 20px;
         border-radius: 4px;
         display: none;
+        font-size: 16px;
       }
+
       #message.success {
         background-color: #d4edda;
         color: #155724;
         border: 1px solid #c3e6cb;
       }
+
       #message.error {
         background-color: #f8d7da;
         color: #721c24;
         border: 1px solid #f5c6cb;
+      }
+
+      /* Tabla de Evaluaciones */
+      #appraisals {
+        margin-top: 30px;
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #ffffff;
+        margin-bottom: 20px;
+      }
+
+      th, td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f4f4f4;
+        color: #333333;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
       }
 
       /* Responsive Table */
@@ -96,19 +152,27 @@
         table, thead, tbody, th, td, tr {
           display: block;
         }
+
         th {
           position: absolute;
           top: -9999px;
           left: -9999px;
         }
+
         tr {
           margin-bottom: 1rem;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 10px;
         }
+
         td {
           border: none;
           position: relative;
           padding-left: 50%;
+          text-align: left;
         }
+
         td:before {
           position: absolute;
           top: 12px;
@@ -117,52 +181,79 @@
           padding-right: 10px;
           white-space: nowrap;
           font-weight: bold;
+          content: attr(data-label);
+          color: #555555;
         }
-        /* Label each cell with the corresponding header */
-        td:nth-of-type(1):before { content: "ID"; }
-        td:nth-of-type(2):before { content: "Fecha"; }
-        td:nth-of-type(3):before { content: "Tipo de Evaluación"; }
-        td:nth-of-type(4):before { content: "Identificador"; }
-        td:nth-of-type(5):before { content: "Email"; }
-        td:nth-of-type(6):before { content: "Categoría"; }
-        td:nth-of-type(7):before { content: "Estado"; }
-        td:nth-of-type(8):before { content: "URL"; }
-        td:nth-of-type(9):before { content: "Descripción Actual"; }
-        td:nth-of-type(10):before { content: "Descripción Humana"; }
+      }
+
+      /* Footer */
+      .footer {
+        margin-top: auto;
+        padding: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #777777;
+      }
+
+      .footer a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
-    <h1>Appraisers Dashboard</h1>
+    <div class="container">
+      <!-- Logo -->
+      <div class="logo">
+        <a href="https://www.appraisily.com/" target="_blank">
+          <img src="https://www.appraisily.com/wp-content/uploads/2023/12/cropped-appraisily.com_a_logo_for_an_online_art_and_antiques_appraisal__a8888b1f-2dbb-479e-9833-09c6263f0892.webp" alt="Appraisily Logo">
+        </a>
+      </div>
 
-    <!-- Botón de Google Sign-In -->
-    <div id="g_id_onload"
-         data-client_id="856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse"
-         data-auto_prompt="false">
+      <!-- Título -->
+      <div class="title">Bienvenido al Appraisers Dashboard</div>
+
+      <!-- Mensajes de Error/Éxito -->
+      <div id="message"></div>
+
+      <!-- Botón de Google Sign-In -->
+      <div id="g_id_onload"
+           data-client_id="856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-shape="rectangular"
+           data-theme="outline"
+           data-text="sign_in_with"
+           data-size="large"
+           data-logo_alignment="left">
+      </div>
+
+      <!-- Loader -->
+      <div id="loader"></div>
+
+      <!-- Contenedor para las evaluaciones -->
+      <div id="appraisals"></div>
+
+      <!-- Botón de Cerrar Sesión -->
+      <button id="logout-button" style="display: none;">Cerrar Sesión</button>
     </div>
-    <div class="g_id_signin"
-         data-type="standard"
-         data-shape="rectangular"
-         data-theme="outline"
-         data-text="sign_in_with"
-         data-size="large"
-         data-logo_alignment="left">
+
+    <!-- Footer -->
+    <div class="footer">
+      © <span id="current-year"></span> Appraisily. Todos los derechos reservados.
     </div>
-
-    <!-- Contenedor para el Loader -->
-    <div id="loader" style="display: none;"></div>
-
-    <!-- Contenedor para mensajes de error o éxito -->
-    <div id="message"></div>
-
-    <!-- Contenedor para las evaluaciones -->
-    <div id="appraisals"></div>
-
-    <!-- Botón de Cerrar Sesión -->
-    <button id="logout-button" style="display: none;">Cerrar Sesión</button>
 
     <script>
+      // Actualizar el año en el footer
+      document.getElementById('current-year').textContent = new Date().getFullYear();
+
       // Función para mostrar mensajes
       function showMessage(type, text) {
         const messageDiv = document.getElementById('message');
@@ -283,16 +374,16 @@
           data.forEach(appraisal => {
             tableHTML += `
               <tr>
-                <td>${appraisal.id}</td>
-                <td>${appraisal.date}</td>
-                <td>${appraisal.appraisalType}</td>
-                <td>${appraisal.identifier}</td>
-                <td>${appraisal.email}</td>
-                <td>${appraisal.category}</td>
-                <td>${appraisal.status}</td>
-                <td><a href="${appraisal.url}" target="_blank">Enlace</a></td>
-                <td>${appraisal.currentDescription}</td>
-                <td>${appraisal.humanDescription}</td>
+                <td data-label="ID">${appraisal.id}</td>
+                <td data-label="Fecha">${appraisal.date}</td>
+                <td data-label="Tipo de Evaluación">${appraisal.appraisalType}</td>
+                <td data-label="Identificador">${appraisal.identifier}</td>
+                <td data-label="Email">${appraisal.email}</td>
+                <td data-label="Categoría">${appraisal.category}</td>
+                <td data-label="Estado">${appraisal.status}</td>
+                <td data-label="URL"><a href="${appraisal.url}" target="_blank">Enlace</a></td>
+                <td data-label="Descripción Actual">${appraisal.currentDescription}</td>
+                <td data-label="Descripción Humana">${appraisal.humanDescription}</td>
               </tr>
             `;
           });
