@@ -31,7 +31,6 @@ body {
   padding: 40px 30px;
   text-align: center;
   margin-top: 50px;
-  overflow-x: auto; /* Permitir el desplazamiento horizontal solo si es necesario */
 }
 
 /* Logo */
@@ -121,21 +120,21 @@ body {
 #appraisals {
   margin-top: 30px;
   width: 100%;
-  overflow-x: auto;
 }
 
+/* Tabla */
 table {
   width: 100%;
   border-collapse: collapse;
   background-color: #ffffff;
   margin-bottom: 20px;
+  table-layout: fixed; /* Permite fijar anchos de columnas */
 }
 
 th, td {
   padding: 12px 15px;
   border: 1px solid #ddd;
   text-align: left;
-  max-width: 200px; /* Limita el ancho de las celdas */
   white-space: nowrap; /* Evita el salto de línea */
   overflow: hidden; /* Oculta el desbordamiento */
   text-overflow: ellipsis; /* Añade puntos suspensivos para textos largos */
@@ -148,6 +147,32 @@ th {
 
 tr:nth-child(even) {
   background-color: #f9f9f9;
+}
+
+/* Ajustar anchos de columnas */
+table th:nth-child(1),
+table td:nth-child(1) {
+  width: 15%; /* Date */
+}
+
+table th:nth-child(2),
+table td:nth-child(2) {
+  width: 25%; /* Appraisal Type */
+}
+
+table th:nth-child(3),
+table td:nth-child(3) {
+  width: 15%; /* Appraisal Number */
+}
+
+table th:nth-child(4),
+table td:nth-child(4) {
+  width: 20%; /* Status */
+}
+
+table th:nth-child(5),
+table td:nth-child(5) {
+  width: 25%; /* Action */
 }
 
 /* Responsive Table */
@@ -208,7 +233,7 @@ tr:nth-child(even) {
 }
 
 /* Action Button */
-.complete-button {
+.action-button {
   padding: 8px 16px;
   background-color: #007bff; /* Azul #007bff */
   color: #ffffff; /* Texto blanco */
@@ -220,15 +245,11 @@ tr:nth-child(even) {
   text-decoration: none;
 }
 
-.complete-button:hover {
+.action-button:hover {
   background-color: #0056b3; /* Un azul más oscuro al pasar el mouse */
 }
 
 /* Ajustes para "Appraisal Number" menos prominente */
-td[data-label="Appraisal Number"] {
-  max-width: 150px; /* Limita el ancho */
-}
-
 td[data-label="Appraisal Number"] {
   white-space: nowrap;
   overflow: hidden;
