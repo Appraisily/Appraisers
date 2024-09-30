@@ -92,10 +92,9 @@
 
     /* Appraisal Form Styles */
     #appraisal-form {
-      max-width: 800px;
-      width: 100%;
-      margin-bottom: 30px;
-      text-align: left; /* Align form elements to the left */
+       display: flex;
+  flex-direction: column;
+  align-items: center;
     }
 
     #appraisal-form label {
@@ -123,6 +122,8 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
+        align-self: center;
+
     }
 
     #appraisal-form button.submit-button:hover {
