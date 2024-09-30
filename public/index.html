@@ -7,10 +7,7 @@
   <title>Appraisers Frontend</title>
   <!-- Cargar la librería de Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-<style>
-  @import url('css/styles.css');
-</style>
-
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <!-- Botón de Cerrar Sesión -->
@@ -136,14 +133,16 @@
         // Ocultar el loader después de recibir la respuesta
         document.getElementById('loader').style.display = 'none';
         
-        if (res.status === 401) {
+        if (res.status === 401 || res.status === 403) {
           throw new Error('No autorizado. Por favor, inicia sesión nuevamente.');
-        } else if (res.status === 403) {
-          throw new Error('Acceso prohibido. No tienes permisos para ver este contenido.');
         }
         return res.json();
       })
       .then(data => {
+        // Mostrar el botón de cerrar sesión y ocultar el botón de iniciar sesión
+        document.getElementById('logout-button').style.display = 'block';
+        document.getElementById('g_id_signin').style.display = 'none';
+
         // Renderizar la tabla de evaluaciones
         const appraisalsDiv = document.getElementById('appraisals');
         if (data.length === 0) {
@@ -205,6 +204,13 @@
         document.getElementById('loader').style.display = 'none';
         console.error('Error al obtener las evaluaciones:', err);
         showMessage('error', err.message || 'Error al obtener las evaluaciones.');
+
+        // Mostrar el botón de iniciar sesión y ocultar el botón de cerrar sesión
+        document.getElementById('logout-button').style.display = 'none';
+        document.getElementById('g_id_signin').style.display = 'block';
+
+        // Limpiar las evaluaciones
+        document.getElementById('appraisals').innerHTML = '';
       });
     }
 
@@ -249,7 +255,7 @@
 
     // Verificar el estado de autenticación al cargar la página
     window.onload = () => {
-      // Intentar cargar las evaluaciones; si no está autorizado, mostrar el botón de iniciar sesión
+      // Intentar cargar las evaluaciones; la función manejará la autenticación
       loadAppraisals();
     };
   </script>
