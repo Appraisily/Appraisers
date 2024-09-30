@@ -262,3 +262,25 @@ td[data-label="Action"] {
       .action-button:hover {
         background-color: #0056b3;
       }
+
+/* Logout Button Styles */
+.logout-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: white;
+  color: red;
+  border: 2px solid red;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
+.logout-button:hover {
+  background-color: #ffe6e6; /* Fondo rojo claro al pasar el mouse */
+  color: darkred;
+}
+
