@@ -18,7 +18,7 @@ body {
   justify-content: flex-start;
   min-height: 100vh;
   padding: 20px;
-  position: relative; /* Para posicionar el botón de cerrar sesión */
+  position: relative; /* For positioning the logout button */
 }
 
 /* Main Container */
@@ -39,7 +39,7 @@ body {
 }
 
 .logo img {
-  width: 150px;
+  width: 120px; /* Reduced logo size */
   height: auto;
 }
 
@@ -58,24 +58,24 @@ body {
 
 /* Logout Button */
 #logout-button {
-  position: fixed; /* Posición fija en la ventana */
+  position: fixed;
   top: 20px;
   right: 20px;
   padding: 10px 20px;
   background-color: #ffffff;
-  color: #d9534f; /* Rojo para el texto */
-  border: 2px solid #d9534f; /* Borde rojo */
+  color: #d9534f;
+  border: 2px solid #d9534f;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
   transition: background-color 0.3s ease, color 0.3s ease;
-  display: none; /* Inicialmente oculto */
-  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  display: none;
+  z-index: 1000;
 }
 
 #logout-button:hover {
-  background-color: #d9534f; /* Fondo rojo al pasar el mouse */
-  color: #ffffff; /* Texto blanco al pasar el mouse */
+  background-color: #d9534f;
+  color: #ffffff;
 }
 
 /* Loader */
@@ -122,22 +122,23 @@ body {
   width: 100%;
 }
 
-/* Tabla */
+/* Table */
 table {
   width: 100%;
   border-collapse: collapse;
   background-color: #ffffff;
   margin-bottom: 20px;
-  table-layout: fixed; /* Permite fijar anchos de columnas */
+  table-layout: fixed; /* Allows fixed column widths */
 }
 
 th, td {
   padding: 12px 15px;
   border: 1px solid #ddd;
-  text-align: left;
-  white-space: nowrap; /* Evita el salto de línea */
-  overflow: hidden; /* Oculta el desbordamiento */
-  text-overflow: ellipsis; /* Añade puntos suspensivos para textos largos */
+  text-align: center; /* Center-align table cells */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px; /* Reduced font size */
 }
 
 th {
@@ -149,7 +150,7 @@ tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-/* Ajustar anchos de columnas */
+/* Adjust column widths */
 table th:nth-child(1),
 table td:nth-child(1) {
   width: 15%; /* Date */
@@ -157,7 +158,7 @@ table td:nth-child(1) {
 
 table th:nth-child(2),
 table td:nth-child(2) {
-  width: 25%; /* Appraisal Type */
+  width: 20%; /* Appraisal Type */
 }
 
 table th:nth-child(3),
@@ -167,12 +168,25 @@ table td:nth-child(3) {
 
 table th:nth-child(4),
 table td:nth-child(4) {
-  width: 20%; /* Status */
+  width: 30%; /* Status */
 }
 
 table th:nth-child(5),
 table td:nth-child(5) {
-  width: 25%; /* Action */
+  width: 20%; /* Action */
+}
+
+/* Allow full text in the 'Status' column */
+td[data-label="Status"] {
+  white-space: normal; /* Allow text to wrap */
+  overflow: visible;
+  text-overflow: initial;
+  font-size: 12px; /* Reduced font size for status */
+}
+
+/* Center the 'Action' button */
+td[data-label="Action"] {
+  text-align: center;
 }
 
 /* Responsive Table */
@@ -212,6 +226,12 @@ table td:nth-child(5) {
     content: attr(data-label);
     color: #555555;
   }
+
+  /* Adjustments for mobile view */
+  td[data-label="Status"] {
+    white-space: normal;
+    font-size: 14px;
+  }
 }
 
 /* Footer */
@@ -235,8 +255,8 @@ table td:nth-child(5) {
 /* Action Button */
 .action-button {
   padding: 8px 16px;
-  background-color: #007bff; /* Azul #007bff */
-  color: #ffffff; /* Texto blanco */
+  background-color: #007bff;
+  color: #ffffff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -246,27 +266,19 @@ table td:nth-child(5) {
 }
 
 .action-button:hover {
-  background-color: #0056b3; /* Un azul más oscuro al pasar el mouse */
+  background-color: #0056b3;
 }
 
-/* Ajustes para "Appraisal Number" menos prominente */
-td[data-label="Appraisal Number"] {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Estilos para el mensaje del nombre de usuario */
+/* Styles for user name display */
 .user-name {
-  position: fixed; /* Posición fija en la ventana */
+  position: fixed;
   top: 20px;
   left: 20px;
   padding: 10px 20px;
   background-color: #ffffff;
-  color: #28a745; /* Verde para el texto */
-  border: 2px solid #28a745; /* Borde verde */
+  color: #28a745;
+  border: 2px solid #28a745;
   border-radius: 4px;
   font-size: 14px;
-  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  z-index: 1000;
 }
-
