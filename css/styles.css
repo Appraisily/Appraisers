@@ -208,6 +208,33 @@
         text-decoration: none;
       }
 
+/* Truncate the Appraisal Number text */
+td[data-label="Appraisal Number"] {
+  max-width: 150px; /* Set a max-width for the column */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Show "..." for overflow */
+}
+
+/* Ensure the table fits within the screen */
+table {
+  table-layout: auto;
+  word-wrap: break-word;
+}
+
+/* Ensure the action buttons are always visible */
+td[data-label="Action"] {
+  text-align: center;
+}
+
+/* Mobile-friendly adjustments */
+@media screen and (max-width: 600px) {
+  td[data-label="Appraisal Number"] {
+    max-width: 100px;
+  }
+}
+
+
       .action-button:hover {
         background-color: #0056b3;
       }
