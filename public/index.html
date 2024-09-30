@@ -256,6 +256,9 @@ function showUserName(name) {
     document.getElementById('g_id_signin').style.display = 'block';
     document.getElementById('logout-button').style.display = 'none';
     
+     // Limpiar el nombre del usuario de localStorage
+  localStorage.removeItem('userName');
+    
     // **Ocultar el mensaje del nombre del usuario**
     document.getElementById('user-name').style.display = 'none';
 
