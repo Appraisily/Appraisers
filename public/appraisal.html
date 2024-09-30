@@ -44,15 +44,26 @@
       flex-wrap: wrap;
       justify-content: center;
       margin-bottom: 30px;
+      gap: 20px;
     }
 
-    .images-container img {
+    .image-wrapper {
+      text-align: center;
+    }
+
+    .image-wrapper img {
       max-width: 100%;
       height: auto;
-      margin: 10px;
+      margin: 10px 0;
       border: 1px solid #ddd;
       border-radius: 4px;
       max-width: 300px; /* Limit the maximum width of images */
+    }
+
+    .image-label {
+      font-size: 14px;
+      color: #333333;
+      margin-top: 5px;
     }
 
     /* Logout Button */
@@ -119,6 +130,22 @@
     #message {
       max-width: 800px;
       margin: 20px auto;
+      padding: 15px 20px;
+      border-radius: 4px;
+      display: none;
+      font-size: 16px;
+    }
+
+    #message.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    #message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
     }
 
     /* Footer */
@@ -139,7 +166,14 @@
       text-decoration: underline;
     }
 
-    /* Loader */
+    /* Loader and Fetching Message */
+    #loader-container {
+      display: none; /* Hidden by default */
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+
     #loader {
       border: 8px solid #f3f3f3;
       border-top: 8px solid #3498db;
@@ -147,8 +181,12 @@
       width: 60px;
       height: 60px;
       animation: spin 1s linear infinite;
-      margin: 20px auto;
-      display: none;
+      margin-bottom: 10px;
+    }
+
+    #loader-message {
+      font-size: 16px;
+      color: #555555;
     }
 
     @keyframes spin {
@@ -177,6 +215,12 @@
 
     <!-- Main Content -->
     <div class="main-content">
+      <!-- Loader Container -->
+      <div id="loader-container">
+        <div id="loader"></div>
+        <div id="loader-message">Fetching appraisal details...</div>
+      </div>
+
       <!-- Descriptions Container -->
       <div class="descriptions-container">
         <!-- Customer Description -->
@@ -209,7 +253,10 @@
       </form>
 
       <!-- Loader -->
-      <div id="loader"></div>
+      <div id="loader-container">
+        <div id="loader"></div>
+        <div id="loader-message">Submitting appraisal...</div>
+      </div>
     </div>
   </div>
 
@@ -245,10 +292,24 @@
       messageDiv.style.display = 'none';
     }
 
+    // Function to show loader with message
+    function showLoader(message) {
+      const loaderContainer = document.getElementById('loader-container');
+      const loaderMessage = document.getElementById('loader-message');
+      loaderMessage.innerText = message;
+      loaderContainer.style.display = 'flex';
+    }
+
+    // Function to hide loader
+    function hideLoader() {
+      const loaderContainer = document.getElementById('loader-container');
+      loaderContainer.style.display = 'none';
+    }
+
     // Function to load appraisal details
     function loadAppraisalDetails() {
-      // Show the loader while loading details
-      document.getElementById('loader').style.display = 'block';
+      // Show the loader with message
+      showLoader('Fetching appraisal details...');
       hideMessage();
 
       fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
@@ -257,7 +318,7 @@
       })
       .then(res => {
         // Hide the loader after receiving the response
-        document.getElementById('loader').style.display = 'none';
+        hideLoader();
 
         if (res.status === 401 || res.status === 403) {
           throw new Error('You are not authenticated. Please log in.');
@@ -274,27 +335,63 @@
         const iaDescriptionText = document.getElementById('ia-description-text');
         iaDescriptionText.innerText = data.iaDescription || 'Not available';
 
-        // Display images
+        // Display images with labels
         const imagesContainer = document.getElementById('images-container');
+        imagesContainer.innerHTML = ''; // Clear any existing images
 
         if (data.images) {
+          // Main Image
           if (data.images.main) {
+            const mainImageWrapper = document.createElement('div');
+            mainImageWrapper.className = 'image-wrapper';
+
             const mainImage = document.createElement('img');
             mainImage.src = data.images.main;
             mainImage.alt = 'Main Image';
-            imagesContainer.appendChild(mainImage);
+            mainImageWrapper.appendChild(mainImage);
+
+            const mainLabel = document.createElement('div');
+            mainLabel.className = 'image-label';
+            mainLabel.innerText = 'Main Image';
+            mainImageWrapper.appendChild(mainLabel);
+
+            imagesContainer.appendChild(mainImageWrapper);
           }
+
+          // Age Image
           if (data.images.age) {
+            const ageImageWrapper = document.createElement('div');
+            ageImageWrapper.className = 'image-wrapper';
+
             const ageImage = document.createElement('img');
             ageImage.src = data.images.age;
             ageImage.alt = 'Age Image';
-            imagesContainer.appendChild(ageImage);
+            ageImageWrapper.appendChild(ageImage);
+
+            const ageLabel = document.createElement('div');
+            ageLabel.className = 'image-label';
+            ageLabel.innerText = 'Age Image';
+            ageImageWrapper.appendChild(ageLabel);
+
+            imagesContainer.appendChild(ageImageWrapper);
           }
+
+          // Signature Image
           if (data.images.signature) {
+            const signatureImageWrapper = document.createElement('div');
+            signatureImageWrapper.className = 'image-wrapper';
+
             const signatureImage = document.createElement('img');
             signatureImage.src = data.images.signature;
             signatureImage.alt = 'Signature Image';
-            imagesContainer.appendChild(signatureImage);
+            signatureImageWrapper.appendChild(signatureImage);
+
+            const signatureLabel = document.createElement('div');
+            signatureLabel.className = 'image-label';
+            signatureLabel.innerText = 'Signature Image';
+            signatureImageWrapper.appendChild(signatureLabel);
+
+            imagesContainer.appendChild(signatureImageWrapper);
           }
         }
 
@@ -303,6 +400,7 @@
       .catch(err => {
         console.error('Error fetching appraisal details:', err);
         showMessage('error', err.message || 'Error fetching appraisal details.');
+        hideLoader();
 
         // Redirect to index if not authenticated
         if (err.message.includes('not authenticated')) {
@@ -320,8 +418,8 @@
       const appraisalValue = document.getElementById('appraisalValue').value;
       const description = document.getElementById('description').value;
 
-      // Show the loader while submitting
-      document.getElementById('loader').style.display = 'block';
+      // Show the loader with message
+      showLoader('Submitting appraisal...');
       hideMessage();
 
       fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/complete`, {
@@ -334,7 +432,7 @@
       })
       .then(res => {
         // Hide the loader after receiving the response
-        document.getElementById('loader').style.display = 'none';
+        hideLoader();
 
         if (res.status === 401 || res.status === 403) {
           throw new Error('You are not authenticated. Please log in.');
@@ -354,7 +452,7 @@
       })
       .catch(err => {
         // Hide the loader in case of error
-        document.getElementById('loader').style.display = 'none';
+        hideLoader();
         console.error('Error completing appraisal:', err);
         showMessage('error', err.message || 'Error completing appraisal. Please try again.');
 
@@ -369,8 +467,8 @@
 
     // Handle logout
     function logout() {
-      // Show the loader while logging out
-      document.getElementById('loader').style.display = 'block';
+      // Show the loader with message
+      showLoader('Logging out...');
       hideMessage();
 
       fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
@@ -380,7 +478,7 @@
       .then(res => res.json())
       .then(data => {
         // Hide the loader after receiving the response
-        document.getElementById('loader').style.display = 'none';
+        hideLoader();
 
         if (data.success) {
           // Redirect to dashboard
@@ -392,7 +490,7 @@
       })
       .catch(err => {
         // Hide the loader in case of error
-        document.getElementById('loader').style.display = 'none';
+        hideLoader();
         console.error('Error during logout:', err);
         showMessage('error', 'Error logging out. Please try again.');
       });
