@@ -196,17 +196,41 @@
       }
 
       /* Action Button */
-      .action-button {
-        padding: 8px 16px;
-        background-color: #007bff;
-        color: #ffffff;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.3s ease;
-        text-decoration: none;
-      }
+/* Improved Action Button */
+.action-button {
+  padding: 10px 20px;
+  background-color: #007bff; /* Blue color */
+  color: #ffffff; /* White text */
+  border: 2px solid #007bff; /* Blue border for a more defined shape */
+  border-radius: 50px; /* Rounded corners for a modern look */
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold; /* Make the text bold */
+  transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+  text-transform: uppercase; /* All caps text */
+}
+
+/* Hover Effect */
+.action-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  color: #ffffff; /* Keep text white */
+  border-color: #0056b3; /* Change border color on hover */
+  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2); /* Increase shadow on hover */
+}
+
+/* Focus Effect */
+.action-button:focus {
+  outline: none; /* Remove default outline */
+  box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.5); /* Blue glow on focus */
+}
+
+/* Active Effect */
+.action-button:active {
+  background-color: #004080; /* Even darker blue when clicked */
+  box-shadow: none; /* Remove shadow when button is pressed */
+}
+
 
 /* Truncate the Appraisal Number text */
 td[data-label="Appraisal Number"] {
