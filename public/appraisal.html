@@ -5,24 +5,54 @@
 <head>
   <meta charset="utf-8" />
   <title>Completar Evaluación</title>
+  <!-- Importar el CSS utilizando la etiqueta <link> -->
+  <link rel="stylesheet" href="../css/styles.css">
   <style>
-    /* ... Estilos existentes ... */
+    /* Estilos adicionales específicos de esta página */
   @import url('../css/styles.css');
+    /* Contenedor principal */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Contenedor de descripciones */
+    .descriptions-container {
+      max-width: 800px;
+      margin-bottom: 30px;
+    }
+
+    .description-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333333;
+    }
+
+    .description-text {
+      font-size: 16px;
+      line-height: 1.5;
+      color: #555555;
+      margin-bottom: 20px;
+      white-space: pre-wrap; /* Preservar saltos de línea */
+    }
 
     /* Estilos para el contenedor de imágenes */
     .images-container {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 30px;
     }
 
     .images-container img {
       max-width: 100%;
       height: auto;
-      margin-bottom: 10px;
+      margin: 10px;
       border: 1px solid #ddd;
       border-radius: 4px;
+      max-width: 300px; /* Limitar el ancho máximo de las imágenes */
     }
 
     /* Botón de Cerrar Sesión */
@@ -38,7 +68,6 @@
       cursor: pointer;
       font-size: 14px;
       transition: background-color 0.3s ease, color 0.3s ease;
-      display: none;
       z-index: 1000;
     }
 
@@ -46,11 +75,55 @@
       background-color: #d9534f;
       color: #ffffff;
     }
+
+    /* Estilos para el formulario */
+    #appraisal-form {
+      max-width: 800px;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    #appraisal-form label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333333;
+    }
+
+    #appraisal-form input,
+    #appraisal-form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    #appraisal-form button.submit-button {
+      background-color: #007bff;
+      color: #ffffff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #appraisal-form button.submit-button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Ajustar el mensaje de éxito/error */
+    #message {
+      max-width: 800px;
+      margin: 20px auto;
+    }
   </style>
 </head>
 <body>
   <!-- Botón de Cerrar Sesión -->
-  <button id="logout-button" class="logout-button" style="display: none;">Cerrar Sesión</button>
+  <button id="logout-button" class="logout-button">Cerrar Sesión</button>
 
   <div class="container">
     <!-- Logo -->
@@ -66,19 +139,42 @@
     <!-- Mensajes de Error/Éxito -->
     <div id="message"></div>
 
-    <!-- Formulario para Completar Evaluación -->
-    <form id="appraisal-form">
-      <label for="numericalField">Valor de la Tasación:</label>
-      <input type="number" id="numericalField" name="numericalField" required />
+    <!-- Contenido Principal -->
+    <div class="main-content">
+      <!-- Contenedor de Descripciones -->
+      <div class="descriptions-container">
+        <!-- Descripción del Cliente -->
+        <div id="customer-description">
+          <div class="description-title">Descripción del Cliente:</div>
+          <div class="description-text" id="customer-description-text"></div>
+        </div>
 
-      <label for="textField">Descripción:</label>
-      <textarea id="textField" name="textField" required></textarea>
+        <!-- Descripción IA -->
+        <div id="ia-description">
+          <div class="description-title">Descripción IA:</div>
+          <div class="description-text" id="ia-description-text"></div>
+        </div>
+      </div>
 
-      <button type="submit" class="submit-button">Enviar</button>
-    </form>
+      <!-- Contenedor de Imágenes -->
+      <div class="images-container" id="images-container">
+        <!-- Las imágenes se insertarán aquí -->
+      </div>
 
-    <!-- Loader -->
-    <div id="loader"></div>
+      <!-- Formulario para Completar Evaluación -->
+      <form id="appraisal-form">
+        <label for="numericalField">Valor de la Tasación:</label>
+        <input type="number" id="numericalField" name="numericalField" required />
+
+        <label for="textField">Descripción:</label>
+        <textarea id="textField" name="textField" rows="6" required></textarea>
+
+        <button type="submit" class="submit-button">Enviar</button>
+      </form>
+
+      <!-- Loader -->
+      <div id="loader"></div>
+    </div>
   </div>
 
   <!-- Footer -->
@@ -135,18 +231,15 @@
         return res.json();
       })
       .then(data => {
-        // Mostrar la descripción IA en el formulario o en otro lugar
-        const form = document.getElementById('appraisal-form');
+        // Mostrar las descripciones
+        const customerDescriptionText = document.getElementById('customer-description-text');
+        customerDescriptionText.innerText = data.customerDescription || 'No disponible';
 
-        // Mostrar la descripción IA como un párrafo antes del formulario
-        const iaDescription = document.createElement('p');
-        iaDescription.innerText = `Descripción IA: ${data.iaDescription}`;
-        iaDescription.style.marginBottom = '20px';
-        form.parentNode.insertBefore(iaDescription, form);
+        const iaDescriptionText = document.getElementById('ia-description-text');
+        iaDescriptionText.innerText = data.iaDescription || 'No disponible';
 
-        // **Mostrar las imágenes**
-        const imagesContainer = document.createElement('div');
-        imagesContainer.className = 'images-container';
+        // Mostrar las imágenes
+        const imagesContainer = document.getElementById('images-container');
 
         if (data.images) {
           if (data.images.main) {
@@ -168,8 +261,6 @@
             imagesContainer.appendChild(signatureImage);
           }
         }
-
-        form.parentNode.insertBefore(imagesContainer, iaDescription.nextSibling);
 
         showMessage('success', 'Detalles de la evaluación cargados exitosamente.');
       })
