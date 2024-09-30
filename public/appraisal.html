@@ -7,31 +7,44 @@
   <title>Completar Evaluación</title>
   <style>
     /* ... Estilos existentes ... */
-    /* Incluye aquí los estilos anteriores y agrega los estilos del botón de cerrar sesión */
-    /* Botón de Cerrar Sesión */
-
       @import url('css/styles.css');
 
-    
+    /* Estilos para el contenedor de imágenes */
+    .images-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .images-container img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    /* Botón de Cerrar Sesión */
     .logout-button {
-      position: fixed; /* Posición fija en la ventana */
+      position: fixed;
       top: 20px;
       right: 20px;
       padding: 10px 20px;
       background-color: #ffffff;
-      color: #d9534f; /* Rojo para el texto */
-      border: 2px solid #d9534f; /* Borde rojo */
+      color: #d9534f;
+      border: 2px solid #d9534f;
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
       transition: background-color 0.3s ease, color 0.3s ease;
-      display: none; /* Inicialmente oculto */
-      z-index: 1000; /* Asegura que esté por encima de otros elementos */
+      display: none;
+      z-index: 1000;
     }
 
     .logout-button:hover {
-      background-color: #d9534f; /* Fondo rojo al pasar el mouse */
-      color: #ffffff; /* Texto blanco al pasar el mouse */
+      background-color: #d9534f;
+      color: #ffffff;
     }
   </style>
 </head>
@@ -130,6 +143,33 @@
         iaDescription.innerText = `Descripción IA: ${data.iaDescription}`;
         iaDescription.style.marginBottom = '20px';
         form.parentNode.insertBefore(iaDescription, form);
+
+        // **Mostrar las imágenes**
+        const imagesContainer = document.createElement('div');
+        imagesContainer.className = 'images-container';
+
+        if (data.images) {
+          if (data.images.main) {
+            const mainImage = document.createElement('img');
+            mainImage.src = data.images.main;
+            mainImage.alt = 'Imagen Principal';
+            imagesContainer.appendChild(mainImage);
+          }
+          if (data.images.age) {
+            const ageImage = document.createElement('img');
+            ageImage.src = data.images.age;
+            ageImage.alt = 'Imagen para Edad';
+            imagesContainer.appendChild(ageImage);
+          }
+          if (data.images.signature) {
+            const signatureImage = document.createElement('img');
+            signatureImage.src = data.images.signature;
+            signatureImage.alt = 'Imagen de la Firma';
+            imagesContainer.appendChild(signatureImage);
+          }
+        }
+
+        form.parentNode.insertBefore(imagesContainer, iaDescription.nextSibling);
 
         showMessage('success', 'Detalles de la evaluación cargados exitosamente.');
       })
