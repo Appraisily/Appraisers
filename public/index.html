@@ -75,48 +75,56 @@
     }
 
     // Manejar la respuesta de credenciales de Google Sign-In
-    function handleCredentialResponse(response) {
-      const idToken = response.credential;
-      console.log("ID Token:", idToken);
-      
-      // Mostrar el loader durante la autenticación
-      document.getElementById('loader').style.display = 'block';
-      hideMessage();
-      
-      // Enviar el ID token al backend para verificación y emisión de JWT
-      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ idToken }),
-        credentials: 'include' // Incluir cookies en la solicitud
-      })
-      .then(res => res.json())
-      .then(data => {
-        // Ocultar el loader después de recibir la respuesta
-        document.getElementById('loader').style.display = 'none';
-        
-        if (data.success) {
-          // Mostrar el botón de cerrar sesión y ocultar el botón de iniciar sesión
-          document.getElementById('logout-button').style.display = 'block';
-          document.getElementById('g_id_signin').style.display = 'none';
-          // Mostrar un mensaje de éxito
-          showMessage('success', 'Autenticación exitosa. Cargando evaluaciones...');
-          // Cargar las evaluaciones
-          loadAppraisals();
-        } else {
-          // Manejar la falla en la autenticación
-          showMessage('error', data.message || 'Autenticación fallida. Por favor, intenta nuevamente.');
-        }
-      })
-      .catch(err => {
-        // Ocultar el loader en caso de error
-        document.getElementById('loader').style.display = 'none';
-        console.error('Error durante la autenticación:', err);
-        showMessage('error', 'Error durante la autenticación. Por favor, intenta nuevamente.');
-      });
+ function handleCredentialResponse(response) {
+  const idToken = response.credential;
+  console.log("ID Token:", idToken);
+  
+  // Mostrar el loader durante la autenticación
+  document.getElementById('loader').style.display = 'block';
+  hideMessage();
+  
+  // Enviar el ID token al backend para verificación y emisión de JWT
+  fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ idToken }),
+    credentials: 'include' // Incluir cookies en la solicitud
+  })
+  .then(res => res.json())
+  .then(data => {
+    // Ocultar el loader después de recibir la respuesta
+    document.getElementById('loader').style.display = 'none';
+    
+    if (data.success) {
+      // **Almacenar el nombre del usuario**
+      const userName = data.name;
+
+      // Mostrar el botón de cerrar sesión y ocultar el botón de iniciar sesión
+      document.getElementById('logout-button').style.display = 'block';
+      document.getElementById('g_id_signin').style.display = 'none';
+
+      // **Mostrar el mensaje de usuario conectado**
+      showUserName(userName);
+
+      // Mostrar un mensaje de éxito
+      showMessage('success', 'Autenticación exitosa. Cargando evaluaciones...');
+      // Cargar las evaluaciones
+      loadAppraisals();
+    } else {
+      // Manejar la falla en la autenticación
+      showMessage('error', data.message || 'Autenticación fallida. Por favor, intenta nuevamente.');
     }
+  })
+  .catch(err => {
+    // Ocultar el loader en caso de error
+    document.getElementById('loader').style.display = 'none';
+    console.error('Error durante la autenticación:', err);
+    showMessage('error', 'Error durante la autenticación. Por favor, intenta nuevamente.');
+  });
+}
+
 
     // Función para cargar evaluaciones desde el backend
     function loadAppraisals() {
