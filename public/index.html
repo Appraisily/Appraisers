@@ -125,6 +125,14 @@
   });
 }
 
+// Función para mostrar el nombre del usuario
+function showUserName(name) {
+  const userNameDiv = document.getElementById('user-name');
+  userNameDiv.textContent = `Estás conectado como ${name}`;
+  userNameDiv.style.display = 'block';
+}
+
+    
 
     // Función para cargar evaluaciones desde el backend
     function loadAppraisals() {
