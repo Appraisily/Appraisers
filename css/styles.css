@@ -255,3 +255,18 @@ td[data-label="Appraisal Number"] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Estilos para el mensaje del nombre de usuario */
+.user-name {
+  position: fixed; /* Posición fija en la ventana */
+  top: 20px;
+  left: 20px;
+  padding: 10px 20px;
+  background-color: #ffffff;
+  color: #28a745; /* Verde para el texto */
+  border: 2px solid #28a745; /* Borde verde */
+  border-radius: 4px;
+  font-size: 14px;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
