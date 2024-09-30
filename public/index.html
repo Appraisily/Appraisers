@@ -168,7 +168,9 @@
               <tr>
                 <td data-label="Date">${appraisal.date}</td>
                 <td data-label="Appraisal Type">${appraisal.appraisalType}</td>
-                <td data-label="Appraisal Number">${appraisal.identifier}</td>
+<td data-label="Appraisal Number" title="${appraisal.identifier}">
+  ${appraisal.identifier}
+</td>
                 <td data-label="Status">${appraisal.status}</td>
                 <td data-label="Action">
                   <button class="complete-button" data-id="${appraisal.id}" data-url="${appraisal.wordpressUrl}">Complete</button>
