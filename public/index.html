@@ -103,6 +103,7 @@
     if (data.success) {
       // **Almacenar el nombre del usuario**
       const userName = data.name;
+  localStorage.setItem('userName', data.name);
 
       // Mostrar el botón de cerrar sesión y ocultar el botón de iniciar sesión
       document.getElementById('logout-button').style.display = 'block';
