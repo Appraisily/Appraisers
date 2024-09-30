@@ -2,330 +2,242 @@
 
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <title>Completar Evaluación</title>
-    <style>
-      /* Reset de márgenes y paddings */
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+<head>
+  <meta charset="utf-8" />
+  <title>Completar Evaluación</title>
+  <style>
+    /* ... Estilos existentes ... */
+    /* Incluye aquí los estilos anteriores y agrega los estilos del botón de cerrar sesión */
+    /* Botón de Cerrar Sesión */
+    .logout-button {
+      position: fixed; /* Posición fija en la ventana */
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: #ffffff;
+      color: #d9534f; /* Rojo para el texto */
+      border: 2px solid #d9534f; /* Borde rojo */
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      display: none; /* Inicialmente oculto */
+      z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
 
-      /* Estilos del cuerpo */
-      body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f9f9f9;
-        color: #333333;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        min-height: 100vh;
-        padding: 20px;
-      }
+    .logout-button:hover {
+      background-color: #d9534f; /* Fondo rojo al pasar el mouse */
+      color: #ffffff; /* Texto blanco al pasar el mouse */
+    }
+  </style>
+</head>
+<body>
+  <!-- Botón de Cerrar Sesión -->
+  <button id="logout-button" class="logout-button" style="display: none;">Cerrar Sesión</button>
 
-      /* Contenedor principal */
-      .container {
-        max-width: 600px;
-        width: 100%;
-        background-color: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        padding: 40px 30px;
-        text-align: center;
-        margin-top: 50px;
-      }
-
-      /* Logo */
-      .logo {
-        margin-bottom: 20px;
-      }
-
-      .logo img {
-        width: 150px;
-        height: auto;
-      }
-
-      /* Título */
-      .title {
-        font-size: 24px;
-        color: #333333;
-        margin-bottom: 20px;
-      }
-
-      /* Formulario */
-      form {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      label {
-        margin-bottom: 8px;
-        font-weight: bold;
-      }
-
-      input[type="number"],
-      textarea {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 20px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 16px;
-      }
-
-      textarea {
-        resize: vertical;
-        min-height: 100px;
-      }
-
-      /* Botón de Enviar */
-      .submit-button {
-        padding: 12px 24px;
-        background-color: #28a745;
-        color: #ffffff;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background-color 0.3s ease;
-      }
-
-      .submit-button:hover {
-        background-color: #218838;
-      }
-
-      /* Loader */
-      #loader {
-        border: 8px solid #f3f3f3;
-        border-top: 8px solid #3498db;
-        border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        animation: spin 1s linear infinite;
-        margin: 20px auto;
-        display: none;
-      }
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-
-      /* Mensajes de Error/Éxito */
-      #message {
-        margin-top: 20px;
-        padding: 15px 20px;
-        border-radius: 4px;
-        display: none;
-        font-size: 16px;
-      }
-
-      #message.success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-      }
-
-      #message.error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-      }
-
-      /* Footer */
-      .footer {
-        margin-top: auto;
-        padding: 20px;
-        text-align: center;
-        font-size: 12px;
-        color: #777777;
-      }
-
-      .footer a {
-        color: #007bff;
-        text-decoration: none;
-      }
-
-      .footer a:hover {
-        text-decoration: underline;
-      }
-
-      /* Responsive */
-      @media screen and (max-width: 600px) {
-        .container {
-          padding: 20px 15px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <!-- Logo -->
-      <div class="logo">
-        <a href="https://www.appraisily.com/" target="_blank">
-          <img src="https://www.appraisily.com/wp-content/uploads/2023/12/cropped-appraisily.com_a_logo_for_an_online_art_and_antiques_appraisal__a8888b1f-2dbb-479e-9833-09c6263f0892.webp" alt="Appraisily Logo">
-        </a>
-      </div>
-
-      <!-- Título -->
-      <div class="title">Completar Evaluación</div>
-
-      <!-- Mensajes de Error/Éxito -->
-      <div id="message"></div>
-
-      <!-- Formulario para Completar Evaluación -->
-      <form id="appraisal-form">
-        <label for="numericalField">Campo Numérico:</label>
-        <input type="number" id="numericalField" name="numericalField" required />
-
-        <label for="textField">Campo de Texto:</label>
-        <textarea id="textField" name="textField" required></textarea>
-
-        <button type="submit" class="submit-button">Enviar</button>
-      </form>
-
-      <!-- Loader -->
-      <div id="loader"></div>
+  <div class="container">
+    <!-- Logo -->
+    <div class="logo">
+      <a href="https://www.appraisily.com/" target="_blank">
+        <img src="https://www.appraisily.com/wp-content/uploads/2023/12/cropped-appraisily.com_a_logo_for_an_online_art_and_antiques_appraisal__a8888b1f-2dbb-479e-9833-09c6263f0892.webp" alt="Appraisily Logo">
+      </a>
     </div>
 
-    <!-- Footer -->
-    <div class="footer">
-      © <span id="current-year"></span> Appraisily. Todos los derechos reservados.
-    </div>
+    <!-- Título -->
+    <div class="title">Completar Evaluación</div>
 
-    <script>
-      // Actualizar el año en el footer
-      document.getElementById('current-year').textContent = new Date().getFullYear();
+    <!-- Mensajes de Error/Éxito -->
+    <div id="message"></div>
 
-      // Obtener el ID de la evaluación desde los parámetros de la URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const appraisalId = urlParams.get('id');
+    <!-- Formulario para Completar Evaluación -->
+    <form id="appraisal-form">
+      <label for="numericalField">Valor de la Tasación:</label>
+      <input type="number" id="numericalField" name="numericalField" required />
 
-      if (!appraisalId) {
-        alert('ID de evaluación no proporcionado.');
-        window.location.href = 'index.html';
-      }
+      <label for="textField">Descripción:</label>
+      <textarea id="textField" name="textField" required></textarea>
 
-      // Función para mostrar mensajes
-      function showMessage(type, text) {
-        const messageDiv = document.getElementById('message');
-        messageDiv.className = type === 'success' ? 'success' : 'error';
-        messageDiv.innerText = text;
-        messageDiv.style.display = 'block';
-      }
+      <button type="submit" class="submit-button">Enviar</button>
+    </form>
 
-      // Función para ocultar mensajes
-      function hideMessage() {
-        const messageDiv = document.getElementById('message');
-        messageDiv.style.display = 'none';
-      }
+    <!-- Loader -->
+    <div id="loader"></div>
+  </div>
 
-      // Función para cargar los detalles de la evaluación
-      function loadAppraisalDetails() {
-        // Mostrar el loader mientras se cargan los detalles
-        document.getElementById('loader').style.display = 'block';
-        hideMessage();
+  <!-- Footer -->
+  <div class="footer">
+    © <span id="current-year"></span> Appraisily. Todos los derechos reservados.
+  </div>
 
-        const jwtToken = localStorage.getItem('jwtToken');
-        if (!jwtToken) {
-          showMessage('error', 'No estás autenticado. Por favor, inicia sesión.');
-          return;
+  <script>
+    // Actualizar el año en el footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Obtener el ID de la evaluación desde los parámetros de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const appraisalId = urlParams.get('id');
+
+    if (!appraisalId) {
+      alert('ID de evaluación no proporcionado.');
+      window.location.href = 'index.html';
+    }
+
+    // Función para mostrar mensajes
+    function showMessage(type, text) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.className = type === 'success' ? 'success' : 'error';
+      messageDiv.innerText = text;
+      messageDiv.style.display = 'block';
+    }
+
+    // Función para ocultar mensajes
+    function hideMessage() {
+      const messageDiv = document.getElementById('message');
+      messageDiv.style.display = 'none';
+    }
+
+    // Función para cargar los detalles de la evaluación
+    function loadAppraisalDetails() {
+      // Mostrar el loader mientras se cargan los detalles
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
+
+      fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
+        method: 'GET',
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('No estás autenticado. Por favor, inicia sesión.');
+        } else if (res.status === 404) {
+          throw new Error('Evaluación no encontrada.');
         }
+        return res.json();
+      })
+      .then(data => {
+        // Mostrar la descripción IA en el formulario o en otro lugar
+        const form = document.getElementById('appraisal-form');
 
-        fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
-          headers: {
-            'Authorization': `Bearer ${jwtToken}`
-          }
-        })
-        .then(res => {
-          // Ocultar el loader después de recibir la respuesta
-          document.getElementById('loader').style.display = 'none';
+        // Mostrar la descripción IA como un párrafo antes del formulario
+        const iaDescription = document.createElement('p');
+        iaDescription.innerText = `Descripción IA: ${data.iaDescription}`;
+        iaDescription.style.marginBottom = '20px';
+        form.parentNode.insertBefore(iaDescription, form);
 
-          if (res.status === 401) {
-            throw new Error('No autorizado. Por favor, inicia sesión nuevamente.');
-          } else if (res.status === 403) {
-            throw new Error('Acceso prohibido. No tienes permisos para ver este contenido.');
-          } else if (res.status === 404) {
-            throw new Error('Evaluación no encontrada.');
-          }
-          return res.json();
-        })
-        .then(data => {
-          // Mostrar la descripción IA en el formulario o en otro lugar
-          const form = document.getElementById('appraisal-form');
+        showMessage('success', 'Detalles de la evaluación cargados exitosamente.');
+      })
+      .catch(err => {
+        console.error('Error al obtener detalles de la evaluación:', err);
+        showMessage('error', err.message || 'Error al obtener detalles de la evaluación.');
 
-          // Puedes mostrar la descripción IA como un párrafo antes del formulario
-          const iaDescription = document.createElement('p');
-          iaDescription.innerText = `Descripción IA: ${data.iaDescription}`;
-          iaDescription.style.marginBottom = '20px';
-          form.parentNode.insertBefore(iaDescription, form);
-
-          showMessage('success', 'Detalles de la evaluación cargados exitosamente.');
-        })
-        .catch(err => {
-          console.error('Error al obtener detalles de la evaluación:', err);
-          showMessage('error', err.message || 'Error al obtener detalles de la evaluación.');
-        });
-      }
-
-      // Función para manejar el envío del formulario
-      document.getElementById('appraisal-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const numericalField = document.getElementById('numericalField').value;
-        const textField = document.getElementById('textField').value;
-
-        // Validar los campos si es necesario
-
-        // Mostrar el loader mientras se envía la solicitud
-        document.getElementById('loader').style.display = 'block';
-        hideMessage();
-
-        const jwtToken = localStorage.getItem('jwtToken');
-        if (!jwtToken) {
-          showMessage('error', 'No estás autenticado. Por favor, inicia sesión.');
-          return;
+        // Redirigir al usuario al index si no está autenticado
+        if (err.message.includes('No estás autenticado')) {
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
         }
-
-        fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwtToken}`
-          },
-          body: JSON.stringify({ numericalField, textField })
-        })
-        .then(res => res.json())
-        .then(data => {
-          // Ocultar el loader después de recibir la respuesta
-          document.getElementById('loader').style.display = 'none';
-          
-          if (data.success) {
-            showMessage('success', 'Evaluación completada exitosamente.');
-            // Opcional: Redireccionar de vuelta al dashboard
-            setTimeout(() => {
-              window.location.href = 'index.html';
-            }, 2000);
-          } else {
-            showMessage('error', data.message || 'Error al completar la evaluación.');
-          }
-        })
-        .catch(err => {
-          // Ocultar el loader en caso de error
-          document.getElementById('loader').style.display = 'none';
-          console.error('Error al completar la evaluación:', err);
-          showMessage('error', 'Error al completar la evaluación. Por favor, intenta nuevamente.');
-        });
       });
+    }
 
-      // Cargar los detalles de la evaluación al cargar la página
-      window.onload = () => {
-        loadAppraisalDetails();
-      };
-    </script>
-  </body>
+    // Función para manejar el envío del formulario
+    document.getElementById('appraisal-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const numericalField = document.getElementById('numericalField').value;
+      const textField = document.getElementById('textField').value;
+
+      // Validar los campos si es necesario
+
+      // Mostrar el loader mientras se envía la solicitud
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
+
+      fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include', // Incluir cookies en la solicitud
+        body: JSON.stringify({ appraisalValue: numericalField, description: textField })
+      })
+      .then(res => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('No estás autenticado. Por favor, inicia sesión.');
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data.success) {
+          showMessage('success', 'Evaluación completada exitosamente.');
+          // Redireccionar de vuelta al dashboard
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+        } else {
+          showMessage('error', data.message || 'Error al completar la evaluación.');
+        }
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error al completar la evaluación:', err);
+        showMessage('error', err.message || 'Error al completar la evaluación. Por favor, intenta nuevamente.');
+
+        // Redirigir al usuario al index si no está autenticado
+        if (err.message.includes('No estás autenticado')) {
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+        }
+      });
+    });
+
+    // Función para manejar el cierre de sesión
+    function logout() {
+      // Mostrar el loader mientras se cierra sesión
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
+
+      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
+        method: 'POST',
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => res.json())
+      .then(data => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+
+        if (data.success) {
+          // Redirigir al usuario al index
+          window.location.href = 'index.html';
+        } else {
+          // Manejar la falla al cerrar sesión
+          showMessage('error', 'Error al cerrar sesión. Por favor, intenta nuevamente.');
+        }
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error durante el cierre de sesión:', err);
+        showMessage('error', 'Error al cerrar sesión. Por favor, intenta nuevamente.');
+      });
+    }
+
+    // Añadir event listener al botón de cerrar sesión
+    document.getElementById('logout-button').addEventListener('click', logout);
+
+    // Llamar a loadAppraisalDetails y mostrar el botón de cerrar sesión si está autenticado
+    window.onload = () => {
+      loadAppraisalDetails();
+      // Mostrar el botón de cerrar sesión
+      document.getElementById('logout-button').style.display = 'block';
+    };
+  </script>
+</body>
 </html>
