@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Appraisers Frontend</title>
-  <!-- Load Google Identity Services Library -->
+  <!-- Cargar la librería de Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -21,13 +21,13 @@
       </a>
     </div>
 
-    <!-- Title -->
+    <!-- Título -->
     <div class="title">Bienvenido al Appraisers Dashboard</div>
 
-    <!-- Error/Success Messages -->
+    <!-- Mensajes de Error/Éxito -->
     <div id="message"></div>
 
-    <!-- Google Sign-In Button -->
+    <!-- Botón de Iniciar Sesión de Google -->
     <div id="g_id_onload"
          data-client_id="856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
          data-callback="handleCredentialResponse"
@@ -45,211 +45,210 @@
     <!-- Loader -->
     <div id="loader"></div>
 
-    <!-- Appraisals Container -->
+    <!-- Contenedor de Evaluaciones -->
     <div id="appraisals"></div>
   </div>
 
-  <!-- Footer -->
+  <!-- Pie de página -->
   <div class="footer">
     © <span id="current-year"></span> Appraisily. Todos los derechos reservados.
   </div>
 
   <script>
-  // Update the year in the footer
-  document.getElementById('current-year').textContent = new Date().getFullYear();
+    // Actualizar el año en el pie de página
+    document.getElementById('current-year').textContent = new Date().getFullYear();
 
-  // Function to show messages
-  function showMessage(type, text) {
-    const messageDiv = document.getElementById('message');
-    messageDiv.className = type === 'success' ? 'success' : 'error';
-    messageDiv.innerText = text;
-    messageDiv.style.display = 'block';
-  }
+    // Función para mostrar mensajes
+    function showMessage(type, text) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.className = type === 'success' ? 'success' : 'error';
+      messageDiv.innerText = text;
+      messageDiv.style.display = 'block';
+    }
 
-  // Function to hide messages
-  function hideMessage() {
-    const messageDiv = document.getElementById('message');
-    messageDiv.style.display = 'none';
-  }
+    // Función para ocultar mensajes
+    function hideMessage() {
+      const messageDiv = document.getElementById('message');
+      messageDiv.style.display = 'none';
+    }
 
-  // Handle the credential response from Google Sign-In
-  function handleCredentialResponse(response) {
-    const idToken = response.credential;
-    console.log("ID Token:", idToken);
-    
-    // Show the loader during authentication
-    document.getElementById('loader').style.display = 'block';
-    hideMessage();
-    
-    // Send the ID token to the backend for verification and JWT issuance
-    fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ idToken }),
-      credentials: 'include' // Include cookies in the request
-    })
-    .then(res => res.json())
-    .then(data => {
-      // Hide the loader after receiving the response
-      document.getElementById('loader').style.display = 'none';
+    // Manejar la respuesta de credenciales de Google Sign-In
+    function handleCredentialResponse(response) {
+      const idToken = response.credential;
+      console.log("ID Token:", idToken);
       
-      if (data.success) {
-        // Mostrar el botón de cerrar sesión y ocultar el botón de iniciar sesión
-        document.getElementById('logout-button').style.display = 'block';
-        document.getElementById('g_id_signin').style.display = 'none';
-        // Mostrar un mensaje de éxito
-        showMessage('success', 'Autenticación exitosa. Cargando evaluaciones...');
-        // Cargar las evaluaciones
-        loadAppraisals();
-      } else {
-        // Manejar la falla en la autenticación
-        showMessage('error', data.message || 'Autenticación fallida. Por favor, intenta nuevamente.');
-      }
-    })
-    .catch(err => {
-      // Ocultar el loader en caso de error
-      document.getElementById('loader').style.display = 'none';
-      console.error('Error during authentication:', err);
-      showMessage('error', 'Error durante la autenticación. Por favor, intenta nuevamente.');
-    });
-  }
-
-  // Function to load appraisals from the backend
-  function loadAppraisals() {
-    // Show the loader while fetching appraisals
-    document.getElementById('loader').style.display = 'block';
-    hideMessage();
-
-    fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include' // Include cookies in the request
-    })
-    .then(res => {
-      // Hide the loader after receiving the response
-      document.getElementById('loader').style.display = 'none';
+      // Mostrar el loader durante la autenticación
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
       
-      if (res.status === 401) {
-        throw new Error('No autorizado. Por favor, inicia sesión nuevamente.');
-      } else if (res.status === 403) {
-        throw new Error('Acceso prohibido. No tienes permisos para ver este contenido.');
-      }
-      return res.json();
-    })
-    .then(data => {
-      // Render the appraisals table
-      const appraisalsDiv = document.getElementById('appraisals');
-      if (data.length === 0) {
-        appraisalsDiv.innerHTML = '<p>No hay evaluaciones pendientes.</p>';
-        showMessage('success', 'No hay evaluaciones pendientes para mostrar.');
-        return;
-      }
+      // Enviar el ID token al backend para verificación y emisión de JWT
+      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ idToken }),
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => res.json())
+      .then(data => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+        
+        if (data.success) {
+          // Mostrar el botón de cerrar sesión y ocultar el botón de iniciar sesión
+          document.getElementById('logout-button').style.display = 'block';
+          document.getElementById('g_id_signin').style.display = 'none';
+          // Mostrar un mensaje de éxito
+          showMessage('success', 'Autenticación exitosa. Cargando evaluaciones...');
+          // Cargar las evaluaciones
+          loadAppraisals();
+        } else {
+          // Manejar la falla en la autenticación
+          showMessage('error', data.message || 'Autenticación fallida. Por favor, intenta nuevamente.');
+        }
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error durante la autenticación:', err);
+        showMessage('error', 'Error durante la autenticación. Por favor, intenta nuevamente.');
+      });
+    }
 
-      let tableHTML = `
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Appraisal Type</th>
-              <th>Appraisal Number</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
+    // Función para cargar evaluaciones desde el backend
+    function loadAppraisals() {
+      // Mostrar el loader mientras se obtienen las evaluaciones
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
 
-      data.forEach(appraisal => {
-        tableHTML += `
-          <tr>
-            <td data-label="Date">${appraisal.date}</td>
-            <td data-label="Appraisal Type">${appraisal.appraisalType}</td>
-            <td data-label="Appraisal Number" title="${appraisal.identifier}">
-              ${appraisal.identifier}
-            </td>
-            <td data-label="Status">${appraisal.status}</td>
-            <td data-label="Action">
-              <button class="action-button" data-id="${appraisal.id}" data-url="${appraisal.wordpressUrl}">Complete</button>
-            </td>
-          </tr>
+      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+        
+        if (res.status === 401) {
+          throw new Error('No autorizado. Por favor, inicia sesión nuevamente.');
+        } else if (res.status === 403) {
+          throw new Error('Acceso prohibido. No tienes permisos para ver este contenido.');
+        }
+        return res.json();
+      })
+      .then(data => {
+        // Renderizar la tabla de evaluaciones
+        const appraisalsDiv = document.getElementById('appraisals');
+        if (data.length === 0) {
+          appraisalsDiv.innerHTML = '<p>No hay evaluaciones pendientes.</p>';
+          showMessage('success', 'No hay evaluaciones pendientes para mostrar.');
+          return;
+        }
+
+        let tableHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Appraisal Type</th>
+                <th>Appraisal Number</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
         `;
-      });
 
-      tableHTML += `
-          </tbody>
-        </table>
-      `;
-
-      appraisalsDiv.innerHTML = tableHTML;
-      showMessage('success', 'Evaluaciones cargadas exitosamente.');
-
-      // Add event listeners to the Complete buttons
-      document.querySelectorAll('.action-button').forEach(button => {
-        button.addEventListener('click', () => {
-          const appraisalId = button.getAttribute('data-id');
-          const wordpressUrl = button.getAttribute('data-url');
-          // Redirect to the appraisal completion page with the appraisal ID and WordPress URL as query parameters
-          window.location.href = `appraisal.html?id=${appraisalId}&wpUrl=${encodeURIComponent(wordpressUrl)}`;
+        data.forEach(appraisal => {
+          tableHTML += `
+            <tr>
+              <td data-label="Date">${appraisal.date}</td>
+              <td data-label="Appraisal Type">${appraisal.appraisalType}</td>
+              <td data-label="Appraisal Number" title="${appraisal.identifier}">
+                ${appraisal.identifier}
+              </td>
+              <td data-label="Status">${appraisal.status}</td>
+              <td data-label="Action">
+                <button class="action-button" data-id="${appraisal.id}" data-url="${appraisal.wordpressUrl}">Complete</button>
+              </td>
+            </tr>
+          `;
         });
+
+        tableHTML += `
+            </tbody>
+          </table>
+        `;
+
+        appraisalsDiv.innerHTML = tableHTML;
+        showMessage('success', 'Evaluaciones cargadas exitosamente.');
+
+        // Añadir event listeners a los botones "Complete"
+        document.querySelectorAll('.action-button').forEach(button => {
+          button.addEventListener('click', () => {
+            const appraisalId = button.getAttribute('data-id');
+            const wordpressUrl = button.getAttribute('data-url');
+            // Redirigir a la página de completar evaluación con los parámetros
+            window.location.href = `appraisal.html?id=${appraisalId}&wpUrl=${encodeURIComponent(wordpressUrl)}`;
+          });
+        });
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error al obtener las evaluaciones:', err);
+        showMessage('error', err.message || 'Error al obtener las evaluaciones.');
       });
-    })
-    .catch(err => {
-      // Hide the loader in case of an error
-      document.getElementById('loader').style.display = 'none';
-      console.error('Error fetching appraisals:', err);
-      showMessage('error', err.message || 'Error al obtener las evaluaciones.');
-    });
-  }
+    }
 
-  // Function to handle logout
-  function logout() {
-    // Show the loader while logging out
-    document.getElementById('loader').style.display = 'block';
-    hideMessage();
+    // Función para manejar el cierre de sesión
+    function logout() {
+      // Mostrar el loader mientras se cierra sesión
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
 
-    fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
-      method: 'POST',
-      credentials: 'include' // Include cookies in the request
-    })
-    .then(res => res.json())
-    .then(data => {
-      // Hide the loader after receiving the response
-      document.getElementById('loader').style.display = 'none';
-      
-      if (data.success) {
-        // Mostrar el botón de iniciar sesión y ocultar el botón de cerrar sesión
-        document.getElementById('g_id_signin').style.display = 'block';
-        document.getElementById('logout-button').style.display = 'none';
-        // Limpiar las evaluaciones
-        document.getElementById('appraisals').innerHTML = '';
-        // Mostrar un mensaje de éxito
-        showMessage('success', 'Has cerrado sesión exitosamente.');
-      } else {
-        // Manejar la falla al cerrar sesión
+      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
+        method: 'POST',
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => res.json())
+      .then(data => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+        
+        if (data.success) {
+          // Mostrar el botón de iniciar sesión y ocultar el botón de cerrar sesión
+          document.getElementById('g_id_signin').style.display = 'block';
+          document.getElementById('logout-button').style.display = 'none';
+          // Limpiar las evaluaciones
+          document.getElementById('appraisals').innerHTML = '';
+          // Mostrar un mensaje de éxito
+          showMessage('success', 'Has cerrado sesión exitosamente.');
+        } else {
+          // Manejar la falla al cerrar sesión
+          showMessage('error', 'Error al cerrar sesión. Por favor, intenta nuevamente.');
+        }
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error durante el cierre de sesión:', err);
         showMessage('error', 'Error al cerrar sesión. Por favor, intenta nuevamente.');
-      }
-    })
-    .catch(err => {
-      // Ocultar el loader en caso de error
-      document.getElementById('loader').style.display = 'none';
-      console.error('Error during logout:', err);
-      showMessage('error', 'Error al cerrar sesión. Por favor, intenta nuevamente.');
-    });
-  }
+      });
+    }
 
-  // Add event listener to the logout button
-  document.getElementById('logout-button').addEventListener('click', logout);
+    // Añadir event listener al botón de cerrar sesión
+    document.getElementById('logout-button').addEventListener('click', logout);
 
-  // Check authentication status on page load
-  window.onload = () => {
-    // Attempt to load appraisals; if unauthorized, show the sign-in button
-    loadAppraisals();
-  };
-</script>
-
+    // Verificar el estado de autenticación al cargar la página
+    window.onload = () => {
+      // Intentar cargar las evaluaciones; si no está autorizado, mostrar el botón de iniciar sesión
+      loadAppraisals();
+    };
+  </script>
 </body>
 </html>
