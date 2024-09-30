@@ -418,8 +418,21 @@
     document.getElementById('appraisal-form').addEventListener('submit', function(event) {
       event.preventDefault();
 
-      const appraisalValue = document.getElementById('appraisalValue').value;
-      const description = document.getElementById('description').value;
+  const appraisalValueInput = document.getElementById('appraisalValue');
+  const appraisalValue = appraisalValueInput.value.trim();
+  const description = document.getElementById('description').value.trim();
+
+  // Client-side validation for Appraisal Value
+  if (appraisalValue === '') {
+    showMessage('error', 'Missing Appraisal Value.');
+    return;
+  }
+
+  // Optionally, validate if appraisalValue is a positive number
+  if (isNaN(appraisalValue) || Number(appraisalValue) <= 0) {
+    showMessage('error', 'Appraisal Value must be a positive number.');
+    return;
+  }
 
       // Show the loader with message
       showLoader('Submitting appraisal...');
