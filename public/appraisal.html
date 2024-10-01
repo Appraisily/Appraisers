@@ -5,12 +5,12 @@
 <head>
   <meta charset="utf-8" />
   <title>Complete Appraisal</title>
-  <!-- Load the CSS using the <link> tag -->
-<style>
-  @import url('./css/styles.css');
-  /* Additional page-specific styles */
-</style>
-
+  <!-- Load Google Identity Services library -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Link to the external CSS file -->
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Additional page-specific styles -->
   <style>
     /* Main Content Container */
     .main-content {
@@ -92,9 +92,12 @@
 
     /* Appraisal Form Styles */
     #appraisal-form {
-       display: flex;
-  flex-direction: column;
-  align-items: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 30px;
     }
 
     #appraisal-form label {
@@ -102,6 +105,8 @@
       font-weight: bold;
       margin-bottom: 5px;
       color: #333333;
+      text-align: left;
+      width: 100%;
     }
 
     #appraisal-form input,
@@ -122,8 +127,7 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
-        align-self: center;
-
+      align-self: center;
     }
 
     #appraisal-form button.submit-button:hover {
@@ -152,22 +156,48 @@
       border: 1px solid #f5c6cb;
     }
 
-    /* Footer */
-    .footer {
-      margin-top: auto;
-      padding: 20px;
-      text-align: center;
-      font-size: 12px;
-      color: #777777;
+    /* Progress Steps */
+    .progress-steps {
+      max-width: 800px;
+      width: 100%;
+      margin-bottom: 30px;
+      text-align: left;
     }
 
-    .footer a {
+    .progress-steps ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .progress-steps li {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .progress-steps li::before {
+      content: '•';
+      font-size: 24px;
+      color: #cccccc;
+      margin-right: 10px;
+      transition: color 0.3s ease;
+    }
+
+    .progress-steps li.completed::before {
+      color: #28a745;
+    }
+
+    .progress-steps li.in-progress::before {
       color: #007bff;
-      text-decoration: none;
     }
 
-    .footer a:hover {
-      text-decoration: underline;
+    .progress-steps li.failed::before {
+      color: #dc3545;
+    }
+
+    .step-description {
+      font-size: 16px;
+      color: #333333;
     }
 
     /* Loader and Fetching Message */
@@ -197,6 +227,55 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* Footer */
+    .footer {
+      margin-top: auto;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #777777;
+    }
+
+    .footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Action Button */
+    .action-button {
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+      text-decoration: none;
+    }
+
+    .action-button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Styles for user name display */
+    .user-name {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 10px 20px;
+      background-color: #ffffff;
+      color: #28a745;
+      border: 2px solid #28a745;
+      border-radius: 4px;
+      font-size: 14px;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
@@ -218,12 +297,36 @@
     <!-- Success/Error Messages -->
     <div id="message"></div>
 
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+      <ul>
+        <li id="step-1" class="completed">
+          <span class="step-description">1. Set Appraisal Value</span>
+        </li>
+        <li id="step-2">
+          <span class="step-description">2. Merge Descriptions with OpenAI</span>
+        </li>
+        <li id="step-3">
+          <span class="step-description">3. Update Post Title in WordPress</span>
+        </li>
+        <li id="step-4">
+          <span class="step-description">4. Insert WordPress Template</span>
+        </li>
+        <li id="step-5">
+          <span class="step-description">5. Send Email to Customer</span>
+        </li>
+        <li id="step-6">
+          <span class="step-description">6. Mark Appraisal as Completed</span>
+        </li>
+      </ul>
+    </div>
+
     <!-- Main Content -->
     <div class="main-content">
       <!-- Loader Container -->
       <div id="loader-container">
         <div id="loader"></div>
-        <div id="loader-message">Fetching appraisal details...</div>
+        <div id="loader-message">Processing...</div>
       </div>
 
       <!-- Descriptions Container -->
@@ -256,12 +359,6 @@
 
         <button type="submit" class="submit-button">Submit</button>
       </form>
-
-      <!-- Loader -->
-      <div id="loader-container">
-        <div id="loader"></div>
-        <div id="loader-message">Submitting appraisal...</div>
-      </div>
     </div>
   </div>
 
@@ -309,6 +406,12 @@
     function hideLoader() {
       const loaderContainer = document.getElementById('loader-container');
       loaderContainer.style.display = 'none';
+    }
+
+    // Function to update progress step
+    function updateStep(stepNumber, status) {
+      const step = document.getElementById(`step-${stepNumber}`);
+      step.className = status; // 'completed', 'in-progress', 'failed'
     }
 
     // Function to load appraisal details
@@ -416,68 +519,6 @@
       });
     }
 
-  // Manejar el envío del formulario
-  document.getElementById('appraisal-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    const appraisalValueInput = document.getElementById('appraisalValue');
-    const appraisalValue = appraisalValueInput.value.trim();
-    const description = document.getElementById('description').value.trim();
-
-    // Validación del lado del cliente para el Appraisal Value
-    if (appraisalValue === '') {
-      showMessage('error', 'Missing Appraisal Value.');
-      return;
-    }
-
-    // Opcional: Validar si appraisalValue es un número positivo
-    if (isNaN(appraisalValue) || Number(appraisalValue) <= 0) {
-      showMessage('error', 'Appraisal Value must be a positive number.');
-      return;
-    }
-
-    // Mostrar el loader con el mensaje adecuado
-    showLoader('Submitting appraisal...');
-    hideMessage();
-
-    fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/complete`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include', // Incluir cookies en la solicitud
-      body: JSON.stringify({ appraisalValue, description })
-    })
-    .then(res => res.json())
-    .then(data => {
-      // Ocultar el loader después de recibir la respuesta
-      hideLoader();
-
-      if (data.success) {
-        showMessage('success', data.message || 'Appraisal completed successfully.');
-        // Redirigir al dashboard después de un breve retraso
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
-      } else {
-        showMessage('error', data.message || 'Error completing appraisal.');
-      }
-    })
-    .catch(err => {
-      // Ocultar el loader en caso de error
-      hideLoader();
-      console.error('Error completing appraisal:', err);
-      showMessage('error', err.message || 'Error completing appraisal. Please try again.');
-
-      // Redirigir a index si no está autenticado
-      if (err.message.includes('not authenticated')) {
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
-      }
-    });
-  });
-    
     // Handle logout
     function logout() {
       // Show the loader with message
@@ -511,6 +552,177 @@
 
     // Add event listener to the logout button
     document.getElementById('logout-button').addEventListener('click', logout);
+
+    // Function to handle form submission and process steps
+    document.getElementById('appraisal-form').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const appraisalValueInput = document.getElementById('appraisalValue');
+      const appraisalValue = appraisalValueInput.value.trim();
+      const description = document.getElementById('description').value.trim();
+
+      // Validación del lado del cliente para el Appraisal Value
+      if (appraisalValue === '') {
+        showMessage('error', 'Missing Appraisal Value.');
+        return;
+      }
+
+      // Opcional: Validar si appraisalValue es un número positivo
+      if (isNaN(appraisalValue) || Number(appraisalValue) <= 0) {
+        showMessage('error', 'Appraisal Value must be a positive number.');
+        return;
+      }
+
+      // Mostrar el loader con el mensaje adecuado
+      showLoader('Submitting appraisal...');
+      hideMessage();
+
+      try {
+        // Paso 1: Set Appraisal Value (ya implementado en backend)
+        updateStep(1, 'completed');
+
+        // Paso 2: Merge Descriptions with OpenAI
+        updateStep(2, 'in-progress');
+        showLoader('Merging descriptions with OpenAI...');
+        
+        const mergeResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/merge-descriptions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({ appraiserDescription: description })
+        });
+
+        const mergeData = await mergeResponse.json();
+
+        if (!mergeData.success) {
+          throw new Error(mergeData.message || 'Error merging descriptions with OpenAI.');
+        }
+
+        updateStep(2, 'completed');
+        hideLoader();
+        showMessage('success', 'Descriptions merged successfully.');
+
+        // Paso 3: Update Post Title in WordPress
+        updateStep(3, 'in-progress');
+        showLoader('Updating post title in WordPress...');
+
+        const updateTitleResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/update-title`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({ newTitle: mergeData.blendedDescription })
+        });
+
+        const updateTitleData = await updateTitleResponse.json();
+
+        if (!updateTitleData.success) {
+          throw new Error(updateTitleData.message || 'Error updating post title in WordPress.');
+        }
+
+        updateStep(3, 'completed');
+        hideLoader();
+        showMessage('success', 'Post title updated successfully.');
+
+        // Paso 4: Insert WordPress Template
+        updateStep(4, 'in-progress');
+        showLoader('Inserting WordPress template...');
+
+        const insertTemplateResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/insert-template`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({ templateId: 'your-template-id' }) // Reemplaza 'your-template-id' con el ID real de tu plantilla
+        });
+
+        const insertTemplateData = await insertTemplateResponse.json();
+
+        if (!insertTemplateData.success) {
+          throw new Error(insertTemplateData.message || 'Error inserting WordPress template.');
+        }
+
+        updateStep(4, 'completed');
+        hideLoader();
+        showMessage('success', 'WordPress template inserted successfully.');
+
+        // Paso 5: Send Email to Customer
+        updateStep(5, 'in-progress');
+        showLoader('Sending email to customer...');
+
+        const sendEmailResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({ appraisalId })
+        });
+
+        const sendEmailData = await sendEmailResponse.json();
+
+        if (!sendEmailData.success) {
+          throw new Error(sendEmailData.message || 'Error sending email to customer.');
+        }
+
+        updateStep(5, 'completed');
+        hideLoader();
+        showMessage('success', 'Email sent to customer successfully.');
+
+        // Paso 6: Mark Appraisal as Completed
+        updateStep(6, 'in-progress');
+        showLoader('Marking appraisal as completed...');
+
+        const completeAppraisalResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/complete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({ appraisalValue, description })
+        });
+
+        const completeAppraisalData = await completeAppraisalResponse.json();
+
+        if (!completeAppraisalData.success) {
+          throw new Error(completeAppraisalData.message || 'Error marking appraisal as completed.');
+        }
+
+        updateStep(6, 'completed');
+        hideLoader();
+        showMessage('success', 'Appraisal marked as completed successfully.');
+
+        // Redirigir al dashboard después de completar todos los pasos
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+
+      } catch (error) {
+        console.error('Error during appraisal process:', error);
+        hideLoader();
+
+        // Determinar en qué paso ocurrió el error
+        const errorStep = ['merging', 'updating title', 'inserting template', 'sending email', 'marking as completed'].find(step => error.message.toLowerCase().includes(step));
+        if (errorStep) {
+          const stepNumber = ['merging', 'updating title', 'inserting template', 'sending email', 'marking as completed'].indexOf(errorStep) + 2;
+          updateStep(stepNumber, 'failed');
+        }
+
+        showMessage('error', error.message || 'An unexpected error occurred during the appraisal process.');
+      }
+    });
+
+    // Function to update the step status
+    function updateStep(stepNumber, status) {
+      const step = document.getElementById(`step-${stepNumber}`);
+      if (step) {
+        step.className = status; // 'completed', 'in-progress', 'failed'
+      }
+    }
 
     // Load appraisal details and show logout button if authenticated
     window.onload = () => {
