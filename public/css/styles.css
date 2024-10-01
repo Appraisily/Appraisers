@@ -51,9 +51,18 @@ body {
 }
 
 /* Sign-In Button */
+.signin-container {
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center;    /* Centra verticalmente */
+  width: 100%;
+  margin-top: 20px;       /* Espaciado superior */
+}
+
 .g_id_signin {
-  display: inline-block;
-  margin-top: 20px;
+  width: 100%;            /* Ocupa todo el ancho disponible */
+  max-width: 400px;       /* Máximo ancho deseado */
+  margin: 0 auto;         /* Centra el botón */
 }
 
 /* Logout Button */
