@@ -354,7 +354,7 @@
         <label for="appraisalValue">Appraisal Value:</label>
         <input type="number" id="appraisalValue" name="appraisalValue" required />
 
-        <label for="description">Description:</label>
+        <label for="description">Appraiser Description:</label>
         <textarea id="description" name="description" rows="6" required></textarea>
 
         <button type="submit" class="submit-button">Submit</button>
@@ -411,7 +411,9 @@
     // Function to update progress step
     function updateStep(stepNumber, status) {
       const step = document.getElementById(`step-${stepNumber}`);
-      step.className = status; // 'completed', 'in-progress', 'failed'
+      if (step) {
+        step.className = status; // 'completed', 'in-progress', 'failed'
+      }
     }
 
     // Function to load appraisal details
@@ -559,7 +561,8 @@
 
       const appraisalValueInput = document.getElementById('appraisalValue');
       const appraisalValue = appraisalValueInput.value.trim();
-      const description = document.getElementById('description').value.trim();
+      const appraiserDescription = document.getElementById('description').value.trim();
+      const iaDescription = document.getElementById('ia-description-text').innerText.trim();
 
       // Validación del lado del cliente para el Appraisal Value
       if (appraisalValue === '') {
@@ -584,14 +587,17 @@
         // Paso 2: Merge Descriptions with OpenAI
         updateStep(2, 'in-progress');
         showLoader('Merging descriptions with OpenAI...');
-        
+
         const mergeResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/merge-descriptions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           credentials: 'include',
-          body: JSON.stringify({ appraiserDescription: description })
+          body: JSON.stringify({ 
+            appraiserDescription: appraiserDescription,
+            iaDescription: iaDescription
+          })
         });
 
         const mergeData = await mergeResponse.json();
@@ -683,7 +689,7 @@
             'Content-Type': 'application/json'
           },
           credentials: 'include',
-          body: JSON.stringify({ appraisalValue, description })
+          body: JSON.stringify({ appraisalValue, description: appraiserDescription })
         });
 
         const completeAppraisalData = await completeAppraisalResponse.json();
@@ -706,10 +712,17 @@
         hideLoader();
 
         // Determinar en qué paso ocurrió el error
-        const errorStep = ['merging', 'updating title', 'inserting template', 'sending email', 'marking as completed'].find(step => error.message.toLowerCase().includes(step));
-        if (errorStep) {
-          const stepNumber = ['merging', 'updating title', 'inserting template', 'sending email', 'marking as completed'].indexOf(errorStep) + 2;
-          updateStep(stepNumber, 'failed');
+        const errorSteps = [
+          { keyword: 'merging', step: 2 },
+          { keyword: 'updating title', step: 3 },
+          { keyword: 'inserting template', step: 4 },
+          { keyword: 'sending email', step: 5 },
+          { keyword: 'marking as completed', step: 6 }
+        ];
+
+        const foundStep = errorSteps.find(stepObj => error.message.toLowerCase().includes(stepObj.keyword));
+        if (foundStep) {
+          updateStep(foundStep.step, 'failed');
         }
 
         showMessage('error', error.message || 'An unexpected error occurred during the appraisal process.');
