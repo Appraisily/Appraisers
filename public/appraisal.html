@@ -452,49 +452,104 @@
   const steps = ['step-1', 'step-2', 'step-3', 'step-4', 'step-5', 'step-6', 'step-7'];
   let currentStepIndex = 0; // Índice del paso actual (0-based)
 
-  // Función para mostrar el paso actual
-  function showCurrentStep() {
-    steps.forEach((stepId, index) => {
-      const step = document.getElementById(stepId);
+  // Obtener referencias a los mensajes y puntos
+  const stepMessages = [
+    document.getElementById('message-step-1'),
+    document.getElementById('message-step-2'),
+    document.getElementById('message-step-3'),
+    document.getElementById('message-step-4'),
+    document.getElementById('message-step-5'),
+    document.getElementById('message-step-6'),
+    document.getElementById('message-step-7')
+  ];
+
+  const progressDots = [
+    document.getElementById('dot-1'),
+    document.getElementById('dot-2'),
+    document.getElementById('dot-3'),
+    document.getElementById('dot-4'),
+    document.getElementById('dot-5'),
+    document.getElementById('dot-6'),
+    document.getElementById('dot-7')
+  ];
+
+  // Inicializar descripciones para los tooltips de los dots
+  const stepDescriptions = [
+    "Set Appraisal Value",
+    "Merge Descriptions with OpenAI",
+    "Update Post Title in WordPress",
+    "Insert WordPress Template",
+    "Building PDF",
+    "Send Email to Customer",
+    "Mark Appraisal as Completed"
+  ];
+
+  // Asignar descripciones a los dots para los tooltips
+  progressDots.forEach((dot, index) => {
+    dot.setAttribute('data-description', stepDescriptions[index]);
+  });
+
+  // Función para mostrar el mensaje del paso actual
+  function showCurrentStepMessage() {
+    stepMessages.forEach((message, index) => {
       if (index === currentStepIndex) {
-        step.classList.add('active');
+        message.classList.add('active');
       } else {
-        step.classList.remove('active');
-        step.classList.remove('completed');
-        step.classList.remove('failed');
+        message.classList.remove('active');
       }
     });
   }
 
   // Función para completar el paso actual y avanzar al siguiente
   function completeCurrentStep() {
-    const stepId = steps[currentStepIndex];
-    const step = document.getElementById(stepId);
-    if (step) {
-      step.classList.remove('active');
-      step.classList.add('completed');
-    }
-    currentStepIndex++;
     if (currentStepIndex < steps.length) {
-      showCurrentStep();
+      // Marcar el mensaje actual como completado (animación hacia arriba)
+      stepMessages[currentStepIndex].classList.remove('active');
+      stepMessages[currentStepIndex].classList.add('completed');
+
+      // Actualizar el dot correspondiente
+      progressDots[currentStepIndex].classList.remove('active');
+      progressDots[currentStepIndex].classList.add('completed');
+
+      // Avanzar al siguiente paso
+      currentStepIndex++;
+      if (currentStepIndex < steps.length) {
+        // Mostrar el siguiente mensaje
+        stepMessages[currentStepIndex].classList.add('active');
+
+        // Actualizar el dot siguiente a activo
+        progressDots[currentStepIndex].classList.add('active');
+      }
     }
   }
 
   // Función para marcar el paso actual como fallido y avanzar al siguiente
-  function failCurrentStep() {
-    const stepId = steps[currentStepIndex];
-    const step = document.getElementById(stepId);
-    if (step) {
-      step.classList.remove('active');
-      step.classList.add('failed');
-    }
-    currentStepIndex++;
+  function failCurrentStep(errorMessage) {
     if (currentStepIndex < steps.length) {
-      showCurrentStep();
+      // Marcar el mensaje actual como fallido
+      stepMessages[currentStepIndex].classList.remove('active');
+      stepMessages[currentStepIndex].classList.add('failed');
+
+      // Actualizar el dot correspondiente
+      progressDots[currentStepIndex].classList.remove('active');
+      progressDots[currentStepIndex].classList.add('failed');
+
+      // Mostrar el mensaje de error en el rectángulo
+      showMessage('error', errorMessage);
+
+      // Avanzar al siguiente paso
+      currentStepIndex++;
+      if (currentStepIndex < steps.length) {
+        // Mostrar el siguiente mensaje
+        stepMessages[currentStepIndex].classList.add('active');
+
+        // Actualizar el dot siguiente a activo
+        progressDots[currentStepIndex].classList.add('active');
+      }
     }
   }
 
-  // Función para mostrar mensajes
+  // Función para mostrar mensajes de éxito o error en el recuadro principal
   function showMessage(type, text) {
     const messageDiv = document.getElementById('message');
     messageDiv.className = type === 'success' ? 'success' : 'error';
@@ -822,10 +877,8 @@
       console.error('Error during appraisal process:', error);
       hideLoader();
 
-      // Marcar el paso actual como fallido
-      failCurrentStep();
-
-      showMessage('error', error.message || 'An unexpected error occurred during the appraisal process.');
+      // Marcar el paso actual como fallido y mostrar el mensaje de error
+      failCurrentStep(error.message || 'An unexpected error occurred during the appraisal process.');
     }
   });
 
@@ -835,9 +888,10 @@
     // Mostrar el botón de logout
     document.getElementById('logout-button').style.display = 'block';
     // Mostrar el paso actual
-    showCurrentStep();
+    showCurrentStepMessage();
   };
 </script>
+
 
 </body>
 </html>
