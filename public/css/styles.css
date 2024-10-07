@@ -78,6 +78,20 @@ body {
   margin-bottom: 20px;
 }
 
+/* Dashboard Title Styles */
+.dashboard-title {
+  position: fixed; /* Fixed positioning to keep it at the top */
+  top: 10px; /* Adjust to be close to the top edge */
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%); /* Center alignment */
+  font-size: 18px;
+  font-weight: bold;
+  color: #333333;
+  background-color: transparent; /* Transparent background */
+  z-index: 1000; /* Ensure it stays above other elements */
+}
+
+
 /* Sign-In Button */
 .signin-container {
   display: flex;
