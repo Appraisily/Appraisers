@@ -783,25 +783,26 @@
       hideLoader();
       showMessage('success', 'Post title updated successfully.');
 
-      // Paso 4: Insert WordPress Template
-      const insertTemplateResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/insert-template`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ templateId: 'your-template-id' }) // Reemplaza 'your-template-id' con el ID real de tu plantilla
-      });
+    // Paso 4: Insert Shortcodes in WordPress Post
+const insertShortcodesResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/insert-template`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  credentials: 'include',
+  body: JSON.stringify({}) // Enviar un cuerpo vacío o puedes omitirlo completamente
+});
 
-      const insertTemplateData = await insertTemplateResponse.json();
+const insertShortcodesData = await insertShortcodesResponse.json();
 
-      if (!insertTemplateData.success) {
-        throw new Error(insertTemplateData.message || 'Error inserting WordPress template.');
-      }
+if (!insertShortcodesData.success) {
+  throw new Error(insertShortcodesData.message || 'Error inserting shortcodes in WordPress.');
+}
 
-      completeCurrentStep();
-      hideLoader();
-      showMessage('success', 'WordPress template inserted successfully.');
+completeCurrentStep();
+hideLoader();
+showMessage('success', 'Shortcodes inserted successfully in WordPress post.');
+
 
       // Paso 5: Building PDF
       showLoader('Building PDF...');
