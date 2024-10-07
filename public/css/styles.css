@@ -334,42 +334,97 @@ td[data-label="Action"] {
   z-index: 1000;
 }
 
-/* Fila de Puntos para los Pasos */
+/* Rectangle for Step Messages */
+.step-messages {
+  width: 100%;
+  max-width: 600px;
+  border: 2px solid #000; /* Borde negro */
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 20px;
+  height: 60px; /* Altura fija para mantener la consistencia */
+  overflow: hidden;
+  position: relative;
+  background-color: #f9f9f9;
+}
+
+/* Individual Step Message */
+.step-message {
+  position: absolute;
+  width: 100%;
+  top: 100%;
+  left: 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.step-message.active {
+  top: 0;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Animación para mover el mensaje hacia arriba */
+.step-message.completed {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+/* Animación para mostrar el siguiente mensaje desde abajo */
+.step-message.next {
+  top: 100%;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Dots for Steps */
 .progress-dots {
   display: flex;
   justify-content: center;
-  align-items: center;
-  margin-top: 20px; /* Espaciado superior para separarlo del formulario */
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .progress-dots .dot {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  background-color: #cccccc; /* Color de los puntos pendientes */
-  margin: 0 10px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  background-color: #cccccc;
+  transition: background-color 0.3s ease;
 }
 
 .progress-dots .dot.active {
-  background-color: #007bff; /* Color para el paso activo */
-  transform: scale(1.2); /* Aumenta el tamaño para resaltar */
+  background-color: #007bff;
 }
 
 .progress-dots .dot.completed {
-  background-color: #28a745; /* Color para pasos completados */
+  background-color: #28a745;
 }
 
 .progress-dots .dot.failed {
-  background-color: #dc3545; /* Color para pasos fallidos */
+  background-color: #dc3545;
 }
 
-/* Responsive Design: Ajustar tamaño de los puntos en pantallas pequeñas */
-@media screen and (max-width: 600px) {
-  .progress-dots .dot {
-    width: 15px;
-    height: 15px;
-    margin: 0 5px;
-  }
+/* Opcional: Tooltip con Descripción al Pasar el Cursor */
+.progress-dots .dot::after {
+  content: attr(data-description);
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  display: none;
+  z-index: 100;
 }
+
+.progress-dots .dot:hover::after {
+  display: block;
+}
+
 
