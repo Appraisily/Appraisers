@@ -333,3 +333,43 @@ td[data-label="Action"] {
   font-size: 14px;
   z-index: 1000;
 }
+
+/* Fila de Puntos para los Pasos */
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px; /* Espaciado superior para separarlo del formulario */
+}
+
+.progress-dots .dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #cccccc; /* Color de los puntos pendientes */
+  margin: 0 10px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.progress-dots .dot.active {
+  background-color: #007bff; /* Color para el paso activo */
+  transform: scale(1.2); /* Aumenta el tamaño para resaltar */
+}
+
+.progress-dots .dot.completed {
+  background-color: #28a745; /* Color para pasos completados */
+}
+
+.progress-dots .dot.failed {
+  background-color: #dc3545; /* Color para pasos fallidos */
+}
+
+/* Responsive Design: Ajustar tamaño de los puntos en pantallas pequeñas */
+@media screen and (max-width: 600px) {
+  .progress-dots .dot {
+    width: 15px;
+    height: 15px;
+    margin: 0 5px;
+  }
+}
+
