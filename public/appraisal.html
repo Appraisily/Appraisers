@@ -10,9 +10,9 @@
   <!-- Link to the external CSS file -->
   <style>
     @import url('css/styles.css');
-
+  </style>  
   <!-- Additional page-specific styles -->
-
+  <style>
     /* Main Content Container */
     .main-content {
       display: flex;
@@ -428,27 +428,31 @@
   }
 
   // Definir los pasos
-  const steps = [
-    { id: 'step-1', description: 'Set Appraisal Value' },
-    { id: 'step-2', description: 'Merge Descriptions with OpenAI' },
-    { id: 'step-3', description: 'Update Post Title in WordPress' },
-    { id: 'step-4', description: 'Insert WordPress Template' },
-    { id: 'step-5', description: 'Building PDF' },
-    { id: 'step-6', description: 'Send Email to Customer' },
-    { id: 'step-7', description: 'Mark Appraisal as Completed' }
-  ];
+  const steps = ['step-1', 'step-2', 'step-3', 'step-4', 'step-5', 'step-6', 'step-7'];
   let currentStepIndex = 0; // Índice del paso actual (0-based)
 
   // Obtener referencias a los mensajes y puntos
-  const stepMessages = steps.map(step => document.getElementById(`message-step-${step.id.split('-')[1]}`));
-  const progressDots = steps.map(step => document.getElementById(`dot-${step.id.split('-')[1]}`));
+  const stepMessages = steps.map(step => document.getElementById(`message-${step}`));
+  const progressDots = steps.map(step => document.getElementById(`dot-${step.split('-')[1]}`));
 
   // Inicializar descripciones para los tooltips de los dots
-  const stepDescriptions = steps.map(step => step.description);
+  const stepDescriptions = [
+    "Set Appraisal Value",
+    "Merge Descriptions with OpenAI",
+    "Update Post Title in WordPress",
+    "Insert WordPress Template",
+    "Building PDF",
+    "Send Email to Customer",
+    "Mark Appraisal as Completed"
+  ];
 
   // Asignar descripciones a los dots para los tooltips
   progressDots.forEach((dot, index) => {
-    dot.setAttribute('data-description', stepDescriptions[index]);
+    if (dot) {
+      dot.setAttribute('data-description', stepDescriptions[index]);
+    } else {
+      console.warn(`Dot with ID 'dot-${index + 1}' not found.`);
+    }
   });
 
   // Función para mostrar el mensaje del paso actual
@@ -465,6 +469,7 @@
   // Función para completar el paso actual y avanzar al siguiente
   function completeCurrentStep() {
     if (currentStepIndex < steps.length) {
+      console.log(`Completing step ${currentStepIndex + 1}: ${steps[currentStepIndex]}`);
       // Marcar el mensaje actual como completado (animación hacia arriba)
       stepMessages[currentStepIndex].classList.remove('active');
       stepMessages[currentStepIndex].classList.add('completed');
@@ -488,6 +493,7 @@
   // Función para marcar el paso actual como fallido y avanzar al siguiente
   function failCurrentStep(errorMessage) {
     if (currentStepIndex < steps.length) {
+      console.error(`Failing step ${currentStepIndex + 1}: ${steps[currentStepIndex]} - Error: ${errorMessage}`);
       // Marcar el mensaje actual como fallido
       stepMessages[currentStepIndex].classList.remove('active');
       stepMessages[currentStepIndex].classList.add('failed');
@@ -678,6 +684,22 @@
   // Añadir event listener al botón de logout
   document.getElementById('logout-button').addEventListener('click', logout);
 
+  // Función para actualizar el mensaje del paso actual al cargar la página
+  function initializeStepMessages() {
+    stepMessages.forEach((message, index) => {
+      if (index < currentStepIndex) {
+        // Pasos ya completados
+        message.classList.add('completed');
+        progressDots[index].classList.add('completed');
+      } else if (index === currentStepIndex) {
+        // Paso actual
+        message.classList.add('active');
+        progressDots[index].classList.add('active');
+      }
+      // Los pasos restantes no tienen clases adicionales
+    });
+  }
+
   // Manejar el envío del formulario y procesar los pasos
   document.getElementById('appraisal-form').addEventListener('submit', async function(event) {
     event.preventDefault();
@@ -849,8 +871,8 @@
     loadAppraisalDetails();
     // Mostrar el botón de logout
     document.getElementById('logout-button').style.display = 'block';
-    // Mostrar el paso actual
-    showCurrentStepMessage();
+    // Inicializar los mensajes de pasos
+    initializeStepMessages();
   };
 </script>
 
