@@ -10,9 +10,9 @@
   <!-- Link to the external CSS file -->
   <style>
     @import url('css/styles.css');
-  </style>  
+
   <!-- Additional page-specific styles -->
-  <style>
+
     /* Main Content Container */
     .main-content {
       display: flex;
@@ -428,40 +428,23 @@
   }
 
   // Definir los pasos
-  const steps = ['step-1', 'step-2', 'step-3', 'step-4', 'step-5', 'step-6', 'step-7'];
+  const steps = [
+    { id: 'step-1', description: 'Set Appraisal Value' },
+    { id: 'step-2', description: 'Merge Descriptions with OpenAI' },
+    { id: 'step-3', description: 'Update Post Title in WordPress' },
+    { id: 'step-4', description: 'Insert WordPress Template' },
+    { id: 'step-5', description: 'Building PDF' },
+    { id: 'step-6', description: 'Send Email to Customer' },
+    { id: 'step-7', description: 'Mark Appraisal as Completed' }
+  ];
   let currentStepIndex = 0; // Índice del paso actual (0-based)
 
   // Obtener referencias a los mensajes y puntos
-  const stepMessages = [
-    document.getElementById('message-step-1'),
-    document.getElementById('message-step-2'),
-    document.getElementById('message-step-3'),
-    document.getElementById('message-step-4'),
-    document.getElementById('message-step-5'),
-    document.getElementById('message-step-6'),
-    document.getElementById('message-step-7')
-  ];
-
-  const progressDots = [
-    document.getElementById('dot-1'),
-    document.getElementById('dot-2'),
-    document.getElementById('dot-3'),
-    document.getElementById('dot-4'),
-    document.getElementById('dot-5'),
-    document.getElementById('dot-6'),
-    document.getElementById('dot-7')
-  ];
+  const stepMessages = steps.map(step => document.getElementById(`message-step-${step.id.split('-')[1]}`));
+  const progressDots = steps.map(step => document.getElementById(`dot-${step.id.split('-')[1]}`));
 
   // Inicializar descripciones para los tooltips de los dots
-  const stepDescriptions = [
-    "Set Appraisal Value",
-    "Merge Descriptions with OpenAI",
-    "Update Post Title in WordPress",
-    "Insert WordPress Template",
-    "Building PDF",
-    "Send Email to Customer",
-    "Mark Appraisal as Completed"
-  ];
+  const stepDescriptions = steps.map(step => step.description);
 
   // Asignar descripciones a los dots para los tooltips
   progressDots.forEach((dot, index) => {
@@ -870,6 +853,7 @@
     showCurrentStepMessage();
   };
 </script>
+
 
 
 </body>
