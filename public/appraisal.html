@@ -156,11 +156,11 @@
       border: 1px solid #f5c6cb;
     }
 
-    /* Progress Steps */
+     /* Progress Steps */
     .progress-steps {
       max-width: 800px;
       width: 100%;
-      margin-bottom: 30px;
+      margin-top: 20px; /* Espaciado superior para separarlo del formulario */
       text-align: left;
     }
 
@@ -169,31 +169,27 @@
       padding: 0;
     }
 
-    .progress-steps li {
+    .progress-steps li.step {
+      display: none; /* Ocultar todos los pasos por defecto */
       display: flex;
       align-items: center;
+      font-size: 16px;
+      color: #555555;
       margin-bottom: 15px;
     }
 
-    .progress-steps li::before {
-      content: '•';
+    .progress-steps li.step.active {
+      display: flex; /* Mostrar solo el paso activo */
+      color: #007bff; /* Color para el paso activo */
+    }
+
+    .progress-steps li.step.active::before {
+      content: '•'; /* Puedes reemplazarlo por un icono si lo deseas */
       font-size: 24px;
-      color: #cccccc;
+      color: #007bff; /* Color del indicador del paso activo */
       margin-right: 10px;
-      transition: color 0.3s ease;
     }
 
-    .progress-steps li.completed::before {
-      color: #28a745;
-    }
-
-    .progress-steps li.in-progress::before {
-      color: #007bff;
-    }
-
-    .progress-steps li.failed::before {
-      color: #dc3545;
-    }
 
     .step-description {
       font-size: 16px;
@@ -276,6 +272,19 @@
       font-size: 14px;
       z-index: 1000;
     }
+
+        /* Dashboard Title Styles */
+    .dashboard-title {
+      position: fixed; /* Posicionamiento fijo para mantenerlo en la parte superior */
+      top: 10px; /* Ajusta para estar cerca del borde superior */
+      left: 50%; /* Centrar horizontalmente */
+      transform: translateX(-50%); /* Centrado */
+      font-size: 18px;
+      font-weight: bold;
+      color: #333333;
+      background-color: transparent; /* Fondo transparente */
+      z-index: 1000; /* Asegurar que esté por encima de otros elementos */
+    }
   </style>
 </head>
 <body>
@@ -287,15 +296,15 @@
   <button id="logout-button" class="logout-button">Logout</button>
   <!-- Div to display the user's name -->
   <div id="user-name" class="user-name" style="display: none;"></div>
+  
   <div class="container">
-      <!-- Back Button -->
-<!-- Example using an SVG icon -->
-<a href="index.html" class="back-button" aria-label="Go back to the list of pending appraisals">
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
-    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
-  </svg>
-  Back
-</a>
+    <!-- Back Button -->
+    <a href="index.html" class="back-button" aria-label="Go back to the list of pending appraisals">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+      </svg>
+      Back
+    </a>
 
     <!-- Logo -->
     <div class="logo">
@@ -309,30 +318,6 @@
 
     <!-- Success/Error Messages -->
     <div id="message"></div>
-
-    <!-- Progress Steps -->
-    <div class="progress-steps">
-      <ul>
-        <li id="step-1" class="completed">
-          <span class="step-description">1. Set Appraisal Value</span>
-        </li>
-        <li id="step-2">
-          <span class="step-description">2. Merge Descriptions with OpenAI</span>
-        </li>
-        <li id="step-3">
-          <span class="step-description">3. Update Post Title in WordPress</span>
-        </li>
-        <li id="step-4">
-          <span class="step-description">4. Insert WordPress Template</span>
-        </li>
-        <li id="step-5">
-          <span class="step-description">5. Send Email to Customer</span>
-        </li>
-        <li id="step-6">
-          <span class="step-description">6. Mark Appraisal as Completed</span>
-        </li>
-      </ul>
-    </div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -372,6 +357,33 @@
 
         <button type="submit" class="submit-button">Submit</button>
       </form>
+
+      <!-- Progress Steps -->
+      <div class="progress-steps">
+        <ul>
+          <li id="step-1" class="step active">
+            <span class="step-description">1. Set Appraisal Value</span>
+          </li>
+          <li id="step-2" class="step">
+            <span class="step-description">2. Merge Descriptions with OpenAI</span>
+          </li>
+          <li id="step-3" class="step">
+            <span class="step-description">3. Update Post Title in WordPress</span>
+          </li>
+          <li id="step-4" class="step">
+            <span class="step-description">4. Insert WordPress Template</span>
+          </li>
+          <li id="step-5" class="step">
+            <span class="step-description">5. Building PDF</span>
+          </li>
+          <li id="step-6" class="step">
+            <span class="step-description">6. Send Email to Customer</span>
+          </li>
+          <li id="step-7" class="step">
+            <span class="step-description">7. Mark Appraisal as Completed</span>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -393,7 +405,53 @@
       window.location.href = 'index.html';
     }
 
-    // Function to show messages
+    // Definir los pasos
+    const steps = ['step-1', 'step-2', 'step-3', 'step-4', 'step-5', 'step-6', 'step-7'];
+    let currentStepIndex = 0; // Índice del paso actual (0-based)
+
+    // Función para mostrar el paso actual
+    function showCurrentStep() {
+      steps.forEach((stepId, index) => {
+        const step = document.getElementById(stepId);
+        if (index === currentStepIndex) {
+          step.classList.add('active');
+        } else {
+          step.classList.remove('active');
+          step.classList.remove('completed');
+          step.classList.remove('failed');
+        }
+      });
+    }
+
+    // Función para completar el paso actual y avanzar al siguiente
+    function completeCurrentStep() {
+      const stepId = steps[currentStepIndex];
+      const step = document.getElementById(stepId);
+      if (step) {
+        step.classList.remove('active');
+        step.classList.add('completed');
+      }
+      currentStepIndex++;
+      if (currentStepIndex < steps.length) {
+        showCurrentStep();
+      }
+    }
+
+    // Función para marcar el paso actual como fallido y avanzar al siguiente
+    function failCurrentStep() {
+      const stepId = steps[currentStepIndex];
+      const step = document.getElementById(stepId);
+      if (step) {
+        step.classList.remove('active');
+        step.classList.add('failed');
+      }
+      currentStepIndex++;
+      if (currentStepIndex < steps.length) {
+        showCurrentStep();
+      }
+    }
+
+    // Función para mostrar mensajes
     function showMessage(type, text) {
       const messageDiv = document.getElementById('message');
       messageDiv.className = type === 'success' ? 'success' : 'error';
@@ -401,13 +459,13 @@
       messageDiv.style.display = 'block';
     }
 
-    // Function to hide messages
+    // Función para ocultar mensajes
     function hideMessage() {
       const messageDiv = document.getElementById('message');
       messageDiv.style.display = 'none';
     }
 
-    // Function to show loader with message
+    // Función para mostrar el loader con mensaje
     function showLoader(message) {
       const loaderContainer = document.getElementById('loader-container');
       const loaderMessage = document.getElementById('loader-message');
@@ -415,32 +473,24 @@
       loaderContainer.style.display = 'flex';
     }
 
-    // Function to hide loader
+    // Función para ocultar el loader
     function hideLoader() {
       const loaderContainer = document.getElementById('loader-container');
       loaderContainer.style.display = 'none';
     }
 
-    // Function to update progress step
-    function updateStep(stepNumber, status) {
-      const step = document.getElementById(`step-${stepNumber}`);
-      if (step) {
-        step.className = status; // 'completed', 'in-progress', 'failed'
-      }
-    }
-
-    // Function to load appraisal details
+    // Función para cargar los detalles del appraisal
     function loadAppraisalDetails() {
-      // Show the loader with message
+      // Mostrar el loader con mensaje
       showLoader('Fetching appraisal details...');
       hideMessage();
 
       fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
         method: 'GET',
-        credentials: 'include' // Include cookies in the request
+        credentials: 'include' // Incluir cookies en la solicitud
       })
       .then(res => {
-        // Hide the loader after receiving the response
+        // Ocultar el loader después de recibir la respuesta
         hideLoader();
 
         if (res.status === 401 || res.status === 403) {
@@ -451,16 +501,16 @@
         return res.json();
       })
       .then(data => {
-        // Display descriptions
+        // Mostrar descripciones
         const customerDescriptionText = document.getElementById('customer-description-text');
         customerDescriptionText.innerText = data.customerDescription || 'Not available';
 
         const iaDescriptionText = document.getElementById('ia-description-text');
         iaDescriptionText.innerText = data.iaDescription || 'Not available';
 
-        // Display images with labels
+        // Mostrar imágenes con etiquetas
         const imagesContainer = document.getElementById('images-container');
-        imagesContainer.innerHTML = ''; // Clear any existing images
+        imagesContainer.innerHTML = ''; // Limpiar imágenes existentes
 
         if (data.images) {
           // Main Image
@@ -534,41 +584,41 @@
       });
     }
 
-    // Handle logout
+    // Manejar el logout
     function logout() {
-      // Show the loader with message
+      // Mostrar el loader con mensaje
       showLoader('Logging out...');
       hideMessage();
 
       fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
         method: 'POST',
-        credentials: 'include' // Include cookies in the request
+        credentials: 'include' // Incluir cookies en la solicitud
       })
       .then(res => res.json())
       .then(data => {
-        // Hide the loader after receiving the response
+        // Ocultar el loader después de recibir la respuesta
         hideLoader();
 
         if (data.success) {
-          // Redirect to dashboard
+          // Redirigir al dashboard
           window.location.href = 'index.html';
         } else {
-          // Handle logout failure
+          // Manejar fallo en el logout
           showMessage('error', 'Error logging out. Please try again.');
         }
       })
       .catch(err => {
-        // Hide the loader in case of error
+        // Ocultar el loader en caso de error
         hideLoader();
         console.error('Error during logout:', err);
         showMessage('error', 'Error logging out. Please try again.');
       });
     }
 
-    // Add event listener to the logout button
+    // Añadir event listener al botón de logout
     document.getElementById('logout-button').addEventListener('click', logout);
 
-    // Function to handle form submission and process steps
+    // Manejar el envío del formulario y procesar los pasos
     document.getElementById('appraisal-form').addEventListener('submit', async function(event) {
       event.preventDefault();
 
@@ -595,12 +645,9 @@
 
       try {
         // Paso 1: Set Appraisal Value (ya implementado en backend)
-        updateStep(1, 'completed');
+        completeCurrentStep();
 
         // Paso 2: Merge Descriptions with OpenAI
-        updateStep(2, 'in-progress');
-        showLoader('Merging descriptions with OpenAI...');
-
         const mergeResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/merge-descriptions`, {
           method: 'POST',
           headers: {
@@ -619,14 +666,11 @@
           throw new Error(mergeData.message || 'Error merging descriptions with OpenAI.');
         }
 
-        updateStep(2, 'completed');
+        completeCurrentStep();
         hideLoader();
         showMessage('success', 'Descriptions merged successfully.');
 
         // Paso 3: Update Post Title in WordPress
-        updateStep(3, 'in-progress');
-        showLoader('Updating post title in WordPress...');
-
         const updateTitleResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/update-title`, {
           method: 'POST',
           headers: {
@@ -642,14 +686,11 @@
           throw new Error(updateTitleData.message || 'Error updating post title in WordPress.');
         }
 
-        updateStep(3, 'completed');
+        completeCurrentStep();
         hideLoader();
         showMessage('success', 'Post title updated successfully.');
 
         // Paso 4: Insert WordPress Template
-        updateStep(4, 'in-progress');
-        showLoader('Inserting WordPress template...');
-
         const insertTemplateResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/insert-template`, {
           method: 'POST',
           headers: {
@@ -665,14 +706,31 @@
           throw new Error(insertTemplateData.message || 'Error inserting WordPress template.');
         }
 
-        updateStep(4, 'completed');
+        completeCurrentStep();
         hideLoader();
         showMessage('success', 'WordPress template inserted successfully.');
 
-        // Paso 5: Send Email to Customer
-        updateStep(5, 'in-progress');
-        showLoader('Sending email to customer...');
+        // Paso 5: Building PDF
+        showLoader('Building PDF...');
+        const buildPdfResponse = await fetch('https://appraisals-backend-856401495068.us-central1.run.app/generate-pdf', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ postId: appraisalId }) // Asegúrate de enviar el postId correcto
+        });
 
+        const buildPdfData = await buildPdfResponse.json();
+
+        if (!buildPdfData.success) {
+          throw new Error(buildPdfData.message || 'Error building PDF.');
+        }
+
+        completeCurrentStep();
+        hideLoader();
+        showMessage('success', 'PDF built successfully.');
+
+        // Paso 6: Send Email to Customer
         const sendEmailResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/send-email`, {
           method: 'POST',
           headers: {
@@ -688,14 +746,11 @@
           throw new Error(sendEmailData.message || 'Error sending email to customer.');
         }
 
-        updateStep(5, 'completed');
+        completeCurrentStep();
         hideLoader();
         showMessage('success', 'Email sent to customer successfully.');
 
-        // Paso 6: Mark Appraisal as Completed
-        updateStep(6, 'in-progress');
-        showLoader('Marking appraisal as completed...');
-
+        // Paso 7: Mark Appraisal as Completed
         const completeAppraisalResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/complete`, {
           method: 'POST',
           headers: {
@@ -711,7 +766,7 @@
           throw new Error(completeAppraisalData.message || 'Error marking appraisal as completed.');
         }
 
-        updateStep(6, 'completed');
+        completeCurrentStep();
         hideLoader();
         showMessage('success', 'Appraisal marked as completed successfully.');
 
@@ -724,37 +779,20 @@
         console.error('Error during appraisal process:', error);
         hideLoader();
 
-        // Determinar en qué paso ocurrió el error
-        const errorSteps = [
-          { keyword: 'merging', step: 2 },
-          { keyword: 'updating title', step: 3 },
-          { keyword: 'inserting template', step: 4 },
-          { keyword: 'sending email', step: 5 },
-          { keyword: 'marking as completed', step: 6 }
-        ];
-
-        const foundStep = errorSteps.find(stepObj => error.message.toLowerCase().includes(stepObj.keyword));
-        if (foundStep) {
-          updateStep(foundStep.step, 'failed');
-        }
+        // Marcar el paso actual como fallido
+        failCurrentStep();
 
         showMessage('error', error.message || 'An unexpected error occurred during the appraisal process.');
       }
     });
 
-    // Function to update the step status
-    function updateStep(stepNumber, status) {
-      const step = document.getElementById(`step-${stepNumber}`);
-      if (step) {
-        step.className = status; // 'completed', 'in-progress', 'failed'
-      }
-    }
-
-    // Load appraisal details and show logout button if authenticated
+    // Función para cargar los detalles del appraisal y mostrar el botón de logout si está autenticado
     window.onload = () => {
       loadAppraisalDetails();
-      // Show the logout button
+      // Mostrar el botón de logout
       document.getElementById('logout-button').style.display = 'block';
+      // Mostrar el paso actual
+      showCurrentStep();
     };
   </script>
 </body>
