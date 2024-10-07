@@ -38,8 +38,8 @@ body {
 /* Back Button Styles */
 .back-button {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 20px; /* Adjust as needed */
+  left: 20px; /* Position in the top-left corner */
   padding: 8px 16px;
   background-color: #007bff;
   color: #ffffff;
@@ -59,7 +59,6 @@ body {
 .back-button {
   z-index: 500;
 }
-
 
 
 /* Logo */
