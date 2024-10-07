@@ -362,7 +362,8 @@ td[data-label="Action"] {
   animation: slideIn 0.5s forwards;
 }
 
-.step-message.completed {
+.step-message.completed,
+.step-message.failed {
   opacity: 0;
   transform: translateY(-20px);
   animation: slideOut 0.5s forwards;
