@@ -804,25 +804,43 @@ hideLoader();
 showMessage('success', 'Shortcodes inserted successfully in WordPress post.');
 
 
-      // Paso 5: Building PDF
-      showLoader('Building PDF...');
-      const buildPdfResponse = await fetch('https://appraisals-backend-856401495068.us-central1.run.app/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ postId: appraisalId }) // Asegúrate de enviar el postId correcto
-      });
+  // Paso 5: Building PDF
+async function buildPDF(appraisalData) {
+  try {
+    showLoader('Building PDF...');
+    
+    const { wordpressUrl, session_ID } = appraisalData;
+    
+    // Extraer el postId de la URL de WordPress
+    const parsedUrl = new URL(wordpressUrl);
+    const postId = parsedUrl.searchParams.get('post');
+    
+    if (!postId) {
+      throw new Error('Invalid WordPress URL: Post ID not found.');
+    }
+    
+    const buildPdfResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/generate-pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ postId: postId, session_ID: session_ID }) // Enviar ambos parámetros
+    });
 
-      const buildPdfData = await buildPdfResponse.json();
+    const buildPdfData = await buildPdfResponse.json();
 
-      if (!buildPdfData.success) {
-        throw new Error(buildPdfData.message || 'Error building PDF.');
-      }
+    if (!buildPdfData.success) {
+      throw new Error(buildPdfData.message || 'Error building PDF.');
+    }
 
-      completeCurrentStep();
-      hideLoader();
-      showMessage('success', 'PDF built successfully.');
+    completeCurrentStep();
+    hideLoader();
+    showMessage('success', 'PDF built successfully.');
+  } catch (error) {
+    hideLoader();
+    showMessage('error', error.message);
+  }
+}
 
       // Paso 6: Send Email to Customer
       const sendEmailResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/send-email`, {
