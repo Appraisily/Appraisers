@@ -8,9 +8,8 @@
   <!-- Load Google Identity Services library -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Link to the external CSS file -->
-  <style>
-    @import url('css/styles.css');
-  </style>    
+  <link rel="stylesheet" href="/css/styles.css">
+  
   <style>
     /* Estilos para el contenedor de búsqueda */
     .search-container {
@@ -25,21 +24,6 @@
       width: 200px;
       border: 1px solid #ccc;
       border-radius: 4px;
-    }
-
-    .search-container button {
-      padding: 5px 10px;
-      margin-left: 5px;
-      font-size: 14px;
-      border: none;
-      background-color: #4CAF50;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .search-container button:hover {
-      background-color: #45a049;
     }
 
     /* Estilos para la tabla */
@@ -93,6 +77,12 @@
       text-align: center;
       margin-top: 20px;
       color: #888;
+    }
+
+    /* Estilos para la visualización del nombre de usuario */
+    .user-name {
+      margin-bottom: 10px;
+      font-weight: bold;
     }
   </style>
   
@@ -289,14 +279,8 @@
       searchInput.id = 'search-input';
       searchInput.placeholder = 'Search...';
 
-      // Crear el botón de búsqueda
-      const searchButton = document.createElement('button');
-      searchButton.id = 'search-button';
-      searchButton.textContent = 'Search';
-
-      // Añadir el input y el botón al contenedor de búsqueda
+      // Añadir el input al contenedor de búsqueda
       searchContainer.appendChild(searchInput);
-      searchContainer.appendChild(searchButton);
 
       // Añadir el contenedor de búsqueda al div de apreciaciones
       appraisalsDiv.appendChild(searchContainer);
@@ -358,11 +342,21 @@
         });
       });
 
-      // Añadir event listener al botón de búsqueda
-      document.getElementById('search-button').addEventListener('click', () => {
-        const query = document.getElementById('search-input').value.trim().toLowerCase();
+      // Añadir event listener al input de búsqueda para búsqueda en tiempo real
+      const debounce = (func, delay) => {
+        let debounceTimer;
+        return function() {
+          const context = this;
+          const args = arguments;
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => func.apply(context, args), delay);
+        };
+      };
+
+      searchInput.addEventListener('input', debounce(() => {
+        const query = searchInput.value.trim().toLowerCase();
         filterAppraisalsTable(query);
-      });
+      }, 300)); // 300 ms de retardo
     }
 
     // Función para filtrar la tabla de apreciaciones según la consulta de búsqueda
