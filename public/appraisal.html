@@ -556,110 +556,115 @@
     loaderContainer.style.display = 'none';
   }
 
-  // Función para cargar los detalles del appraisal
   function loadAppraisalDetails() {
-    // Mostrar el loader con mensaje
-    showLoader('Fetching appraisal details...');
-    hideMessage();
+  // Mostrar el loader con mensaje
+  showLoader('Fetching appraisal details...');
+  hideMessage();
 
-    fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
-      method: 'GET',
-      credentials: 'include' // Incluir cookies en la solicitud
-    })
-    .then(res => {
-      // Ocultar el loader después de recibir la respuesta
-      hideLoader();
+  fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list`, {
+    method: 'GET',
+    credentials: 'include' // Incluir cookies en la solicitud
+  })
+  .then(res => {
+    // Ocultar el loader después de recibir la respuesta
+    hideLoader();
 
-      if (res.status === 401 || res.status === 403) {
-        throw new Error('You are not authenticated. Please log in.');
-      } else if (res.status === 404) {
-        throw new Error('Appraisal not found.');
-      }
-      return res.json();
-    })
-    .then(data => {
-      // Mostrar descripciones
-      const customerDescriptionText = document.getElementById('customer-description-text');
-      customerDescriptionText.innerText = data.customerDescription || 'Not available';
+    if (res.status === 401 || res.status === 403) {
+      throw new Error('You are not authenticated. Please log in.');
+    } else if (res.status === 404) {
+      throw new Error('Appraisal not found.');
+    }
+    return res.json();
+  })
+  .then(data => {
+    // Verificar que los datos sean correctos
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid appraisal data received.');
+    }
 
-      const iaDescriptionText = document.getElementById('ia-description-text');
-      iaDescriptionText.innerText = data.iaDescription || 'Not available';
+    // Mostrar descripciones
+    const customerDescriptionText = document.getElementById('customer-description-text');
+    customerDescriptionText.innerText = data.customerDescription || 'Not available';
 
-      // Mostrar imágenes con etiquetas
-      const imagesContainer = document.getElementById('images-container');
-      imagesContainer.innerHTML = ''; // Limpiar imágenes existentes
+    const iaDescriptionText = document.getElementById('ia-description-text');
+    iaDescriptionText.innerText = data.iaDescription || 'Not available';
 
-      if (data.images) {
-        // Main Image
-        if (data.images.main) {
-          const mainImageWrapper = document.createElement('div');
-          mainImageWrapper.className = 'image-wrapper';
+    // Mostrar imágenes con etiquetas
+    const imagesContainer = document.getElementById('images-container');
+    imagesContainer.innerHTML = ''; // Limpiar imágenes existentes
 
-          const mainImage = document.createElement('img');
-          mainImage.src = data.images.main;
-          mainImage.alt = 'Main Image';
-          mainImageWrapper.appendChild(mainImage);
+    if (data.images) {
+      // Main Image
+      if (data.images.main) {
+        const mainImageWrapper = document.createElement('div');
+        mainImageWrapper.className = 'image-wrapper';
 
-          const mainLabel = document.createElement('div');
-          mainLabel.className = 'image-label';
-          mainLabel.innerText = 'Main Image';
-          mainImageWrapper.appendChild(mainLabel);
+        const mainImage = document.createElement('img');
+        mainImage.src = data.images.main;
+        mainImage.alt = 'Main Image';
+        mainImageWrapper.appendChild(mainImage);
 
-          imagesContainer.appendChild(mainImageWrapper);
-        }
+        const mainLabel = document.createElement('div');
+        mainLabel.className = 'image-label';
+        mainLabel.innerText = 'Main Image';
+        mainImageWrapper.appendChild(mainLabel);
 
-        // Age Image
-        if (data.images.age) {
-          const ageImageWrapper = document.createElement('div');
-          ageImageWrapper.className = 'image-wrapper';
-
-          const ageImage = document.createElement('img');
-          ageImage.src = data.images.age;
-          ageImage.alt = 'Age Image';
-          ageImageWrapper.appendChild(ageImage);
-
-          const ageLabel = document.createElement('div');
-          ageLabel.className = 'image-label';
-          ageLabel.innerText = 'Age Image';
-          ageImageWrapper.appendChild(ageLabel);
-
-          imagesContainer.appendChild(ageImageWrapper);
-        }
-
-        // Signature Image
-        if (data.images.signature) {
-          const signatureImageWrapper = document.createElement('div');
-          signatureImageWrapper.className = 'image-wrapper';
-
-          const signatureImage = document.createElement('img');
-          signatureImage.src = data.images.signature;
-          signatureImage.alt = 'Signature Image';
-          signatureImageWrapper.appendChild(signatureImage);
-
-          const signatureLabel = document.createElement('div');
-          signatureLabel.className = 'image-label';
-          signatureLabel.innerText = 'Signature Image';
-          signatureImageWrapper.appendChild(signatureLabel);
-
-          imagesContainer.appendChild(signatureImageWrapper);
-        }
+        imagesContainer.appendChild(mainImageWrapper);
       }
 
-      showMessage('success', 'Appraisal details loaded successfully.');
-    })
-    .catch(err => {
-      console.error('Error fetching appraisal details:', err);
-      showMessage('error', err.message || 'Error fetching appraisal details.');
-      hideLoader();
+      // Age Image
+      if (data.images.age) {
+        const ageImageWrapper = document.createElement('div');
+        ageImageWrapper.className = 'image-wrapper';
 
-      // Redirigir a index si no está autenticado
-      if (err.message.includes('not authenticated')) {
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
+        const ageImage = document.createElement('img');
+        ageImage.src = data.images.age;
+        ageImage.alt = 'Age Image';
+        ageImageWrapper.appendChild(ageImage);
+
+        const ageLabel = document.createElement('div');
+        ageLabel.className = 'image-label';
+        ageLabel.innerText = 'Age Image';
+        ageImageWrapper.appendChild(ageLabel);
+
+        imagesContainer.appendChild(ageImageWrapper);
       }
-    });
-  }
+
+      // Signature Image
+      if (data.images.signature) {
+        const signatureImageWrapper = document.createElement('div');
+        signatureImageWrapper.className = 'image-wrapper';
+
+        const signatureImage = document.createElement('img');
+        signatureImage.src = data.images.signature;
+        signatureImage.alt = 'Signature Image';
+        signatureImageWrapper.appendChild(signatureImage);
+
+        const signatureLabel = document.createElement('div');
+        signatureLabel.className = 'image-label';
+        signatureLabel.innerText = 'Signature Image';
+        signatureImageWrapper.appendChild(signatureLabel);
+
+        imagesContainer.appendChild(signatureImageWrapper);
+      }
+    }
+
+    showMessage('success', 'Appraisal details loaded successfully.');
+  })
+  .catch(err => {
+    console.error('Error fetching appraisal details:', err);
+    showMessage('error', err.message || 'Error fetching appraisal details.');
+    hideLoader();
+
+    // Redirigir a index si no está autenticado
+    if (err.message.includes('not authenticated')) {
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
+    }
+  });
+}
+
 
   // Manejar el logout
   function logout() {
