@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/css/styles.css">
   
   <style>
-    /* Estilos para el contenedor de búsqueda y selector */
+    /* Estilos para el contenedor de controles */
     .controls-container {
       display: flex;
       justify-content: space-between;
@@ -19,33 +19,56 @@
       margin-bottom: 10px;
     }
 
+    .buttons-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    .buttons-container button {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .buttons-container button.pending {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .buttons-container button.pending:hover {
+      background-color: #45a049;
+    }
+
+    .buttons-container button.completed {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .buttons-container button.completed:hover {
+      background-color: #0b7dda;
+    }
+
+    .buttons-container button.search {
+      background-color: #FFC107;
+      color: white;
+    }
+
+    .buttons-container button.search:hover {
+      background-color: #e0a800;
+    }
+
     .search-container {
       display: flex;
-      justify-content: flex-end;
-      flex-grow: 1;
+      align-items: center;
+      gap: 10px;
     }
 
     .search-container input[type="text"] {
       padding: 5px;
       font-size: 14px;
       width: 200px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .toggle-container {
-      display: flex;
-      align-items: center;
-    }
-
-    .toggle-container label {
-      margin-right: 10px;
-      font-weight: bold;
-    }
-
-    .toggle-container select {
-      padding: 5px;
-      font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
@@ -69,10 +92,12 @@
     /* Estilos para mensajes */
     .success {
       color: green;
+      margin-bottom: 10px;
     }
 
     .error {
       color: red;
+      margin-bottom: 10px;
     }
 
     /* Estilos para el loader */
@@ -189,10 +214,10 @@
   </div>
 
   <script>
-    // Update the year in the footer
+    // Actualizar el año en el footer
     document.getElementById('current-year').textContent = new Date().getFullYear();
 
-    // Function to show messages
+    // Función para mostrar mensajes
     function showMessage(type, text) {
       const messageDiv = document.getElementById('message');
       messageDiv.className = type === 'success' ? 'success' : 'error';
@@ -200,65 +225,65 @@
       messageDiv.style.display = 'block';
     }
 
-    // Function to hide messages
+    // Función para ocultar mensajes
     function hideMessage() {
       const messageDiv = document.getElementById('message');
       messageDiv.style.display = 'none';
     }
 
-    // Handle Google Sign-In credential response
+    // Manejar la respuesta de Google Sign-In
     function handleCredentialResponse(response) {
       const idToken = response.credential;
       console.log("ID Token:", idToken);
       
-      // Show the loader during authentication
+      // Mostrar el loader durante la autenticación
       document.getElementById('loader').style.display = 'block';
       hideMessage();
       
-      // Send the ID token to the backend for verification and JWT issuance
+      // Enviar el ID token al backend para verificación y emisión de JWT
       fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ idToken }),
-        credentials: 'include' // Include cookies in the request
+        credentials: 'include' // Incluir cookies en la solicitud
       })
       .then(res => res.json())
       .then(data => {
-        // Hide the loader after receiving the response
+        // Ocultar el loader después de recibir la respuesta
         document.getElementById('loader').style.display = 'none';
         
         if (data.success) {
-          // Store the user's name
+          // Almacenar el nombre del usuario
           const userName = data.name;
           localStorage.setItem('userName', data.name);
 
-          // Show the logout button and hide the sign-in button
+          // Mostrar el botón de cierre de sesión y ocultar el de inicio de sesión
           document.getElementById('logout-button').style.display = 'block';
           document.getElementById('g_id_signin').style.display = 'none';
 
-          // Show the user name
+          // Mostrar el nombre del usuario
           showUserName(userName);
 
-          // Show a success message
+          // Mostrar un mensaje de éxito
           showMessage('success', 'Authentication successful. Loading appraisals...');
-          // Load the appraisals
+          // Cargar las apreciaciones
           loadAppraisals(currentAppraisalType);
         } else {
-          // Handle authentication failure
+          // Manejar el fallo en la autenticación
           showMessage('error', data.message || 'Authentication failed. Please try again.');
         }
       })
       .catch(err => {
-        // Hide the loader in case of error
+        // Ocultar el loader en caso de error
         document.getElementById('loader').style.display = 'none';
         console.error('Error during authentication:', err);
         showMessage('error', 'Error during authentication. Please try again.');
       });
     }
 
-    // Function to show the user's name
+    // Función para mostrar el nombre del usuario
     function showUserName(name) {
       const userNameDiv = document.getElementById('user-name');
       userNameDiv.textContent = `Logged in as ${name}`;
@@ -300,7 +325,7 @@
       .then(data => {
         allAppraisals = data; // Almacenar todos los datos de apreciaciones
 
-        // Renderizar el cuadro de búsqueda, selector y la tabla
+        // Renderizar la tabla de apreciaciones
         renderAppraisalsTable(allAppraisals, appraisalType);
 
         showMessage('success', 'Appraisals loaded successfully.');
@@ -320,64 +345,60 @@
       });
     }
 
-    // Función para renderizar el cuadro de búsqueda, selector y la tabla de apreciaciones
+    // Función para renderizar la tabla de apreciaciones
     function renderAppraisalsTable(appraisals, appraisalType) {
       const appraisalsDiv = document.getElementById('appraisals');
 
       // Limpiar contenido previo
       appraisalsDiv.innerHTML = '';
 
-      // Crear el contenedor de controles (búsqueda y selector)
+      // Crear el contenedor de controles (botones y búsqueda)
       const controlsContainer = document.createElement('div');
       controlsContainer.className = 'controls-container';
 
-      // Crear el contenedor de búsqueda
+      // Crear contenedor de botones
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.className = 'buttons-container';
+
+      // Crear botón para Pending
+      const pendingButton = document.createElement('button');
+      pendingButton.className = 'pending';
+      pendingButton.textContent = 'Mostrar Pending';
+      pendingButton.id = 'show-pending';
+
+      // Crear botón para Completed
+      const completedButton = document.createElement('button');
+      completedButton.className = 'completed';
+      completedButton.textContent = 'Mostrar Completed';
+      completedButton.id = 'show-completed';
+
+      // Añadir botones al contenedor de botones
+      buttonsContainer.appendChild(pendingButton);
+      buttonsContainer.appendChild(completedButton);
+
+      // Crear contenedor de búsqueda
       const searchContainer = document.createElement('div');
       searchContainer.className = 'search-container';
 
-      // Crear el input de búsqueda
+      // Crear input de búsqueda
       const searchInput = document.createElement('input');
       searchInput.type = 'text';
       searchInput.id = 'search-input';
       searchInput.placeholder = 'Search...';
 
-      // Añadir el input al contenedor de búsqueda
+      // Crear botón de búsqueda
+      const searchButton = document.createElement('button');
+      searchButton.className = 'search';
+      searchButton.textContent = 'Buscar';
+      searchButton.id = 'search-button';
+
+      // Añadir input y botón al contenedor de búsqueda
       searchContainer.appendChild(searchInput);
+      searchContainer.appendChild(searchButton);
 
-      // Crear el contenedor del selector
-      const toggleContainer = document.createElement('div');
-      toggleContainer.className = 'toggle-container';
-
-      // Crear la etiqueta del selector
-      const toggleLabel = document.createElement('label');
-      toggleLabel.htmlFor = 'appraisal-type-select';
-      toggleLabel.textContent = 'View:';
-
-      // Crear el selector de tipo de apreciaciones
-      const appraisalTypeSelect = document.createElement('select');
-      appraisalTypeSelect.id = 'appraisal-type-select';
-
-      const optionPending = document.createElement('option');
-      optionPending.value = 'pending';
-      optionPending.textContent = 'Pending';
-
-      const optionCompleted = document.createElement('option');
-      optionCompleted.value = 'completed';
-      optionCompleted.textContent = 'Completed';
-
-      appraisalTypeSelect.appendChild(optionPending);
-      appraisalTypeSelect.appendChild(optionCompleted);
-
-      // Establecer el valor seleccionado basado en currentAppraisalType
-      appraisalTypeSelect.value = appraisalType;
-
-      // Añadir la etiqueta y el selector al contenedor del selector
-      toggleContainer.appendChild(toggleLabel);
-      toggleContainer.appendChild(appraisalTypeSelect);
-
-      // Añadir los contenedores de búsqueda y selector al contenedor de controles
+      // Añadir botones y búsqueda al contenedor de controles
+      controlsContainer.appendChild(buttonsContainer);
       controlsContainer.appendChild(searchContainer);
-      controlsContainer.appendChild(toggleContainer);
 
       // Añadir el contenedor de controles al div de apreciaciones
       appraisalsDiv.appendChild(controlsContainer);
@@ -457,26 +478,25 @@
         });
       });
 
-      // Añadir event listener al input de búsqueda para búsqueda en tiempo real
-      const debounce = (func, delay) => {
-        let debounceTimer;
-        return function() {
-          const context = this;
-          const args = arguments;
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => func.apply(context, args), delay);
-        };
-      };
+      // Añadir event listeners a los nuevos botones
+      document.getElementById('show-pending').addEventListener('click', () => {
+        currentAppraisalType = 'pending';
+        loadAppraisals('pending');
+      });
 
-      searchInput.addEventListener('input', debounce(() => {
-        const query = searchInput.value.trim().toLowerCase();
+      document.getElementById('show-completed').addEventListener('click', () => {
+        currentAppraisalType = 'completed';
+        loadAppraisals('completed');
+      });
+
+      // Añadir event listener al botón de búsqueda
+      document.getElementById('search-button').addEventListener('click', () => {
+        const query = document.getElementById('search-input').value.trim().toLowerCase();
+        if (query === '') {
+          showMessage('error', 'Please enter a search query.');
+          return;
+        }
         filterAppraisalsTable(query, appraisalType);
-      }, 300)); // 300 ms de retardo
-
-      // Añadir event listener al selector de tipo de apreciaciones
-      appraisalTypeSelect.addEventListener('change', () => {
-        currentAppraisalType = appraisalTypeSelect.value;
-        loadAppraisals(currentAppraisalType);
       });
     }
 
@@ -492,14 +512,14 @@
         );
       });
 
-      // Renderizar nuevamente la tabla con las apreciaciones filtradas
-      renderAppraisalsTable(filteredAppraisals, appraisalType);
-
       if (filteredAppraisals.length === 0) {
         showMessage('error', 'No appraisals match your search.');
       } else {
         showMessage('success', `${filteredAppraisals.length} appraisal(s) found.`);
       }
+
+      // Renderizar la tabla con las apreciaciones filtradas
+      renderAppraisalsTable(filteredAppraisals, appraisalType);
     }
 
     // Función para manejar el cierre de sesión
