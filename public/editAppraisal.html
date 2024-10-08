@@ -1,0 +1,235 @@
+<!-- public/editAppraisal.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Edit Appraisal</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <style>
+    /* Estilos básicos */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="text"], textarea {
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    /* Estilos para mensajes */
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+
+    /* Estilos para el loader */
+    #loader {
+      display: none;
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 2s linear infinite;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+  
+</head>
+<body>
+  <div class="container">
+    <h2>Edit Appraisal</h2>
+    <div id="message"></div>
+    <form id="edit-appraisal-form">
+      <label for="date">Date:</label>
+      <input type="text" id="date" name="date" readonly>
+
+      <label for="appraisalType">Appraisal Type:</label>
+      <input type="text" id="appraisalType" name="appraisalType" readonly>
+
+      <label for="identifier">Appraisal Number:</label>
+      <input type="text" id="identifier" name="identifier" readonly>
+
+      <label for="status">Status:</label>
+      <input type="text" id="status" name="status" readonly>
+
+      <label for="iaDescription">AI Description:</label>
+      <textarea id="iaDescription" name="iaDescription" rows="4"></textarea>
+
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+
+  <!-- Loader -->
+  <div id="loader"></div>
+
+  <script>
+    // Obtener parámetros de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const appraisalId = urlParams.get('id');
+    const wordpressUrl = urlParams.get('wpUrl');
+
+    if (!appraisalId || !wordpressUrl) {
+      alert('Invalid appraisal parameters.');
+      window.location.href = 'index.html';
+    }
+
+    const form = document.getElementById('edit-appraisal-form');
+    const messageDiv = document.getElementById('message');
+
+    // Función para mostrar mensajes
+    function showMessage(type, text) {
+      messageDiv.className = type === 'success' ? 'success' : 'error';
+      messageDiv.innerText = text;
+      messageDiv.style.display = 'block';
+    }
+
+    // Función para ocultar mensajes
+    function hideMessage() {
+      messageDiv.style.display = 'none';
+    }
+
+    // Función para mostrar el loader
+    function showLoader() {
+      document.getElementById('loader').style.display = 'block';
+    }
+
+    // Función para ocultar el loader
+    function hideLoader() {
+      document.getElementById('loader').style.display = 'none';
+    }
+
+    // Cargar los detalles de la apreciación para editar
+    function loadAppraisalDetails() {
+      showLoader();
+      hideMessage();
+
+      fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      .then(res => {
+        hideLoader();
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('Unauthorized. Please log in again.');
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data.success === false) {
+          throw new Error(data.message || 'Error fetching appraisal details.');
+        }
+
+        // Rellenar los campos del formulario
+        document.getElementById('date').value = data.date;
+        document.getElementById('appraisalType').value = data.appraisalType;
+        document.getElementById('identifier').value = data.identifier;
+        document.getElementById('status').value = data.status;
+        document.getElementById('iaDescription').value = data.iaDescription;
+      })
+      .catch(err => {
+        console.error('Error loading appraisal details:', err);
+        showMessage('error', err.message || 'Error loading appraisal details.');
+      });
+    }
+
+    // Manejar el envío del formulario
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      hideMessage();
+
+      const updatedIaDescription = document.getElementById('iaDescription').value.trim();
+
+      if (updatedIaDescription === '') {
+        showMessage('error', 'AI Description cannot be empty.');
+        return;
+      }
+
+      showLoader();
+
+      fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/update-ia-description`, {
+        method: 'PUT', // Asegúrate de que el backend tiene este endpoint
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ iaDescription: updatedIaDescription })
+      })
+      .then(res => {
+        hideLoader();
+        return res.json();
+      })
+      .then(data => {
+        if (data.success) {
+          showMessage('success', 'Appraisal updated successfully.');
+        } else {
+          showMessage('error', data.message || 'Error updating appraisal.');
+        }
+      })
+      .catch(err => {
+        hideLoader();
+        console.error('Error updating appraisal:', err);
+        showMessage('error', 'Error updating appraisal.');
+      });
+    });
+
+    // Cargar los detalles al cargar la página
+    window.onload = () => {
+      loadAppraisalDetails();
+    };
+  </script>
+</body>
+</html>
