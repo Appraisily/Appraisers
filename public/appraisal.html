@@ -904,25 +904,38 @@ async function handleBuildPdf(appraisalId) {
   }
 }
 
-      // Paso 6: Send Email to Customer
-      const sendEmailResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ appraisalId })
-      });
+   // Paso 6: Send Email to Customer
+async function sendEmailToCustomer(appraisalId) {
+  try {
+    showLoader('Sending email to customer...');
 
-      const sendEmailData = await sendEmailResponse.json();
+    const sendEmailResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include' // Asegúrate de que las cookies se envían correctamente
+      // No es necesario enviar body ya que el 'id' está en la URL
+    });
 
-      if (!sendEmailData.success) {
-        throw new Error(sendEmailData.message || 'Error sending email to customer.');
-      }
+    const sendEmailData = await sendEmailResponse.json();
 
-      completeCurrentStep();
-      hideLoader();
-      showMessage('success', 'Email sent to customer successfully.');
+    if (!sendEmailData.success) {
+      throw new Error(sendEmailData.message || 'Error sending email to customer.');
+    }
+
+    completeCurrentStep();
+    hideLoader();
+    showMessage('success', 'Email sent to customer successfully.');
+  } catch (error) {
+    hideLoader();
+    showMessage('error', error.message);
+    console.error('Error sending email to customer:', error);
+  }
+}
+
+
+
 
       // Paso 7: Mark Appraisal as Completed
       const completeAppraisalResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/complete`, {
