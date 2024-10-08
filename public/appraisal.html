@@ -904,8 +904,10 @@ async function handleBuildPdf(appraisalId) {
   }
 }
 
-   // Paso 6: Send Email to Customer
+ // Paso 6: Send Email to Customer
 async function sendEmailToCustomer(appraisalId) {
+  console.log(`[sendEmailToCustomer] Iniciando envío de email para appraisal ID: ${appraisalId}`);
+  
   try {
     showLoader('Sending email to customer...');
 
@@ -918,7 +920,10 @@ async function sendEmailToCustomer(appraisalId) {
       // No es necesario enviar body ya que el 'id' está en la URL
     });
 
+    console.log(`[sendEmailToCustomer] Respuesta del servidor: ${sendEmailResponse.status}`);
+
     const sendEmailData = await sendEmailResponse.json();
+    console.log(`[sendEmailToCustomer] Datos recibidos:`, sendEmailData);
 
     if (!sendEmailData.success) {
       throw new Error(sendEmailData.message || 'Error sending email to customer.');
@@ -930,10 +935,9 @@ async function sendEmailToCustomer(appraisalId) {
   } catch (error) {
     hideLoader();
     showMessage('error', error.message);
-    console.error('Error sending email to customer:', error);
+    console.error('[sendEmailToCustomer] Error enviando email al cliente:', error);
   }
 }
-
 
 
 
