@@ -11,17 +11,41 @@
   <link rel="stylesheet" href="/css/styles.css">
   
   <style>
-    /* Estilos para el contenedor de búsqueda */
+    /* Estilos para el contenedor de búsqueda y selector */
+    .controls-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
     .search-container {
       display: flex;
       justify-content: flex-end;
-      margin-bottom: 10px;
+      flex-grow: 1;
     }
 
     .search-container input[type="text"] {
       padding: 5px;
       font-size: 14px;
       width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .toggle-container label {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+
+    .toggle-container select {
+      padding: 5px;
+      font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
@@ -83,6 +107,33 @@
     .user-name {
       margin-bottom: 10px;
       font-weight: bold;
+    }
+
+    /* Estilos para botones de acción */
+    .action-button {
+      padding: 5px 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .action-button.complete {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .action-button.complete:hover {
+      background-color: #45a049;
+    }
+
+    .action-button.edit {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .action-button.edit:hover {
+      background-color: #0b7dda;
     }
   </style>
   
@@ -193,7 +244,7 @@
           // Show a success message
           showMessage('success', 'Authentication successful. Loading appraisals...');
           // Load the appraisals
-          loadAppraisals();
+          loadAppraisals(currentAppraisalType);
         } else {
           // Handle authentication failure
           showMessage('error', data.message || 'Authentication failed. Please try again.');
@@ -214,24 +265,31 @@
       userNameDiv.style.display = 'block';
     }
 
-    // Variable to store all appraisals data
+    // Variables para almacenar datos de apreciaciones
     let allAppraisals = [];
+    let currentAppraisalType = 'pending'; // Puede ser 'pending' o 'completed'
 
-    // Function to load appraisals from the backend
-    function loadAppraisals() {
-      // Show the loader while fetching appraisals
+    // Función para cargar apreciaciones desde el backend
+    function loadAppraisals(appraisalType) {
+      // Mostrar el loader mientras se obtienen las apreciaciones
       document.getElementById('loader').style.display = 'block';
       hideMessage();
 
-      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals', {
+      // Determinar el endpoint basado en el tipo de apreciación
+      let endpoint = 'https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals';
+      if (appraisalType === 'completed') {
+        endpoint = 'https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/completed';
+      }
+
+      fetch(endpoint, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include' // Include cookies in the request
+        credentials: 'include' // Incluir cookies en la solicitud
       })
       .then(res => {
-        // Hide the loader after receiving the response
+        // Ocultar el loader después de recibir la respuesta
         document.getElementById('loader').style.display = 'none';
         
         if (res.status === 401 || res.status === 403) {
@@ -240,34 +298,38 @@
         return res.json();
       })
       .then(data => {
-        allAppraisals = data; // Store all appraisals data
+        allAppraisals = data; // Almacenar todos los datos de apreciaciones
 
-        // Render the search box and the table
-        renderAppraisalsTable(allAppraisals);
+        // Renderizar el cuadro de búsqueda, selector y la tabla
+        renderAppraisalsTable(allAppraisals, appraisalType);
 
         showMessage('success', 'Appraisals loaded successfully.');
       })
       .catch(err => {
-        // Hide the loader in case of error
+        // Ocultar el loader en caso de error
         document.getElementById('loader').style.display = 'none';
         console.error('Error fetching appraisals:', err);
         showMessage('error', err.message || 'Error fetching appraisals.');
 
-        // Show the sign-in button and hide the logout button
+        // Mostrar el botón de inicio de sesión y ocultar el de cierre de sesión
         document.getElementById('logout-button').style.display = 'none';
         document.getElementById('g_id_signin').style.display = 'block';
 
-        // Clear the appraisals
+        // Limpiar las apreciaciones
         document.getElementById('appraisals').innerHTML = '';
       });
     }
 
-    // Función para renderizar el cuadro de búsqueda y la tabla de apreciaciones
-    function renderAppraisalsTable(appraisals) {
+    // Función para renderizar el cuadro de búsqueda, selector y la tabla de apreciaciones
+    function renderAppraisalsTable(appraisals, appraisalType) {
       const appraisalsDiv = document.getElementById('appraisals');
 
       // Limpiar contenido previo
       appraisalsDiv.innerHTML = '';
+
+      // Crear el contenedor de controles (búsqueda y selector)
+      const controlsContainer = document.createElement('div');
+      controlsContainer.className = 'controls-container';
 
       // Crear el contenedor de búsqueda
       const searchContainer = document.createElement('div');
@@ -282,8 +344,43 @@
       // Añadir el input al contenedor de búsqueda
       searchContainer.appendChild(searchInput);
 
-      // Añadir el contenedor de búsqueda al div de apreciaciones
-      appraisalsDiv.appendChild(searchContainer);
+      // Crear el contenedor del selector
+      const toggleContainer = document.createElement('div');
+      toggleContainer.className = 'toggle-container';
+
+      // Crear la etiqueta del selector
+      const toggleLabel = document.createElement('label');
+      toggleLabel.htmlFor = 'appraisal-type-select';
+      toggleLabel.textContent = 'View:';
+
+      // Crear el selector de tipo de apreciaciones
+      const appraisalTypeSelect = document.createElement('select');
+      appraisalTypeSelect.id = 'appraisal-type-select';
+
+      const optionPending = document.createElement('option');
+      optionPending.value = 'pending';
+      optionPending.textContent = 'Pending';
+
+      const optionCompleted = document.createElement('option');
+      optionCompleted.value = 'completed';
+      optionCompleted.textContent = 'Completed';
+
+      appraisalTypeSelect.appendChild(optionPending);
+      appraisalTypeSelect.appendChild(optionCompleted);
+
+      // Establecer el valor seleccionado basado en currentAppraisalType
+      appraisalTypeSelect.value = appraisalType;
+
+      // Añadir la etiqueta y el selector al contenedor del selector
+      toggleContainer.appendChild(toggleLabel);
+      toggleContainer.appendChild(appraisalTypeSelect);
+
+      // Añadir los contenedores de búsqueda y selector al contenedor de controles
+      controlsContainer.appendChild(searchContainer);
+      controlsContainer.appendChild(toggleContainer);
+
+      // Añadir el contenedor de controles al div de apreciaciones
+      appraisalsDiv.appendChild(controlsContainer);
 
       // Crear la tabla
       let tableHTML = `
@@ -303,7 +400,7 @@
       if (appraisals.length === 0) {
         tableHTML += `
           <tr>
-            <td colspan="5">No pending appraisals.</td>
+            <td colspan="5">No appraisals found.</td>
           </tr>
         `;
       } else {
@@ -317,7 +414,19 @@
               </td>
               <td data-label="Status">${appraisal.status}</td>
               <td data-label="Action">
-                <button class="action-button" data-id="${appraisal.id}" data-url="${appraisal.wordpressUrl}">Complete</button>
+          `;
+
+          if (appraisalType === 'pending') {
+            tableHTML += `
+                <button class="action-button complete" data-id="${appraisal.id}" data-url="${appraisal.wordpressUrl}">Complete</button>
+            `;
+          } else if (appraisalType === 'completed') {
+            tableHTML += `
+                <button class="action-button edit" data-id="${appraisal.id}" data-url="${appraisal.wordpressUrl}">Edit</button>
+            `;
+          }
+
+          tableHTML += `
               </td>
             </tr>
           `;
@@ -332,13 +441,19 @@
       // Añadir la tabla al div de apreciaciones
       appraisalsDiv.innerHTML += tableHTML;
 
-      // Añadir event listeners a los botones "Complete"
+      // Añadir event listeners a los botones de acción
       document.querySelectorAll('.action-button').forEach(button => {
         button.addEventListener('click', () => {
           const appraisalId = button.getAttribute('data-id');
           const wordpressUrl = button.getAttribute('data-url');
-          // Redireccionar a la página de completado de apreciación con parámetros
-          window.location.href = `appraisal.html?id=${appraisalId}&wpUrl=${encodeURIComponent(wordpressUrl)}`;
+
+          if (appraisalType === 'pending') {
+            // Redireccionar a la página de completado de apreciación con parámetros
+            window.location.href = `appraisal.html?id=${appraisalId}&wpUrl=${encodeURIComponent(wordpressUrl)}`;
+          } else if (appraisalType === 'completed') {
+            // Redireccionar a la página de edición de apreciación con parámetros
+            window.location.href = `editAppraisal.html?id=${appraisalId}&wpUrl=${encodeURIComponent(wordpressUrl)}`;
+          }
         });
       });
 
@@ -355,12 +470,18 @@
 
       searchInput.addEventListener('input', debounce(() => {
         const query = searchInput.value.trim().toLowerCase();
-        filterAppraisalsTable(query);
+        filterAppraisalsTable(query, appraisalType);
       }, 300)); // 300 ms de retardo
+
+      // Añadir event listener al selector de tipo de apreciaciones
+      appraisalTypeSelect.addEventListener('change', () => {
+        currentAppraisalType = appraisalTypeSelect.value;
+        loadAppraisals(currentAppraisalType);
+      });
     }
 
     // Función para filtrar la tabla de apreciaciones según la consulta de búsqueda
-    function filterAppraisalsTable(query) {
+    function filterAppraisalsTable(query, appraisalType) {
       const filteredAppraisals = allAppraisals.filter(appraisal => {
         // Verificar si alguno de los campos contiene la consulta
         return (
@@ -372,7 +493,7 @@
       });
 
       // Renderizar nuevamente la tabla con las apreciaciones filtradas
-      renderAppraisalsTable(filteredAppraisals);
+      renderAppraisalsTable(filteredAppraisals, appraisalType);
 
       if (filteredAppraisals.length === 0) {
         showMessage('error', 'No appraisals match your search.');
@@ -440,8 +561,8 @@
         // Mostrar la visualización del nombre del usuario
         showUserName(userName);
 
-        // Cargar las apreciaciones
-        loadAppraisals();
+        // Cargar las apreciaciones (pendientes por defecto)
+        loadAppraisals(currentAppraisalType);
       } else {
         // Usuario no autenticado
         document.getElementById('logout-button').style.display = 'none';
