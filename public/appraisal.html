@@ -846,7 +846,12 @@ async function buildPDF(appraisalData) {
     }
 
     // Paso 5.2: Solicitar la generación del PDF con postId y session_ID
-    const buildPdfResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/generate-pdf', {
+async function generatePdf(postId, session_ID) {
+  try {
+    console.log(`[generatePdf] Iniciando generación de PDF para postId: ${postId} y session_ID: ${session_ID}`);
+    showLoader('Building PDF...');
+
+    const buildPdfResponse = await fetch('https://appraisals-backend-856401495068.us-central1.run.app/generate-pdf', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -855,17 +860,38 @@ async function buildPDF(appraisalData) {
       body: JSON.stringify({ postId: postId, session_ID: session_ID }) // Enviar ambos parámetros
     });
 
+    console.log(`[generatePdf] Respuesta recibida del backend: ${buildPdfResponse.status}`);
+
     const buildPdfData = await buildPdfResponse.json();
+    console.log('[generatePdf] Datos de respuesta:', buildPdfData);
 
     if (!buildPdfData.success) {
+      console.warn(`[generatePdf] Falló la generación del PDF: ${buildPdfData.message}`);
       throw new Error(buildPdfData.message || 'Error building PDF.');
     }
 
-    // Opcional: Manejar el URL del PDF si es proporcionado
+    // **Guardar los enlaces en variables**
+    const pdfLink = buildPdfData.pdfLink;
+    const docLink = buildPdfData.docLink;
+
+    console.log(`[generatePdf] PDF Link: ${pdfLink}`);
+    console.log(`[generatePdf] Document Link: ${docLink}`);
+
+    // **Opcional: Manejar el URL del PDF si es proporcionado**
     if (buildPdfData.pdfUrl) {
-      // Por ejemplo, redirigir al usuario para descargar el PDF
+      console.log('[generatePdf] Abriendo el PDF en una nueva pestaña.');
       window.open(buildPdfData.pdfUrl, '_blank');
     }
+
+    // **Almacenar los enlaces en variables globales o en el estado (si usas React, por ejemplo)**
+    // Por ahora, simplemente los almacenaremos en variables locales
+    // Si necesitas usarlos en otras partes de tu aplicación, considera almacenarlos en el estado o en un contexto
+
+    // Ejemplo de almacenamiento en variables locales
+    const storedPdfLink = pdfLink;
+    const storedDocLink = docLink;
+
+    console.log(`[generatePdf] Enlaces almacenados - PDF: ${storedPdfLink}, Documento: ${storedDocLink}`);
 
     completeCurrentStep();
     hideLoader();
@@ -877,32 +903,7 @@ async function buildPDF(appraisalData) {
   }
 }
 
-// Ejemplo de cómo podrías llamar a la función buildPDF con appraisalData
-async function handleBuildPdf(appraisalId) {
-  try {
-    // Obtener los detalles de la apreciación
-    const appraisalResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-        // Incluir cookies si es necesario para autenticación
-      }
-    });
 
-    const appraisalData = await appraisalResponse.json();
-
-    if (!appraisalData || !appraisalData.id) {
-      throw new Error('Appraisal data not found.');
-    }
-
-    // Llamar a la función para construir el PDF
-    await buildPDF(appraisalData);
-  } catch (error) {
-    hideLoader();
-    showMessage('error', error.message);
-    console.error('Error al manejar la generación de PDF:', error);
-  }
-}
 
  // Paso 6: Send Email to Customer
 async function sendEmailToCustomer(appraisalId) {
