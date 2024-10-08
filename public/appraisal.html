@@ -1,94 +1,247 @@
-<!-- public/index.html -->
+<!-- public/appraisal.html -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Appraisers Dashboard</title>
+  <title>Complete Appraisal</title>
   <!-- Load Google Identity Services library -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Link to the external CSS file -->
-  <link rel="stylesheet" href="/css/styles.css">
-  
   <style>
-    /* Estilos para el contenedor de búsqueda y selector */
-    .controls-container {
+    @import url('css/styles.css');
+  </style>  
+  <!-- Additional page-specific styles -->
+  <style>
+    /* Main Content Container */
+    .main-content {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .search-container {
-      display: flex;
-      justify-content: flex-end;
-      flex-grow: 1;
-    }
-
-    .search-container input[type="text"] {
-      padding: 5px;
-      font-size: 14px;
-      width: 200px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .toggle-container {
-      display: flex;
+      flex-direction: column;
       align-items: center;
     }
 
-    .toggle-container label {
-      margin-right: 10px;
+    /* Descriptions Container */
+    .descriptions-container {
+      max-width: 800px;
+      margin-bottom: 30px;
+      text-align: left; /* Align text to the left for better readability */
+    }
+
+    .description-title {
+      font-size: 20px;
       font-weight: bold;
+      margin-bottom: 10px;
+      color: #333333;
     }
 
-    .toggle-container select {
-      padding: 5px;
+    .description-text {
+      font-size: 16px;
+      line-height: 1.5;
+      color: #555555;
+      margin-bottom: 20px;
+      white-space: pre-wrap; /* Preserve line breaks */
+    }
+
+    /* Images Container */
+    .images-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 30px;
+      gap: 20px;
+    }
+
+    .image-wrapper {
+      text-align: center;
+    }
+
+    .image-wrapper img {
+      max-width: 100%;
+      height: auto;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      max-width: 300px; /* Limit the maximum width of images */
+    }
+
+    .image-label {
       font-size: 14px;
+      color: #333333;
+      margin-top: 5px;
+    }
+
+    /* Logout Button */
+    .logout-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: #ffffff;
+      color: #d9534f;
+      border: 2px solid #d9534f;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      z-index: 1000;
+    }
+
+    .logout-button:hover {
+      background-color: #d9534f;
+      color: #ffffff;
+    }
+
+    /* Appraisal Form Styles */
+    #appraisal-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 30px;
+    }
+
+    #appraisal-form label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333333;
+      text-align: left;
+      width: 100%;
+    }
+
+    #appraisal-form input,
+    #appraisal-form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      font-size: 16px;
     }
 
-    /* Estilos para la tabla */
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    #appraisal-form button.submit-button {
+      background-color: #007bff;
+      color: #ffffff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      align-self: center;
     }
 
-    table th, table td {
-      padding: 10px;
-      border: 1px solid #ddd;
-      text-align: left;
+    #appraisal-form button.submit-button:hover {
+      background-color: #0056b3;
     }
 
-    table th {
-      background-color: #f2f2f2;
-    }
-
-    /* Estilos para mensajes */
-    .success {
-      color: green;
-    }
-
-    .error {
-      color: red;
-    }
-
-    /* Estilos para el loader */
-    #loader {
+    /* Success/Error Messages */
+    #message {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 15px 20px;
+      border-radius: 4px;
       display: none;
+      font-size: 16px;
+    }
+
+    #message.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    #message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Progress Steps */
+.progress-steps {
+  max-width: 800px;
+  width: 100%;
+  margin-top: 20px; /* Espaciado superior para separarlo del formulario */
+  text-align: center; /* Centrar la lista de pasos */
+}
+
+.progress-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  justify-content: center; /* Centrar los elementos horizontalmente */
+  gap: 20px; /* Espaciado entre los puntos */
+}
+
+.progress-steps li.step {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #cccccc; /* Color por defecto para los pasos no completados */
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.progress-steps li.step.active {
+  background-color: #007bff; /* Color para el paso actual */
+}
+
+.progress-steps li.step.completed {
+  background-color: #28a745; /* Color para pasos completados */
+}
+
+.progress-steps li.step.failed {
+  background-color: #dc3545; /* Color para pasos fallidos */
+}
+
+/* Opcional: Añadir Tooltips o Descripciones al pasar el cursor */
+.progress-steps li.step::after {
+  content: attr(data-description);
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  display: none;
+  z-index: 100;
+}
+
+.progress-steps li.step:hover::after {
+  display: block;
+}
+
+
+    .step-description {
+      font-size: 16px;
+      color: #333333;
+    }
+
+    /* Loader and Fetching Message */
+    #loader-container {
+      display: none; /* Hidden by default */
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    #loader {
       border: 8px solid #f3f3f3;
       border-top: 8px solid #3498db;
       border-radius: 50%;
       width: 60px;
       height: 60px;
-      animation: spin 2s linear infinite;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 9999;
+      animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    }
+
+    #loader-message {
+      font-size: 16px;
+      color: #555555;
     }
 
     @keyframes spin {
@@ -96,29 +249,94 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Estilos para el footer */
+    /* Footer */
     .footer {
+      margin-top: auto;
+      padding: 20px;
       text-align: center;
-      margin-top: 20px;
-      color: #888;
+      font-size: 12px;
+      color: #777777;
     }
 
-    /* Estilos para la visualización del nombre de usuario */
-    .user-name {
-      margin-bottom: 10px;
-      font-weight: bold;
+    .footer a {
+      color: #007bff;
+      text-decoration: none;
     }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Action Button */
+    .action-button {
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+      text-decoration: none;
+    }
+
+    .action-button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Styles for user name display */
+    .user-name {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 10px 20px;
+      background-color: #ffffff;
+      color: #28a745;
+      border: 2px solid #28a745;
+      border-radius: 4px;
+      font-size: 14px;
+      z-index: 1000;
+    }
+
+        /* Dashboard Title Styles */
+    .dashboard-title {
+      position: fixed; /* Posicionamiento fijo para mantenerlo en la parte superior */
+      top: 10px; /* Ajusta para estar cerca del borde superior */
+      left: 50%; /* Centrar horizontalmente */
+      transform: translateX(-50%); /* Centrado */
+      font-size: 18px;
+      font-weight: bold;
+      color: #333333;
+      background-color: transparent; /* Fondo transparente */
+      z-index: 1000; /* Asegurar que esté por encima de otros elementos */
+    }
+
+    .back-button svg {
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
   </style>
-  
 </head>
 <body>
-  <!-- Logout Button -->
-  <button id="logout-button" class="logout-button" style="display: none;">Logout</button>
 
+  <!-- Dashboard Title -->
+  <div class="dashboard-title">Appraiser's Dashboard</div>
+  
+  <!-- Logout Button -->
+  <button id="logout-button" class="logout-button">Logout</button>
   <!-- Div to display the user's name -->
   <div id="user-name" class="user-name" style="display: none;"></div>
   
   <div class="container">
+    <!-- Back Button -->
+    <a href="index.html" class="back-button" aria-label="Go back to the list of pending appraisals">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+      </svg>
+      Back
+    </a>
+
     <!-- Logo -->
     <div class="logo">
       <a href="https://www.appraisily.com/" target="_blank">
@@ -127,34 +345,80 @@
     </div>
 
     <!-- Title -->
-    <div class="title">Welcome to the Appraisers Dashboard</div>
+    <div class="title">Complete Appraisal</div>
 
     <!-- Success/Error Messages -->
     <div id="message"></div>
 
-    <!-- Google Sign-In Button -->
-    <div class="signin-container">
-      <div id="g_id_onload"
-           data-client_id="856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
-           data-callback="handleCredentialResponse"
-           data-auto_prompt="false">
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Loader Container -->
+      <div id="loader-container">
+        <div id="loader"></div>
+        <div id="loader-message">Processing...</div>
       </div>
-      <div id="g_id_signin" class="g_id_signin"
-           data-type="standard"
-           data-shape="rectangular"
-           data-theme="outline"
-           data-text="sign_in_with"
-           data-size="large"
-           data-logo_alignment="left">
+
+      <!-- Descriptions Container -->
+      <div class="descriptions-container">
+        <!-- Customer Description -->
+        <div id="customer-description">
+          <div class="description-title">Customer Description:</div>
+          <div class="description-text" id="customer-description-text"></div>
+        </div>
+
+        <!-- AI Description -->
+        <div id="ia-description">
+          <div class="description-title">AI Description:</div>
+          <div class="description-text" id="ia-description-text"></div>
+        </div>
       </div>
-    </div>
 
-    <!-- Loader -->
-    <div id="loader"></div>
+      <!-- Images Container -->
+      <div class="images-container" id="images-container">
+        <!-- Images will be inserted here -->
+      </div>
 
-    <!-- Appraisals Container -->
-    <div id="appraisals"></div>
+      <!-- Form to Complete Appraisal -->
+      <form id="appraisal-form">
+        <label for="appraisalValue">Appraisal Value:</label>
+        <input type="number" id="appraisalValue" name="appraisalValue" required />
+
+        <label for="description">Appraiser Description:</label>
+        <textarea id="description" name="description" rows="6" required></textarea>
+
+        <button type="submit" class="submit-button">Submit</button>
+
+ <!-- Rectangle for Step Messages -->
+  <div class="step-messages">
+    <div class="step-message" id="message-step-1"></div>
+    <div class="step-message" id="message-step-2"></div>
+    <div class="step-message" id="message-step-3"></div>
+    <div class="step-message" id="message-step-4"></div>
+    <div class="step-message" id="message-step-5"></div>
+    <div class="step-message" id="message-step-6"></div>
+    <div class="step-message" id="message-step-7"></div>
   </div>
+
+  <!-- Dots for Steps -->
+  <div class="progress-dots">
+    <div class="dot" id="dot-1"></div>
+    <div class="dot" id="dot-2"></div>
+    <div class="dot" id="dot-3"></div>
+    <div class="dot" id="dot-4"></div>
+    <div class="dot" id="dot-5"></div>
+    <div class="dot" id="dot-6"></div>
+    <div class="dot" id="dot-7"></div>
+  </div>
+
+
+
+        
+      </form>
+
+   
+
+
+
 
   <!-- Footer -->
   <div class="footer">
@@ -447,132 +711,6 @@
     });
   }
 
-  // Definir funciones auxiliares fuera del manejador de eventos
-  async function buildPDF(appraisalData) {
-    try {
-      showLoader('Building PDF...');
-
-      const { wordpressUrl } = appraisalData;
-
-      if (!wordpressUrl) {
-        throw new Error('WordPress URL is missing.');
-      }
-
-      // Extraer el postId de la URL de WordPress
-      const parsedUrl = new URL(wordpressUrl);
-      const postId = parsedUrl.searchParams.get('post');
-
-      if (!postId) {
-        throw new Error('Invalid WordPress URL: Post ID not found.');
-      }
-
-      // Paso 5.1: Obtener session_ID desde el backend
-      const getSessionIdResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/get-session-id', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-          // Incluir cookies si es necesario para autenticación
-        },
-        body: JSON.stringify({ postId: postId })
-      });
-
-      const getSessionIdData = await getSessionIdResponse.json();
-
-      if (!getSessionIdData.success) {
-        throw new Error(getSessionIdData.message || 'Error fetching session_ID.');
-      }
-
-      const session_ID = getSessionIdData.session_ID;
-
-      if (!session_ID) {
-        throw new Error('session_ID not found.');
-      }
-
-      // Paso 5.2: Solicitar la generación del PDF con postId y session_ID
-      const buildPdfResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-          // Incluir cookies si es necesario para autenticación
-        },
-        body: JSON.stringify({ postId: postId, session_ID: session_ID }) // Enviar ambos parámetros
-      });
-
-      console.log(`[buildPDF] Respuesta recibida del backend: ${buildPdfResponse.status}`);
-
-      const buildPdfData = await buildPdfResponse.json();
-      console.log('[buildPDF] Datos de respuesta:', buildPdfData);
-
-      if (!buildPdfData.success) {
-        console.warn(`[buildPDF] Falló la generación del PDF: ${buildPdfData.message}`);
-        throw new Error(buildPdfData.message || 'Error building PDF.');
-      }
-
-      // **Guardar los enlaces en variables**
-      const pdfLink = buildPdfData.pdfLink;
-      const docLink = buildPdfData.docLink;
-
-      console.log(`[buildPDF] PDF Link: ${pdfLink}`);
-      console.log(`[buildPDF] Document Link: ${docLink}`);
-
-      // **Opcional: Manejar el URL del PDF si es proporcionado**
-      if (buildPdfData.pdfUrl) {
-        console.log('[buildPDF] Abriendo el PDF en una nueva pestaña.');
-        window.open(buildPdfData.pdfUrl, '_blank');
-      }
-
-      // **Almacenar los enlaces en variables globales o en el estado (si usas React, por ejemplo)**
-      // Por ahora, simplemente los almacenaremos en variables locales
-      // Si necesitas usarlos en otras partes de tu aplicación, considera almacenarlos en el estado o en un contexto
-
-      // Ejemplo de almacenamiento en variables locales
-      const storedPdfLink = pdfLink;
-      const storedDocLink = docLink;
-
-      console.log(`[buildPDF] Enlaces almacenados - PDF: ${storedPdfLink}, Documento: ${storedDocLink}`);
-
-      completeCurrentStep();
-      hideLoader();
-      showMessage('success', 'PDF built successfully.');
-    } catch (error) {
-      hideLoader();
-      showMessage('error', error.message);
-      console.error('Error en la generación de PDF:', error);
-    }
-  }
-
-  async function sendEmailToCustomer(appraisalId) {
-    try {
-      showLoader('Sending email to customer...');
-
-      const sendEmailResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include' // Asegúrate de que las cookies se envían correctamente
-        // No es necesario enviar body ya que el 'id' está en la URL
-      });
-
-      console.log(`[sendEmailToCustomer] Respuesta del servidor: ${sendEmailResponse.status}`);
-
-      const sendEmailData = await sendEmailResponse.json();
-      console.log(`[sendEmailToCustomer] Datos recibidos:`, sendEmailData);
-
-      if (!sendEmailData.success) {
-        throw new Error(sendEmailData.message || 'Error sending email to customer.');
-      }
-
-      completeCurrentStep();
-      hideLoader();
-      showMessage('success', 'Email sent to customer successfully.');
-    } catch (error) {
-      hideLoader();
-      showMessage('error', error.message);
-      console.error('[sendEmailToCustomer] Error enviando email al cliente:', error);
-    }
-  }
-
   // Manejar el envío del formulario y procesar los pasos
   document.getElementById('appraisal-form').addEventListener('submit', async function(event) {
     event.preventDefault();
@@ -645,43 +783,159 @@
       hideLoader();
       showMessage('success', 'Post title updated successfully.');
 
-      // Paso 4: Insert Shortcodes in WordPress Post
-      const insertShortcodesResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/insert-template`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({}) // Enviar un cuerpo vacío o puedes omitirlo completamente
-      });
+    // Paso 4: Insert Shortcodes in WordPress Post
+const insertShortcodesResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/insert-template`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  credentials: 'include',
+  body: JSON.stringify({}) // Enviar un cuerpo vacío o puedes omitirlo completamente
+});
 
-      const insertShortcodesData = await insertShortcodesResponse.json();
+const insertShortcodesData = await insertShortcodesResponse.json();
 
-      if (!insertShortcodesData.success) {
-        throw new Error(insertShortcodesData.message || 'Error inserting shortcodes in WordPress.');
+if (!insertShortcodesData.success) {
+  throw new Error(insertShortcodesData.message || 'Error inserting shortcodes in WordPress.');
+}
+
+completeCurrentStep();
+hideLoader();
+showMessage('success', 'Shortcodes inserted successfully in WordPress post.');
+
+
+// Paso 5: Building PDF
+async function buildPDF(appraisalData) {
+  try {
+    showLoader('Building PDF...');
+
+    const { wordpressUrl } = appraisalData;
+
+    if (!wordpressUrl) {
+      throw new Error('WordPress URL is missing.');
+    }
+
+    // Extraer el postId de la URL de WordPress
+    const parsedUrl = new URL(wordpressUrl);
+    const postId = parsedUrl.searchParams.get('post');
+
+    if (!postId) {
+      throw new Error('Invalid WordPress URL: Post ID not found.');
+    }
+
+    // Paso 5.1: Obtener session_ID desde el backend
+    const getSessionIdResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/get-session-id', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Incluir cookies si es necesario para autenticación
+      },
+      body: JSON.stringify({ postId: postId })
+    });
+
+    const getSessionIdData = await getSessionIdResponse.json();
+
+    if (!getSessionIdData.success) {
+      throw new Error(getSessionIdData.message || 'Error fetching session_ID.');
+    }
+
+    const session_ID = getSessionIdData.session_ID;
+
+    if (!session_ID) {
+      throw new Error('session_ID not found.');
+    }
+
+    // Paso 5.2: Solicitar la generación del PDF con postId y session_ID
+    const buildPdfResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/generate-pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Incluir cookies si es necesario para autenticación
+      },
+      body: JSON.stringify({ postId: postId, session_ID: session_ID }) // Enviar ambos parámetros
+    });
+
+    const buildPdfData = await buildPdfResponse.json();
+
+    if (!buildPdfData.success) {
+      throw new Error(buildPdfData.message || 'Error building PDF.');
+    }
+
+    // Opcional: Manejar el URL del PDF si es proporcionado
+    if (buildPdfData.pdfUrl) {
+      // Por ejemplo, redirigir al usuario para descargar el PDF
+      window.open(buildPdfData.pdfUrl, '_blank');
+    }
+
+    completeCurrentStep();
+    hideLoader();
+    showMessage('success', 'PDF built successfully.');
+  } catch (error) {
+    hideLoader();
+    showMessage('error', error.message);
+    console.error('Error en la generación de PDF:', error);
+  }
+}
+
+// Ejemplo de cómo podrías llamar a la función buildPDF con appraisalData
+async function handleBuildPdf(appraisalId) {
+  try {
+    // Obtener los detalles de la apreciación
+    const appraisalResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+        // Incluir cookies si es necesario para autenticación
       }
+    });
 
-      completeCurrentStep();
-      hideLoader();
-      showMessage('success', 'Shortcodes inserted successfully in WordPress post.');
+    const appraisalData = await appraisalResponse.json();
 
-      // Paso 5: Building PDF
-      // Primero, debes obtener los detalles del appraisal para pasar los datos necesarios
-      const appraisalDetailsResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
-        method: 'GET',
-        credentials: 'include'
-      });
+    if (!appraisalData || !appraisalData.id) {
+      throw new Error('Appraisal data not found.');
+    }
 
-      const appraisalDetails = await appraisalDetailsResponse.json();
+    // Llamar a la función para construir el PDF
+    await buildPDF(appraisalData);
+  } catch (error) {
+    hideLoader();
+    showMessage('error', error.message);
+    console.error('Error al manejar la generación de PDF:', error);
+  }
+}
 
-      if (!appraisalDetails.success) {
-        throw new Error('Error fetching appraisal details for PDF.');
-      }
+   // Paso 6: Send Email to Customer
+async function sendEmailToCustomer(appraisalId) {
+  try {
+    showLoader('Sending email to customer...');
 
-      await buildPDF(appraisalDetails); // Llamar a la función buildPDF
+    const sendEmailResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include' // Asegúrate de que las cookies se envían correctamente
+      // No es necesario enviar body ya que el 'id' está en la URL
+    });
 
-      // Paso 6: Send Email to Customer
-      await sendEmailToCustomer(appraisalId); // Llamar a la función sendEmailToCustomer
+    const sendEmailData = await sendEmailResponse.json();
+
+    if (!sendEmailData.success) {
+      throw new Error(sendEmailData.message || 'Error sending email to customer.');
+    }
+
+    completeCurrentStep();
+    hideLoader();
+    showMessage('success', 'Email sent to customer successfully.');
+  } catch (error) {
+    hideLoader();
+    showMessage('error', error.message);
+    console.error('Error sending email to customer:', error);
+  }
+}
+
+
+
 
       // Paso 7: Mark Appraisal as Completed
       const completeAppraisalResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/complete`, {
@@ -726,6 +980,8 @@
     initializeStepMessages();
   };
 </script>
+
+
 
 </body>
 </html>
