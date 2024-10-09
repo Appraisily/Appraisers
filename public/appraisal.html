@@ -735,23 +735,24 @@ showMessage('success', 'Appraisal Value y descripción establecidos correctament
         showMessage('success', 'Post title updated successfully.');
 
         // Paso 4: Insert Shortcodes in WordPress Post
-        const insertShortcodesResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/insert-template`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({}) // Enviar un cuerpo vacío o puedes omitirlo completamente
-        });
+const insertShortcodesResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/insert-template`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  credentials: 'include',
+  body: JSON.stringify({}) // Enviar un cuerpo vacío o puedes omitirlo completamente
+});
 
-        const insertShortcodesData = await insertShortcodesResponse.json();
+const insertShortcodesData = await insertShortcodesResponse.json();
 
-        if (!insertShortcodesData.success) {
-          throw new Error(insertShortcodesData.message || 'Error inserting shortcodes in WordPress.');
-        }
+if (!insertShortcodesData.success) {
+  throw new Error(insertShortcodesData.message || 'Error inserting shortcodes in WordPress.');
+}
 
-        completeCurrentStep();
-        showMessage('success', 'Shortcodes inserted successfully in WordPress post.');
+completeCurrentStep();
+showMessage('success', 'Shortcodes inserted successfully in WordPress post.');
+
 
         // Paso 5: Building PDF
         async function buildPDF(appraisalData) {
