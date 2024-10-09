@@ -699,6 +699,8 @@
         headers: {
           'Content-Type': 'application/json',
         },
+              credentials: 'include', // Incluir cookies en la solicitud
+
         body: JSON.stringify({ postId: postId })
       });
 
