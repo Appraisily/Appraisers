@@ -262,19 +262,6 @@
       z-index: 1000;
     }
 
-    /* Dashboard Title Styles */
-    .dashboard-title {
-      position: fixed; /* Posicionamiento fijo para mantenerlo en la parte superior */
-      top: 10px; /* Ajusta para estar cerca del borde superior */
-      left: 50%; /* Centrar horizontalmente */
-      transform: translateX(-50%); /* Centrado */
-      font-size: 18px;
-      font-weight: bold;
-      color: #333333;
-      background-color: transparent; /* Fondo transparente */
-      z-index: 1000; /* Asegurar que esté por encima de otros elementos */
-    }
-
     .back-button svg {
       margin-right: 5px;
       vertical-align: middle;
@@ -797,7 +784,7 @@ showMessage('success', 'Shortcodes inserted successfully in WordPress post.');
             }
 
             // Paso 5.2: Solicitar la generación del PDF con postId y session_ID
-            const buildPdfResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/generate-pdf', {
+            const buildPdfResponse = await fetch('https://appraisals-backend-856401495068.us-central1.run.app/generate-pdf', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
