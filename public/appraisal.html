@@ -669,8 +669,29 @@
       hideMessage();
 
       try {
-        // Paso 1: Set Appraisal Value (ya implementado en backend)
-        completeCurrentStep();
+      // Paso 1: Set Appraisal Value
+const setValueResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/set-value`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  credentials: 'include',
+  body: JSON.stringify({ 
+    appraisalValue: appraisalValue,
+    description: appraiserDescription
+  })
+});
+
+const setValueData = await setValueResponse.json();
+
+if (!setValueData.success) {
+  throw new Error(setValueData.message || 'Error setting Appraisal Value.');
+}
+
+// Completar el Paso 1
+completeCurrentStep();
+showMessage('success', 'Appraisal Value y descripción establecidos correctamente.');
+
 
         // Paso 2: Merge Descriptions with OpenAI
         const mergeResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/merge-descriptions`, {
