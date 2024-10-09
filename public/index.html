@@ -212,654 +212,396 @@
   <div class="footer">
     © <span id="current-year"></span> Appraisily. All rights reserved.
   </div>
-<!-- ... (El resto de tu código HTML permanece igual) ... -->
-<script>
-  let appraisalDataGlobal = null;
 
-  // Actualizar el año en el footer
-  document.getElementById('current-year').textContent = new Date().getFullYear();
+  <script>
+    // Actualizar el año en el footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
 
-  // Obtener el ID del appraisal de los parámetros de la URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const appraisalId = urlParams.get('id');
-
-  if (!appraisalId) {
-    alert('Appraisal ID no proporcionado.');
-    window.location.href = 'index.html';
-  }
-
-  // Definir los pasos
-  const steps = [
-    'Paso 1: Set Appraisal Value',
-    'Paso 2: Merge Descriptions with OpenAI',
-    'Paso 3: Update Post Title in WordPress',
-    'Paso 4: Insert WordPress Template',
-    'Paso 5: Building PDF',
-    'Paso 6: Send Email to Customer',
-    'Paso 7: Mark Appraisal as Completed'
-  ];
-  let currentStepIndex = 0; // Índice del paso actual (0-based)
-
-  // Obtener referencias a los pasos de la lista
-  const stepElements = document.querySelectorAll('.steps-list li.step');
-
-  // Función para mostrar el paso actual
-  function showCurrentStepMessage() {
-    stepElements.forEach((step, index) => {
-      if (index === currentStepIndex) {
-        step.classList.add('active');
-        step.classList.remove('completed', 'pending', 'error');
-      } else if (index < currentStepIndex) {
-        step.classList.add('completed');
-        step.classList.remove('active', 'pending', 'error');
-      } else {
-        step.classList.add('pending');
-        step.classList.remove('active', 'completed', 'error');
-      }
-    });
-  }
-
-  // Inicializar los pasos al cargar la página
-  showCurrentStepMessage();
-
-  // Función para completar el paso actual y avanzar al siguiente
-  function completeCurrentStep() {
-    if (currentStepIndex < stepElements.length) {
-      console.log(`Completing step ${currentStepIndex + 1}: ${steps[currentStepIndex]}`);
-      // Marcar el paso actual como completado
-      stepElements[currentStepIndex].classList.add('completed');
-      stepElements[currentStepIndex].classList.remove('active', 'pending', 'error');
-
-      // Avanzar al siguiente paso
-      currentStepIndex++;
-      if (currentStepIndex < stepElements.length) {
-        // Marcar el siguiente paso como activo
-        stepElements[currentStepIndex].classList.add('active');
-        stepElements[currentStepIndex].classList.remove('completed', 'pending', 'error');
-      }
-    }
-  }
-
-  // Función para marcar el paso actual como fallido y avanzar al siguiente
-  function failCurrentStep(errorMessage) {
-    if (currentStepIndex < stepElements.length) {
-      console.error(`Failing step ${currentStepIndex + 1}: ${steps[currentStepIndex]} - Error: ${errorMessage}`);
-      // Marcar el paso actual como fallido
-      stepElements[currentStepIndex].classList.add('error');
-      stepElements[currentStepIndex].classList.remove('active', 'pending', 'completed');
-
-      // Mostrar el mensaje de error en el recuadro principal
-      showMessage('error', errorMessage);
-
-      // Avanzar al siguiente paso
-      currentStepIndex++;
-      if (currentStepIndex < stepElements.length) {
-        // Marcar el siguiente paso como activo
-        stepElements[currentStepIndex].classList.add('active');
-        stepElements[currentStepIndex].classList.remove('completed', 'pending', 'error');
-      }
-    }
-  }
-
-  // Función para mostrar mensajes de éxito o error en el recuadro principal
-  function showMessage(type, text) {
-    const messageDiv = document.getElementById('message');
-    messageDiv.className = type === 'success' ? 'success' : 'error';
-    messageDiv.innerText = text;
-    messageDiv.style.display = 'block';
-  }
-
-  // Función para ocultar mensajes
-  function hideMessage() {
-    const messageDiv = document.getElementById('message');
-    messageDiv.style.display = 'none';
-  }
-
-  // Función para mostrar el loader con mensaje y controlar la visibilidad de la lista de pasos
-  function showLoader(message) {
-    const loaderContainer = document.getElementById('loader-container');
-    const loaderMessage = document.getElementById('loader-message');
-    const stepsList = document.querySelector('.steps-list');
-
-    loaderMessage.innerText = message;
-
-    if (message === 'Submitting appraisal...') {
-      stepsList.style.display = 'block';
-    } else {
-      stepsList.style.display = 'none';
+    // Función para mostrar mensajes
+    function showMessage(type, text) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.className = type === 'success' ? 'success' : 'error';
+      messageDiv.innerText = text;
+      messageDiv.style.display = 'block';
     }
 
-    loaderContainer.style.display = 'flex';
-  }
+    // Función para ocultar mensajes
+    function hideMessage() {
+      const messageDiv = document.getElementById('message');
+      messageDiv.style.display = 'none';
+    }
 
-  // Función para ocultar el loader y la lista de pasos
-  function hideLoader() {
-    const loaderContainer = document.getElementById('loader-container');
-    const stepsList = document.querySelector('.steps-list');
-    loaderContainer.style.display = 'none';
-    stepsList.style.display = 'none';
-  }
-
-  // Función para cargar los detalles del appraisal
-  function loadAppraisalDetails() {
-    // Mostrar el loader con mensaje
-    showLoader('Fetching appraisal details...');
-    hideMessage();
-
-    fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list`, {
-      method: 'GET',
-      credentials: 'include' // Incluir cookies en la solicitud
-    })
-    .then(res => {
-      // Ocultar el loader después de recibir la respuesta
-      hideLoader();
-
-      if (res.status === 401 || res.status === 403) {
-        throw new Error('You are not authenticated. Please log in.');
-      } else if (res.status === 404) {
-        throw new Error('Appraisal not found.');
-      }
-      return res.json();
-    })
-    .then(data => {
-      // Verificar que los datos sean correctos
-      if (!data || typeof data !== 'object') {
-        throw new Error('Invalid appraisal data received.');
-      }
-
-      // **Asignar los datos a la variable global**
-      appraisalDataGlobal = data;
-
-      // Mostrar descripciones
-      const customerDescriptionText = document.getElementById('customer-description-text');
-      customerDescriptionText.innerText = data.customerDescription || 'Not available';
-
-      const iaDescriptionText = document.getElementById('ia-description-text');
-      iaDescriptionText.innerText = data.iaDescription || 'Not available';
-
-      // Mostrar imágenes con etiquetas
-      const imagesContainer = document.getElementById('images-container');
-      imagesContainer.innerHTML = ''; // Limpiar imágenes existentes
-
-      if (data.images) {
-        // Main Image
-        if (data.images.main) {
-          const mainImageWrapper = document.createElement('div');
-          mainImageWrapper.className = 'image-wrapper';
-
-          const mainImage = document.createElement('img');
-          mainImage.src = data.images.main;
-          mainImage.alt = 'Main Image';
-          mainImageWrapper.appendChild(mainImage);
-
-          const mainLabel = document.createElement('div');
-          mainLabel.className = 'image-label';
-          mainLabel.innerText = 'Main Image';
-          mainImageWrapper.appendChild(mainLabel);
-
-          imagesContainer.appendChild(mainImageWrapper);
-        }
-
-        // Age Image
-        if (data.images.age) {
-          const ageImageWrapper = document.createElement('div');
-          ageImageWrapper.className = 'image-wrapper';
-
-          const ageImage = document.createElement('img');
-          ageImage.src = data.images.age;
-          ageImage.alt = 'Age Image';
-          ageImageWrapper.appendChild(ageImage);
-
-          const ageLabel = document.createElement('div');
-          ageLabel.className = 'image-label';
-          ageLabel.innerText = 'Age Image';
-          ageImageWrapper.appendChild(ageLabel);
-
-          imagesContainer.appendChild(ageImageWrapper);
-        }
-
-        // Signature Image
-        if (data.images.signature) {
-          const signatureImageWrapper = document.createElement('div');
-          signatureImageWrapper.className = 'image-wrapper';
-
-          const signatureImage = document.createElement('img');
-          signatureImage.src = data.images.signature;
-          signatureImage.alt = 'Signature Image';
-          signatureImageWrapper.appendChild(signatureImage);
-
-          const signatureLabel = document.createElement('div');
-          signatureLabel.className = 'image-label';
-          signatureLabel.innerText = 'Signature Image';
-          signatureImageWrapper.appendChild(signatureLabel);
-
-          imagesContainer.appendChild(signatureImageWrapper);
-        }
-      }
-
-      showMessage('success', 'Appraisal details loaded successfully.');
-    })
-    .catch(err => {
-      console.error('Error fetching appraisal details:', err);
-      showMessage('error', err.message || 'Error fetching appraisal details.');
-      hideLoader();
-
-      // Redirigir a index si no está autenticado
-      if (err.message.includes('not authenticated')) {
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
-      }
-    });
-  }
-
-  // Manejar el logout
-  function logout() {
-    // Mostrar el loader con mensaje
-    showLoader('Logging out...');
-    hideMessage();
-
-    fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
-      method: 'POST',
-      credentials: 'include' // Incluir cookies en la solicitud
-    })
-    .then(res => res.json())
-    .then(data => {
-      // Ocultar el loader después de recibir la respuesta
-      hideLoader();
-
-      if (data.success) {
-        // Mostrar el botón de inicio de sesión y ocultar el de cierre de sesión
-        document.getElementById('g_id_signin').style.display = 'block';
-        document.getElementById('logout-button').style.display = 'none';
-
-        // Eliminar el nombre del usuario del localStorage
-        localStorage.removeItem('userName');
-
-        // Ocultar la visualización del nombre del usuario
-        document.getElementById('user-name').style.display = 'none';
-
-        // Limpiar las apreciaciones
-        document.getElementById('appraisals').innerHTML = '';
-        // Mostrar un mensaje de éxito
-        showMessage('success', 'Successfully logged out.');
-      } else {
-        // Manejar fallo en el logout
-        showMessage('error', 'Error logging out. Please try again.');
-      }
-    })
-    .catch(err => {
-      // Ocultar el loader en caso de error
-      hideLoader();
-      console.error('Error during logout:', err);
-      showMessage('error', 'Error logging out. Please try again.');
-    });
-  }
-
-  // Añadir event listener al botón de logout
-  document.getElementById('logout-button').addEventListener('click', logout);
-
-  // Función para guardar los enlaces en Google Sheets
-  async function saveLinks(appraisalId, pdfLink, docLink) {
-    try {
-      const saveLinksResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/save-links`, {
+    // Manejar la respuesta de Google Sign-In
+    function handleCredentialResponse(response) {
+      const idToken = response.credential;
+      console.log("ID Token:", idToken);
+      
+      // Mostrar el loader durante la autenticación
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
+      
+      // Enviar el ID token al backend para verificación y emisión de JWT
+      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include',
-        body: JSON.stringify({ pdfLink, docLink })
+        body: JSON.stringify({ idToken }),
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => res.json())
+      .then(data => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+        
+        if (data.success) {
+          // Almacenar el nombre del usuario
+          const userName = data.name;
+          localStorage.setItem('userName', data.name);
+
+          // Mostrar el botón de cierre de sesión y ocultar el de inicio de sesión
+          document.getElementById('logout-button').style.display = 'block';
+          document.getElementById('g_id_signin').style.display = 'none';
+
+          // Mostrar el nombre del usuario
+          showUserName(userName);
+
+          // Mostrar un mensaje de éxito
+          showMessage('success', 'Authentication successful. Loading appraisals...');
+          // Cargar las apreciaciones
+          loadAppraisals(currentAppraisalType);
+        } else {
+          // Manejar el fallo en la autenticación
+          showMessage('error', data.message || 'Authentication failed. Please try again.');
+        }
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error during authentication:', err);
+        showMessage('error', 'Error during authentication. Please try again.');
       });
-
-      const saveLinksData = await saveLinksResponse.json();
-
-      if (!saveLinksData.success) {
-        throw new Error(saveLinksData.message || 'Error saving PDF and Doc links.');
-      }
-
-      console.log('Links saved successfully:', saveLinksData.message);
-      showMessage('success', 'PDF y Doc Links guardados exitosamente.');
-    } catch (error) {
-      console.error('Error saving links:', error);
-      showMessage('error', error.message || 'Error saving PDF and Doc links.');
-      throw error; // Re-throw para manejar en la llamada principal
     }
-  }
 
-  // Función para construir el PDF
-  async function buildPDF(appraisalData) {
-    try {
-      showLoader('Building PDF...');
-      completeCurrentStep();
-
-      const { wordpressUrl } = appraisalData;
-
-      if (!wordpressUrl) {
-        throw new Error('WordPress URL is missing.');
-      }
-
-      // Extraer el postId de la URL de WordPress
-      const parsedUrl = new URL(wordpressUrl);
-      const postId = parsedUrl.searchParams.get('post');
-
-      if (!postId) {
-        throw new Error('Invalid WordPress URL: Post ID not found.');
-      }
-
-      // Obtener session_ID desde el backend (simplificado)
-      const sessionIdResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/get-session-id', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ postId: postId })
-      });
-
-      const sessionIdData = await sessionIdResponse.json();
-
-      if (!sessionIdData.success) {
-        throw new Error(sessionIdData.message || 'Error fetching session_ID.');
-      }
-
-      const session_ID = sessionIdData.session_ID;
-
-      if (!session_ID) {
-        throw new Error('session_ID not found.');
-      }
-
-      // Solicitar la generación del PDF con postId y session_ID
-      console.log('Solicitando generación de PDF con postId y session_ID:', postId, session_ID);
-      const buildPdfResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Incluir cookies si es necesario para autenticación
-        },
-        body: JSON.stringify({ postId: postId, session_ID: session_ID }) // Enviar ambos parámetros
-      });
-
-      const buildPdfData = await buildPdfResponse.json();
-
-      if (!buildPdfData.success) {
-        throw new Error(buildPdfData.message || 'Error building PDF.');
-      }
-
-      // Guardar los enlaces al PDF y al documento de Google Docs
-      const pdfLink = buildPdfData.pdfLink;
-      const docLink = buildPdfData.docLink;
-
-      console.log(`PDF Link: ${pdfLink}`);
-      console.log(`Document Link: ${docLink}`);
-
-      // Opcional: Manejar el URL del PDF si es proporcionado
-      if (buildPdfData.pdfUrl) {
-        // Por ejemplo, redirigir al usuario para descargar el PDF
-        window.open(buildPdfData.pdfUrl, '_blank');
-      }
-
-      // Guardar los enlaces en Google Sheets mediante el nuevo endpoint
-      await saveLinks(appraisalId, pdfLink, docLink);
-
-      // Completar el Paso 5
-      completeCurrentStep();
-      showMessage('success', 'PDF construido y links guardados exitosamente.');
-    } catch (error) {
-      hideLoader();
-      showMessage('error', error.message);
-      console.error('Error en la generación de PDF:', error);
-      failCurrentStep(error.message || 'Error building PDF.');
+    // Función para mostrar el nombre del usuario
+    function showUserName(name) {
+      const userNameDiv = document.getElementById('user-name');
+      userNameDiv.textContent = `Logged in as ${name}`;
+      userNameDiv.style.display = 'block';
     }
-  }
 
-  // Función para manejar la construcción del PDF
-  async function handleBuildPdf(appraisalId) {
-    try {
-      // Obtener los detalles de la apreciación
-      const appraisalResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
+    // Variables para almacenar datos de apreciaciones
+    let allAppraisals = [];
+    let currentAppraisalType = 'pending'; // Puede ser 'pending' o 'completed'
+
+    // Función para cargar apreciaciones desde el backend
+    function loadAppraisals(appraisalType) {
+      // Mostrar el loader mientras se obtienen las apreciaciones
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
+
+      // Determinar el endpoint basado en el tipo de apreciación
+      let endpoint = 'https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals';
+      if (appraisalType === 'completed') {
+        endpoint = 'https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/completed';
+      }
+
+      fetch(endpoint, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
-          // Incluir cookies si es necesario para autenticación
+        },
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+        
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('Unauthorized. Please log in again.');
         }
+        return res.json();
+      })
+      .then(data => {
+        allAppraisals = data; // Almacenar todos los datos de apreciaciones
+
+        // Renderizar la tabla de apreciaciones
+        renderAppraisalsTable(allAppraisals, appraisalType);
+
+        showMessage('success', 'Appraisals loaded successfully.');
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error fetching appraisals:', err);
+        showMessage('error', err.message || 'Error fetching appraisals.');
+
+        // Mostrar el botón de inicio de sesión y ocultar el de cierre de sesión
+        document.getElementById('logout-button').style.display = 'none';
+        document.getElementById('g_id_signin').style.display = 'block';
+
+        // Limpiar las apreciaciones
+        document.getElementById('appraisals').innerHTML = '';
       });
+    }
 
-      const appraisalData = await appraisalResponse.json();
+    // Función para renderizar la tabla de apreciaciones
+    function renderAppraisalsTable(appraisals, appraisalType) {
+      const appraisalsDiv = document.getElementById('appraisals');
 
-      if (!appraisalData || !appraisalData.id) {
-        throw new Error('Appraisal data not found.');
+      // Limpiar contenido previo
+      appraisalsDiv.innerHTML = '';
+
+      // Crear el contenedor de controles (botones y búsqueda)
+      const controlsContainer = document.createElement('div');
+      controlsContainer.className = 'controls-container';
+
+      // Crear contenedor de botones
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.className = 'buttons-container';
+
+      // Crear botón para Pending
+      const pendingButton = document.createElement('button');
+      pendingButton.className = 'pending';
+      pendingButton.textContent = 'Mostrar Pending';
+      pendingButton.id = 'show-pending';
+
+      // Crear botón para Completed
+      const completedButton = document.createElement('button');
+      completedButton.className = 'completed';
+      completedButton.textContent = 'Mostrar Completed';
+      completedButton.id = 'show-completed';
+
+      // Añadir botones al contenedor de botones
+      buttonsContainer.appendChild(pendingButton);
+      buttonsContainer.appendChild(completedButton);
+
+      // Crear contenedor de búsqueda
+      const searchContainer = document.createElement('div');
+      searchContainer.className = 'search-container';
+
+      // Crear input de búsqueda
+      const searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.id = 'search-input';
+      searchInput.placeholder = 'Search...';
+
+      // Crear botón de búsqueda
+      const searchButton = document.createElement('button');
+      searchButton.className = 'search';
+      searchButton.textContent = 'Buscar';
+      searchButton.id = 'search-button';
+
+      // Añadir input y botón al contenedor de búsqueda
+      searchContainer.appendChild(searchInput);
+      searchContainer.appendChild(searchButton);
+
+      // Añadir botones y búsqueda al contenedor de controles
+      controlsContainer.appendChild(buttonsContainer);
+      controlsContainer.appendChild(searchContainer);
+
+      // Añadir el contenedor de controles al div de apreciaciones
+      appraisalsDiv.appendChild(controlsContainer);
+
+      // Crear la tabla
+      let tableHTML = `
+        <table id="appraisals-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Appraisal Type</th>
+              <th>Appraisal Number</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      if (appraisals.length === 0) {
+        tableHTML += `
+          <tr>
+            <td colspan="5">No appraisals found.</td>
+          </tr>
+        `;
+      } else {
+        appraisals.forEach(appraisal => {
+          tableHTML += `
+            <tr>
+              <td data-label="Date">${appraisal.date}</td>
+              <td data-label="Appraisal Type">${appraisal.appraisalType}</td>
+              <td data-label="Appraisal Number" title="${appraisal.identifier}">
+                ${appraisal.identifier}
+              </td>
+              <td data-label="Status">${appraisal.status}</td>
+              <td data-label="Action">
+          `;
+
+          if (appraisalType === 'pending') {
+            tableHTML += `
+                <button class="action-button complete" data-id="${appraisal.id}" data-url="${appraisal.wordpressUrl}">Complete</button>
+            `;
+          } else if (appraisalType === 'completed') {
+            tableHTML += `
+                <button class="action-button edit" data-id="${appraisal.id}" data-url="${appraisal.wordpressUrl}">Edit</button>
+            `;
+          }
+
+          tableHTML += `
+              </td>
+            </tr>
+          `;
+        });
       }
 
-      // Llamar a la función para construir el PDF con los datos globales
-      await buildPDF(appraisalDataGlobal);
-    } catch (error) {
-      hideLoader();
-      showMessage('error', error.message);
-      console.error('Error al manejar la generación de PDF:', error);
-    }
-  }
+      tableHTML += `
+          </tbody>
+        </table>
+      `;
 
-  // Paso 6: Send Email to Customer
-  async function sendEmailToCustomer(appraisalId) {
-    try {
-      showLoader('Sending email to customer...');
+      // Añadir la tabla al div de apreciaciones
+      appraisalsDiv.innerHTML += tableHTML;
+
+      // Añadir event listeners a los botones de acción
+      document.querySelectorAll('.action-button').forEach(button => {
+        button.addEventListener('click', () => {
+          const appraisalId = button.getAttribute('data-id');
+          const wordpressUrl = button.getAttribute('data-url');
+
+          if (appraisalType === 'pending') {
+            // Redireccionar a la página de completado de apreciación con parámetros
+            window.location.href = `appraisal.html?id=${appraisalId}&wpUrl=${encodeURIComponent(wordpressUrl)}`;
+          } else if (appraisalType === 'completed') {
+            // Redireccionar a la página de edición de apreciación con parámetros
+            window.location.href = `editAppraisal.html?id=${appraisalId}&wpUrl=${encodeURIComponent(wordpressUrl)}`;
+          }
+        });
+      });
+
+      // Añadir event listeners a los nuevos botones
+      document.getElementById('show-pending').addEventListener('click', () => {
+        currentAppraisalType = 'pending';
+        loadAppraisals('pending');
+      });
+
+      document.getElementById('show-completed').addEventListener('click', () => {
+        currentAppraisalType = 'completed';
+        loadAppraisals('completed');
+      });
+
+      // Añadir event listener al botón de búsqueda
+      document.getElementById('search-button').addEventListener('click', () => {
+        const query = document.getElementById('search-input').value.trim().toLowerCase();
+        if (query === '') {
+          showMessage('error', 'Please enter a search query.');
+          return;
+        }
+        filterAppraisalsTable(query, appraisalType);
+      });
+    }
+
+    // Función para filtrar la tabla de apreciaciones según la consulta de búsqueda
+    function filterAppraisalsTable(query, appraisalType) {
+      const filteredAppraisals = allAppraisals.filter(appraisal => {
+        // Verificar si alguno de los campos contiene la consulta
+        return (
+          (appraisal.date && appraisal.date.toLowerCase().includes(query)) ||
+          (appraisal.appraisalType && appraisal.appraisalType.toLowerCase().includes(query)) ||
+          (appraisal.identifier && appraisal.identifier.toLowerCase().includes(query)) ||
+          (appraisal.status && appraisal.status.toLowerCase().includes(query))
+        );
+      });
+
+      if (filteredAppraisals.length === 0) {
+        showMessage('error', 'No appraisals match your search.');
+      } else {
+        showMessage('success', `${filteredAppraisals.length} appraisal(s) found.`);
+      }
+
+      // Renderizar la tabla con las apreciaciones filtradas
+      renderAppraisalsTable(filteredAppraisals, appraisalType);
+    }
+
+    // Función para manejar el cierre de sesión
+    function logout() {
+      // Mostrar el loader mientras se cierra sesión
+      document.getElementById('loader').style.display = 'block';
       hideMessage();
 
-      const sendEmailResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/send-email`, {
+      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include' // Asegúrate de que las cookies se envían correctamente
-        // No es necesario enviar body ya que el 'id' está en la URL
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => res.json())
+      .then(data => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+        
+        if (data.success) {
+          // Mostrar el botón de inicio de sesión y ocultar el de cierre de sesión
+          document.getElementById('g_id_signin').style.display = 'block';
+          document.getElementById('logout-button').style.display = 'none';
+          
+          // Eliminar el nombre del usuario del localStorage
+          localStorage.removeItem('userName');
+          
+          // Ocultar la visualización del nombre del usuario
+          document.getElementById('user-name').style.display = 'none';
+
+          // Limpiar las apreciaciones
+          document.getElementById('appraisals').innerHTML = '';
+          // Mostrar un mensaje de éxito
+          showMessage('success', 'Successfully logged out.');
+        } else {
+          // Manejar el fallo en el cierre de sesión
+          showMessage('error', 'Error logging out. Please try again.');
+        }
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error during logout:', err);
+        showMessage('error', 'Error logging out. Please try again.');
       });
-
-      const sendEmailData = await sendEmailResponse.json();
-      console.log('Respuesta del envío de email:', sendEmailData);
-
-      if (!sendEmailData.success) {
-        throw new Error(sendEmailData.message || 'Error sending email to customer.');
-      }
-
-      completeCurrentStep();
-      hideLoader();
-      showMessage('success', 'Email sent to customer successfully.');
-    } catch (error) {
-      hideLoader();
-      showMessage('error', error.message);
-      console.error('Error sending email to customer:', error);
-      failCurrentStep(error.message || 'Error sending email to customer.');
-    }
-  }
-
-  // Paso 7: Mark Appraisal as Completed
-  async function markAppraisalAsCompleted(appraisalId, appraisalValue, appraiserDescription) {
-    try {
-      showLoader('Marking appraisal as completed...');
-      hideMessage();
-
-      const completeAppraisalResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ appraisalValue, description: appraiserDescription })
-      });
-
-      const completeAppraisalData = await completeAppraisalResponse.json();
-
-      if (!completeAppraisalData.success) {
-        throw new Error(completeAppraisalData.message || 'Error marking appraisal as completed.');
-      }
-
-      completeCurrentStep();
-      showMessage('success', 'Appraisal marked as completed successfully.');
-
-      // Redirigir al dashboard después de completar todos los pasos
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 9000);
-    } catch (error) {
-      console.error('Error marking appraisal as completed:', error);
-      hideLoader();
-      failCurrentStep(error.message || 'Error marking appraisal as completed.');
-    }
-  }
-
-  // Función para manejar el envío del formulario y procesar los pasos
-  document.getElementById('appraisal-form').addEventListener('submit', async function(event) {
-    event.preventDefault();
-
-    const appraisalValueInput = document.getElementById('appraisalValue');
-    const appraisalValue = appraisalValueInput.value.trim();
-    const appraiserDescription = document.getElementById('description').value.trim();
-    const iaDescription = document.getElementById('ia-description-text').innerText.trim();
-
-    // Validación del lado del cliente para el Appraisal Value
-    if (appraisalValue === '') {
-      showMessage('error', 'Missing Appraisal Value.');
-      return;
     }
 
-    // Validar si appraisalValue es un número positivo
-    if (isNaN(appraisalValue) || Number(appraisalValue) <= 0) {
-      showMessage('error', 'Appraisal Value must be a positive number.');
-      return;
-    }
+    // Añadir event listener al botón de cierre de sesión
+    document.getElementById('logout-button').addEventListener('click', logout);
 
-    // Mostrar el loader con el mensaje adecuado
-    showLoader('Submitting appraisal...');
-    showCurrentStepMessage();
-    hideMessage();
+    // Verificar el estado de autenticación al cargar la página
+    window.onload = () => {
+      // Verificar si el nombre del usuario está en el localStorage
+      const userName = localStorage.getItem('userName');
+      
+      if (userName) {
+        // Mostrar el botón de cierre de sesión y ocultar el de inicio de sesión
+        document.getElementById('logout-button').style.display = 'block';
+        document.getElementById('g_id_signin').style.display = 'none';
 
-    try {
-      // Paso 1: Set Appraisal Value
-      const setValueResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/set-value`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ 
-          appraisalValue: appraisalValue,
-          description: appraiserDescription
-        })
-      });
+        // Mostrar la visualización del nombre del usuario
+        showUserName(userName);
 
-      const setValueData = await setValueResponse.json();
-
-      if (!setValueData.success) {
-        throw new Error(setValueData.message || 'Error setting Appraisal Value.');
+        // Cargar las apreciaciones (pendientes por defecto)
+        loadAppraisals(currentAppraisalType);
+      } else {
+        // Usuario no autenticado
+        document.getElementById('logout-button').style.display = 'none';
+        document.getElementById('g_id_signin').style.display = 'block';
       }
+    };
 
-      // Completar el Paso 1
-      completeCurrentStep();
-      showMessage('success', 'Appraisal Value y descripción establecidos correctamente.');
+// Scroll bara dashboard
+    window.addEventListener('scroll', function() {
+        const title = document.querySelector('.dashboard-title');
+        if (window.scrollY > 50) {  // Ajusta el valor según el punto en que quieres que ocurra el cambio
+            title.classList.add('scrolled');
+        } else {
+            title.classList.remove('scrolled');
+        }
+    });
 
-      // Paso 2: Merge Descriptions with OpenAI
-      const mergeResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/merge-descriptions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ 
-          appraiserDescription: appraiserDescription,
-          iaDescription: iaDescription
-        })
-      });
 
-      const mergeData = await mergeResponse.json();
-
-      if (!mergeData.success) {
-        throw new Error(mergeData.message || 'Error merging descriptions with OpenAI.');
-      }
-
-      completeCurrentStep();
-      showMessage('success', 'Descriptions merged successfully.');
-
-      // Paso 3: Update Post Title in WordPress
-      const updateTitleResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/update-title`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ newTitle: mergeData.blendedDescription })
-      });
-
-      const updateTitleData = await updateTitleResponse.json();
-
-      if (!updateTitleData.success) {
-        throw new Error(updateTitleData.message || 'Error updating post title in WordPress.');
-      }
-
-      completeCurrentStep();
-      showMessage('success', 'Post title updated successfully.');
-
-      // Paso 4: Insert Shortcodes in WordPress Post
-      const insertShortcodesResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/insert-template`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({}) // Enviar un cuerpo vacío o puedes omitirlo completamente
-      });
-
-      const insertShortcodesData = await insertShortcodesResponse.json();
-
-      if (!insertShortcodesData.success) {
-        throw new Error(insertShortcodesData.message || 'Error inserting shortcodes in WordPress.');
-      }
-
-      completeCurrentStep();
-      showMessage('success', 'Shortcodes inserted successfully in WordPress post.');
-
-      // Paso 5: Building PDF
-      await buildPDF(appraisalDataGlobal);
-
-      // Paso 6: Send Email to Customer
-      await sendEmailToCustomer(appraisalId);
-
-      // Paso 7: Mark Appraisal as Completed
-      await markAppraisalAsCompleted(appraisalId, appraisalValue, appraiserDescription);
-
-    } catch (error) {
-      console.error('Error during appraisal process:', error);
-      hideLoader();
-
-      // Marcar el paso actual como fallido y mostrar el mensaje de error
-      failCurrentStep(error.message || 'An unexpected error occurred during the appraisal process.');
-    }
-  });
-
-  // Función para mostrar el nombre del usuario
-  function showUserName(name) {
-    const userNameDiv = document.getElementById('user-name');
-    userNameDiv.textContent = `Logged in as ${name}`;
-    userNameDiv.style.display = 'block';
-  }
-
-  // Scroll bar dashboard
-  window.addEventListener('scroll', function() {
-    const title = document.querySelector('.dashboard-title');
-    if (window.scrollY > 50) {  // Ajusta el valor según el punto en que quieres que ocurra el cambio
-      title.classList.add('scrolled');
-    } else {
-      title.classList.remove('scrolled');
-    }
-  });
-
-  // Cargar los detalles del appraisal y mostrar el botón de logout si está autenticado
-  window.onload = () => {
-    loadAppraisalDetails();
-    // Mostrar el botón de logout
-    document.getElementById('logout-button').style.display = 'block';
-    // Inicializar los mensajes de pasos
-    showCurrentStepMessage();
-  };
-</script>
-
+  
+  </script>
 </body>
 </html>
