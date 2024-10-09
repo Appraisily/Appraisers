@@ -742,94 +742,117 @@ showMessage('success', 'Shortcodes inserted successfully in WordPress post.');
 
 
         // Paso 5: Building PDF
-        async function buildPDF(appraisalData) {
-          try {
-            showLoader('Submitting appraisal...'); // Reutilizar el mensaje para mantener los pasos visibles
-            completeCurrentStep();
 
-            const { wordpressUrl } = appraisalData;
+    // Función para guardar los enlaces en Google Sheets
+    async function saveLinks(appraisalId, pdfLink, docLink) {
+      try {
+        const saveLinksResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/save-links`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({ pdfLink, docLink })
+        });
 
-            if (!wordpressUrl) {
-              throw new Error('WordPress URL is missing.');
-            }
+        const saveLinksData = await saveLinksResponse.json();
 
-            // Extraer el postId de la URL de WordPress
-            const parsedUrl = new URL(wordpressUrl);
-            const postId = parsedUrl.searchParams.get('post');
-
-            if (!postId) {
-              throw new Error('Invalid WordPress URL: Post ID not found.');
-            }
-
-            // Paso 5.1: Obtener session_ID desde el backend
-            const getSessionIdResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/get-session-id', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                // Incluir cookies si es necesario para autenticación
-              },
-              body: JSON.stringify({ postId: postId })
-            });
-
-            const getSessionIdData = await getSessionIdResponse.json();
-
-            if (!getSessionIdData.success) {
-              throw new Error(getSessionIdData.message || 'Error fetching session_ID.');
-            }
-
-            const session_ID = getSessionIdData.session_ID;
-
-            if (!session_ID) {
-              throw new Error('session_ID not found.');
-            }
-
-            // Paso 5.2: Solicitar la generación del PDF con postId y session_ID
-            const buildPdfResponse = await fetch('https://appraisals-backend-856401495068.us-central1.run.app/generate-pdf', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                // Incluir cookies si es necesario para autenticación
-              },
-              body: JSON.stringify({ postId: postId, session_ID: session_ID }) // Enviar ambos parámetros
-            });
-
-            const buildPdfData = await buildPdfResponse.json();
-
-            if (!buildPdfData.success) {
-              throw new Error(buildPdfData.message || 'Error building PDF.');
-            }
-
-            // Guardar los enlaces al PDF y al documento de Google Docs
-            const pdfLink = buildPdfData.pdfLink;
-            const docLink = buildPdfData.docLink;
-
-            console.log(`PDF Link: ${pdfLink}`);
-            console.log(`Document Link: ${docLink}`);
-
-            // Opcional: Manejar el URL del PDF si es proporcionado
-            if (buildPdfData.pdfUrl) {
-              // Por ejemplo, redirigir al usuario para descargar el PDF
-              window.open(buildPdfData.pdfUrl, '_blank');
-            }
-
-            // Aquí puedes guardar los enlaces en variables si es necesario
-            // Por ejemplo:
-            // window.pdfLink = pdfLink;
-            // window.docLink = docLink;
-
-            completeCurrentStep();
-            showMessage('success', 'PDF built successfully.');
-          } catch (error) {
-            hideLoader();
-            showMessage('error', error.message);
-            console.error('Error en la generación de PDF:', error);
-            failCurrentStep(error.message || 'Error building PDF.');
-          }
+        if (!saveLinksData.success) {
+          throw new Error(saveLinksData.message || 'Error saving PDF and Doc links.');
         }
 
-        // Llamar a la función para construir el PDF
-        await buildPDF(data);
+        console.log('Links saved successfully:', saveLinksData.message);
+        showMessage('success', 'PDF y Doc Links guardados exitosamente.');
+      } catch (error) {
+        console.error('Error saving links:', error);
+        showMessage('error', error.message || 'Error saving PDF and Doc links.');
+        throw error; // Re-throw para manejar en la llamada principal
+      }
+    }
 
+    // Función para construir el PDF
+    async function buildPDF(appraisalData) {
+      try {
+        showLoader('Building PDF...');
+        completeCurrentStep();
+
+        const { wordpressUrl } = appraisalData;
+
+        if (!wordpressUrl) {
+          throw new Error('WordPress URL is missing.');
+        }
+
+        // Extraer el postId de la URL de WordPress
+        const parsedUrl = new URL(wordpressUrl);
+        const postId = parsedUrl.searchParams.get('post');
+
+        if (!postId) {
+          throw new Error('Invalid WordPress URL: Post ID not found.');
+        }
+
+        // Obtener session_ID desde el backend (simplificado)
+        const sessionIdResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/get-session-id', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ postId: postId })
+        });
+
+        const sessionIdData = await sessionIdResponse.json();
+
+        if (!sessionIdData.success) {
+          throw new Error(sessionIdData.message || 'Error fetching session_ID.');
+        }
+
+        const session_ID = sessionIdData.session_ID;
+
+        if (!session_ID) {
+          throw new Error('session_ID not found.');
+        }
+
+        // Solicitar la generación del PDF con postId y session_ID
+        const buildPdfResponse = await fetch('https://appraisals-backend-856401495068.us-central1.run.app/generate-pdf', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // Incluir cookies si es necesario para autenticación
+          },
+          body: JSON.stringify({ postId: postId, session_ID: session_ID }) // Enviar ambos parámetros
+        });
+
+        const buildPdfData = await buildPdfResponse.json();
+
+        if (!buildPdfData.success) {
+          throw new Error(buildPdfData.message || 'Error building PDF.');
+        }
+
+        // Guardar los enlaces al PDF y al documento de Google Docs
+        const pdfLink = buildPdfData.pdfLink;
+        const docLink = buildPdfData.docLink;
+
+        console.log(`PDF Link: ${pdfLink}`);
+        console.log(`Document Link: ${docLink}`);
+
+        // Opcional: Manejar el URL del PDF si es proporcionado
+        if (buildPdfData.pdfUrl) {
+          // Por ejemplo, redirigir al usuario para descargar el PDF
+          window.open(buildPdfData.pdfUrl, '_blank');
+        }
+
+        // Guardar los enlaces en Google Sheets mediante el nuevo endpoint
+        await saveLinks(appraisalId, pdfLink, docLink);
+
+        // Completar el Paso 5
+        completeCurrentStep();
+        showMessage('success', 'PDF construido y links guardados exitosamente.');
+      } catch (error) {
+        hideLoader();
+        showMessage('error', error.message);
+        console.error('Error en la generación de PDF:', error);
+        failCurrentStep(error.message || 'Error building PDF.');
+      }
+    }
         // Paso 6: Send Email to Customer
         await sendEmailToCustomer(appraisalId);
 
