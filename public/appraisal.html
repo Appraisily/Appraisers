@@ -201,6 +201,11 @@
     #loader-message {
       font-size: 16px;
       color: #555555;
+      margin-bottom: 20px;
+    }
+
+    .steps-list {
+      display: none; /* Hidden by default */
     }
 
     @keyframes spin {
@@ -273,6 +278,11 @@
     .back-button svg {
       margin-right: 5px;
       vertical-align: middle;
+    }
+
+    /* Estilo para pasos fallidos */
+    .steps-list li.step.error {
+      color: #dc3545; /* Rojo para errores */
     }
   </style>
 </head>
@@ -396,13 +406,13 @@
       stepElements.forEach((step, index) => {
         if (index === currentStepIndex) {
           step.classList.add('active');
-          step.classList.remove('completed', 'pending');
+          step.classList.remove('completed', 'pending', 'error');
         } else if (index < currentStepIndex) {
           step.classList.add('completed');
-          step.classList.remove('active', 'pending');
+          step.classList.remove('active', 'pending', 'error');
         } else {
           step.classList.add('pending');
-          step.classList.remove('active', 'completed');
+          step.classList.remove('active', 'completed', 'error');
         }
       });
     }
@@ -416,14 +426,14 @@
         console.log(`Completing step ${currentStepIndex + 1}: ${steps[currentStepIndex]}`);
         // Marcar el paso actual como completado
         stepElements[currentStepIndex].classList.add('completed');
-        stepElements[currentStepIndex].classList.remove('active');
+        stepElements[currentStepIndex].classList.remove('active', 'pending', 'error');
 
         // Avanzar al siguiente paso
         currentStepIndex++;
         if (currentStepIndex < stepElements.length) {
           // Marcar el siguiente paso como activo
           stepElements[currentStepIndex].classList.add('active');
-          stepElements[currentStepIndex].classList.remove('completed', 'pending');
+          stepElements[currentStepIndex].classList.remove('completed', 'pending', 'error');
         }
       }
     }
@@ -434,7 +444,7 @@
         console.error(`Failing step ${currentStepIndex + 1}: ${steps[currentStepIndex]} - Error: ${errorMessage}`);
         // Marcar el paso actual como fallido
         stepElements[currentStepIndex].classList.add('error');
-        stepElements[currentStepIndex].classList.remove('active');
+        stepElements[currentStepIndex].classList.remove('active', 'pending', 'completed');
 
         // Mostrar el mensaje de error en el recuadro principal
         showMessage('error', errorMessage);
@@ -444,7 +454,7 @@
         if (currentStepIndex < stepElements.length) {
           // Marcar el siguiente paso como activo
           stepElements[currentStepIndex].classList.add('active');
-          stepElements[currentStepIndex].classList.remove('completed', 'pending');
+          stepElements[currentStepIndex].classList.remove('completed', 'pending', 'error');
         }
       }
     }
@@ -463,20 +473,32 @@
       messageDiv.style.display = 'none';
     }
 
-    // Función para mostrar el loader con mensaje
+    // Función para mostrar el loader con mensaje y controlar la visibilidad de la lista de pasos
     function showLoader(message) {
       const loaderContainer = document.getElementById('loader-container');
       const loaderMessage = document.getElementById('loader-message');
+      const stepsList = document.querySelector('.steps-list');
+
       loaderMessage.innerText = message;
+
+      if (message === 'Submitting appraisal...') {
+        stepsList.style.display = 'block';
+      } else {
+        stepsList.style.display = 'none';
+      }
+
       loaderContainer.style.display = 'flex';
     }
 
-    // Función para ocultar el loader
+    // Función para ocultar el loader y la lista de pasos
     function hideLoader() {
       const loaderContainer = document.getElementById('loader-container');
+      const stepsList = document.querySelector('.steps-list');
       loaderContainer.style.display = 'none';
+      stepsList.style.display = 'none';
     }
 
+    // Función para cargar los detalles del appraisal
     function loadAppraisalDetails() {
       // Mostrar el loader con mensaje
       showLoader('Fetching appraisal details...');
@@ -713,7 +735,7 @@
         // Paso 5: Building PDF
         async function buildPDF(appraisalData) {
           try {
-            showLoader('Building PDF...');
+            showLoader('Submitting appraisal...'); // Reutilizar el mensaje para mantener los pasos visibles
             completeCurrentStep();
 
             const { wordpressUrl } = appraisalData;
@@ -792,6 +814,7 @@
             hideLoader();
             showMessage('error', error.message);
             console.error('Error en la generación de PDF:', error);
+            failCurrentStep(error.message || 'Error building PDF.');
           }
         }
 
@@ -864,8 +887,7 @@
     // Paso 6: Send Email to Customer
     async function sendEmailToCustomer(appraisalId) {
       try {
-        showLoader('Sending email to customer...');
-        showCurrentStepMessage();
+        showLoader('Submitting appraisal...'); // Reutilizar el mensaje para mantener los pasos visibles
         hideMessage();
 
         const sendEmailResponse = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/send-email`, {
@@ -891,6 +913,7 @@
         hideLoader();
         showMessage('error', error.message);
         console.error('Error sending email to customer:', error);
+        failCurrentStep(error.message || 'Error sending email to customer.');
       }
     }
 
@@ -898,9 +921,9 @@
     function failCurrentStep(errorMessage) {
       if (currentStepIndex < stepElements.length) {
         console.error(`Failing step ${currentStepIndex + 1}: ${steps[currentStepIndex]} - Error: ${errorMessage}`);
-        // Marcar el paso actual como fallido (puedes añadir una clase 'failed' si deseas estilos específicos)
+        // Marcar el paso actual como fallido
         stepElements[currentStepIndex].classList.add('error');
-        stepElements[currentStepIndex].classList.remove('active');
+        stepElements[currentStepIndex].classList.remove('active', 'pending', 'completed');
 
         // Mostrar el mensaje de error en el recuadro principal
         showMessage('error', errorMessage);
@@ -910,7 +933,7 @@
         if (currentStepIndex < stepElements.length) {
           // Marcar el siguiente paso como activo
           stepElements[currentStepIndex].classList.add('active');
-          stepElements[currentStepIndex].classList.remove('completed', 'pending');
+          stepElements[currentStepIndex].classList.remove('completed', 'pending', 'error');
         }
       }
     }
