@@ -77,16 +77,27 @@ body {
 
 /* Dashboard Title Styles */
 .dashboard-title {
-  position: fixed; /* Fixed positioning to keep it at the top */
-  top: 10px; /* Adjust to be close to the top edge */
-  left: 50%; /* Center horizontally */
-  transform: translateX(-50%); /* Center alignment */
-  font-size: 18px;
-  font-weight: bold;
-  color: #333333;
-  background-color: transparent; /* Transparent background */
-  z-index: 1000; /* Ensure it stays above other elements */
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #333333;
+    background-color: transparent;
+    z-index: 1000;
+    transition: background-color 0.3s ease, width 0.3s ease, left 0.3s ease;
+    padding: 10px 0;
 }
+.dashboard-title.scrolled {
+    width: 100%;  /* Ocupa el 100% del ancho */
+    left: 0;  /* Alineado a la izquierda */
+    transform: none;  /* Anula el translateX */
+    background-color: rgba(255, 255, 255, 0.8);  /* Fondo blanco con transparencia */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);  /* Sombra opcional para mayor contraste */
+    padding: 10px 20px;  /* Ajustar el padding si es necesario */
+}
+
 
 /* Estilos para el contenedor del botón Google Sign-In */
 .signin-container {
