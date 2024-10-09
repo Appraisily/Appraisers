@@ -361,6 +361,9 @@
     </div>
 
   <script>
+
+    let appraisalDataGlobal = null;
+
     // Actualizar el año en el footer
     document.getElementById('current-year').textContent = new Date().getFullYear();
 
@@ -511,6 +514,10 @@
         if (!data || typeof data !== 'object') {
           throw new Error('Invalid appraisal data received.');
         }
+
+            // **Asignar los datos a la variable global**
+    appraisalDataGlobal = data;
+
 
         // Mostrar descripciones
         const customerDescriptionText = document.getElementById('customer-description-text');
@@ -908,7 +915,7 @@ showMessage('success', 'Shortcodes inserted successfully in WordPress post.');
         }
 
         // Llamar a la función para construir el PDF
-        await buildPDF(appraisalData);
+        await buildPDF(appraisalDataGlobal);
       } catch (error) {
         hideLoader();
         showMessage('error', error.message);
