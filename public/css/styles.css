@@ -105,6 +105,7 @@ body {
     justify-content: center;   /* Centra horizontalmente */
     align-items: center;       /* Centra verticalmente */
     margin-top: -50px;         /* Ajusta el espaciado superior si es necesario */
+  height: 5vh;  
 }
 
 /* Ajuste del botón de Google Sign-In */
