@@ -104,20 +104,21 @@ body {
     display: flex;
     justify-content: center;   /* Centra horizontalmente */
     align-items: center;       /* Centra verticalmente */
-    margin-top: -50px;         /* Ajusta el espaciado superior si es necesario */
+    margin-top: 20px;         /* Ajusta el espaciado superior si es necesario */
   height: 5vh;  
+      width: 100%;                /* Ocupa todo el ancho del contenedor padre */
+
 }
 
 /* Ajuste del botón de Google Sign-In */
 .g_id_signin {
-    width: 100%;               /* Ocupa todo el ancho disponible */
-    max-width: 400px;          /* Máximo ancho para el botón */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);  /* Añadir sombra */
-    border-radius: 8px;                          /* Bordes redondeados */
-    padding: 10px;                               /* Espacio interno alrededor del botón */
+   display: flex;
+    justify-content: center;    /* Centra el contenido dentro del botón */
+    align-items: center;        /* Alinea verticalmente el contenido */
+    width: 100%;                /* Ocupa todo el ancho del contenedor */
+    max-width: 400px;           /* Establece un ancho máximo para el botón */
+    margin: 0 auto;             /* Asegura que el botón esté centrado */
+    padding: 10px;              /* Opcional: Añadir padding si es necesario */
 
 }
 
