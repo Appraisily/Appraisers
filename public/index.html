@@ -589,6 +589,19 @@
         document.getElementById('g_id_signin').style.display = 'block';
       }
     };
+
+// Scroll bara dashboard
+    window.addEventListener('scroll', function() {
+        const title = document.querySelector('.dashboard-title');
+        if (window.scrollY > 50) {  // Ajusta el valor según el punto en que quieres que ocurra el cambio
+            title.classList.add('scrolled');
+        } else {
+            title.classList.remove('scrolled');
+        }
+    });
+
+
+  
   </script>
 </body>
 </html>
