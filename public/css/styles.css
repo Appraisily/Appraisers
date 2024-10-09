@@ -104,6 +104,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);  /* Añadir sombra */
+    border-radius: 8px;                          /* Bordes redondeados */
+    padding: 10px;                               /* Espacio interno alrededor del botón */
+
 }
 
 /* Opcional: mejora del estilo de la imagen de cuenta */
@@ -112,6 +116,8 @@ body {
     width: 40px;               /* Tamaño personalizado para la imagen */
     margin-right: 10px;        /* Espaciado entre la imagen y el texto */
 }
+
+
 
 /* Logout Button */
 #logout-button {
