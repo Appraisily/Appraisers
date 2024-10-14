@@ -845,9 +845,10 @@
       showMessage('success', 'Appraisal marked as completed successfully.');
 
       // Redirigir al dashboard después de completar todos los pasos
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 9000);
+ 
+      //setTimeout(() => {
+        //window.location.href = 'index.html';
+     // }, 9000);
     } catch (error) {
       console.error('Error marking appraisal as completed:', error);
       hideLoader();
