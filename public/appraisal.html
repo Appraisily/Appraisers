@@ -718,7 +718,7 @@
 
       // Solicitar la generación del PDF con postId y session_ID
       console.log('Solicitando generación de PDF con postId y session_ID:', postId, session_ID);
-const buildPdfResponse = await fetch('https://appraisals-backend-856401495068.us-central1.run.app/api/appraisals/generate-pdf', { // URL corregida
+const buildPdfResponse = await fetch('POST https://appraisals-backend-856401495068.us-central1.run.app/generate-pdf', { // URL corregida
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
