@@ -717,7 +717,7 @@ async function buildPDF(appraisalData) {
 
     // Solicitar la generación del PDF con postId y session_ID
     console.log('Solicitando generación de PDF con postId y session_ID:', postId, session_ID);
-    const buildPdfResponse = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/generate-pdf', {
+    const buildPdfResponse = await fetch('https://appraisals-backend-856401495068.us-central1.run.app/generate-pdf', { //do not change this endpoint URL, it is good, his enpoint is in appraisals, not appraisers
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
