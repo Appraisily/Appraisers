@@ -805,8 +805,16 @@ async function sendEmailToCustomer(appraisalId) {
       body: JSON.stringify({ templateId }) // Enviar el templateId en el cuerpo de la solicitud
     });
 
-    const sendEmailData = await sendEmailResponse.json();
-    console.log('Respuesta del envío de email:', sendEmailData);
+    const responseText = await sendEmailResponse.text();
+    console.log('Respuesta cruda del envío de email:', responseText);
+
+    let sendEmailData;
+    try {
+      sendEmailData = JSON.parse(responseText);
+    } catch (error) {
+      console.error('Error al parsear la respuesta JSON:', error);
+      throw new Error('Invalid response format from server.');
+    }
 
     if (!sendEmailData.success) {
       throw new Error(sendEmailData.message || 'Error sending email to customer.');
