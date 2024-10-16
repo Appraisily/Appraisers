@@ -1,5 +1,3 @@
-<!-- public/editAppraisal.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,80 +6,30 @@
   <link rel="stylesheet" href="/css/styles.css">
   
   <style>
-    /* Estilos básicos */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+    /* ... estilos existentes ... */
+
+    ul#acf-fields-list {
+      list-style-type: none;
+      padding: 0;
     }
 
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    form {
+    ul#acf-fields-list li {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      margin-bottom: 10px;
     }
 
-    label {
-      margin-bottom: 5px;
+    ul#acf-fields-list li span.field-name {
       font-weight: bold;
+      width: 150px;
     }
 
-    input[type="text"], textarea {
-      padding: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+    ul#acf-fields-list li span.field-value {
+      flex-grow: 1;
     }
 
-    button {
-      padding: 10px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    /* Estilos para mensajes */
-    .success {
-      color: green;
-    }
-
-    .error {
-      color: red;
-    }
-
-    /* Estilos para el loader */
-    #loader {
-      display: none;
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid #3498db;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 2s linear infinite;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 9999;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    ul#acf-fields-list li button.edit-button {
+      margin-left: 10px;
     }
   </style>
   
@@ -90,24 +38,8 @@
   <div class="container">
     <h2>Edit Appraisal</h2>
     <div id="message"></div>
-    <form id="edit-appraisal-form">
-      <label for="date">Date:</label>
-      <input type="text" id="date" name="date" readonly>
-
-      <label for="appraisalType">Appraisal Type:</label>
-      <input type="text" id="appraisalType" name="appraisalType" readonly>
-
-      <label for="identifier">Appraisal Number:</label>
-      <input type="text" id="identifier" name="identifier" readonly>
-
-      <label for="status">Status:</label>
-      <input type="text" id="status" name="status" readonly>
-
-      <label for="iaDescription">AI Description:</label>
-      <textarea id="iaDescription" name="iaDescription" rows="4"></textarea>
-
-      <button type="submit">Save Changes</button>
-    </form>
+    <!-- Lista para mostrar los campos ACF -->
+    <ul id="acf-fields-list"></ul>
   </div>
 
   <!-- Loader -->
@@ -124,8 +56,16 @@
       window.location.href = 'index.html';
     }
 
-    const form = document.getElementById('edit-appraisal-form');
     const messageDiv = document.getElementById('message');
+
+    // Lista de campos ACF que quieres mostrar
+    const acfFieldsToDisplay = [
+      'value', 'main', 'signature', 'age', 'similar', 'customer_email', 'secondary_email',
+      'customer_name', 'customer_address', 'session_id', 'googlevision', '_gallery_populated',
+      'table', 'ad_copy', 'age_text', 'age1', 'condition', 'signature1', 'signature2', 'style',
+      'valuation_method', 'authorship', 'conclusion1', 'conclusion2', 'test', 'pdflink', 'doclink',
+      'glossary', 'shortcodes_inserted'
+    ];
 
     // Función para mostrar mensajes
     function showMessage(type, text) {
@@ -149,82 +89,102 @@
       document.getElementById('loader').style.display = 'none';
     }
 
-    // Cargar los detalles de la apreciación para editar
-    function loadAppraisalDetails() {
-      showLoader();
-      hideMessage();
-
-      fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      })
-      .then(res => {
-        hideLoader();
-        if (res.status === 401 || res.status === 403) {
-          throw new Error('Unauthorized. Please log in again.');
-        }
-        return res.json();
-      })
-      .then(data => {
-        if (data.success === false) {
-          throw new Error(data.message || 'Error fetching appraisal details.');
-        }
-
-        // Rellenar los campos del formulario
-        document.getElementById('date').value = data.date;
-        document.getElementById('appraisalType').value = data.appraisalType;
-        document.getElementById('identifier').value = data.identifier;
-        document.getElementById('status').value = data.status;
-        document.getElementById('iaDescription').value = data.iaDescription;
-      })
-      .catch(err => {
-        console.error('Error loading appraisal details:', err);
-        showMessage('error', err.message || 'Error loading appraisal details.');
-      });
+    // Función para obtener la URL de una imagen desde su ID
+    function getImageUrl(imageId) {
+      // Implementar llamada al backend para obtener la URL de la imagen
+      // Por simplicidad, suponemos que es una URL directa
+      return imageId; // O ajustar según sea necesario
     }
 
-    // Manejar el envío del formulario
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      hideMessage();
+    // Función para obtener las URLs de imágenes de una galería
+    function getGalleryImageUrls(galleryField) {
+      // Implementar lógica para obtener URLs de imágenes
+      // Por simplicidad, suponemos que es un array de URLs
+      return Array.isArray(galleryField) ? galleryField : [];
+    }
 
-      const updatedIaDescription = document.getElementById('iaDescription').value.trim();
 
-      if (updatedIaDescription === '') {
-        showMessage('error', 'AI Description cannot be empty.');
-        return;
-      }
+    
 
-      showLoader();
+ function loadAppraisalDetails() {
+  showLoader();
+  hideMessage();
 
-      fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/update-ia-description`, {
-        method: 'PUT', // Asegúrate de que el backend tiene este endpoint
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ iaDescription: updatedIaDescription })
-      })
-      .then(res => {
-        hideLoader();
-        return res.json();
-      })
-      .then(data => {
-        if (data.success) {
-          showMessage('success', 'Appraisal updated successfully.');
-        } else {
-          showMessage('error', data.message || 'Error updating appraisal.');
-        }
-      })
-      .catch(err => {
-        hideLoader();
-        console.error('Error updating appraisal:', err);
-        showMessage('error', 'Error updating appraisal.');
-      });
+  fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
+  .then(res => {
+    hideLoader();
+    if (res.status === 401 || res.status === 403) {
+      throw new Error('Unauthorized. Please log in again.');
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (!data) {
+      throw new Error('Error fetching appraisal details.');
+    }
+
+    const acfData = data.acfFields || {};
+    const acfFieldsList = document.getElementById('acf-fields-list');
+    acfFieldsList.innerHTML = ''; // Limpiar lista
+
+    acfFieldsToDisplay.forEach(fieldName => {
+      const fieldValue = acfData[fieldName] !== undefined ? acfData[fieldName] : 'N/A';
+      // ... código para mostrar los campos ...
     });
+
+  })
+  .catch(err => {
+    console.error('Error loading appraisal details:', err);
+    showMessage('error', err.message || 'Error loading appraisal details.');
+  });
+}
+
+
+  function editField(fieldName, currentValue) {
+  const newValue = prompt(`Enter new value for ${fieldName}:`, currentValue);
+
+  if (newValue === null) {
+    // Usuario canceló la edición
+    return;
+  }
+
+  showLoader();
+  hideMessage();
+
+  fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/update-acf-field`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({ fieldName, fieldValue: newValue })
+  })
+  .then(res => {
+    hideLoader();
+    return res.json();
+  })
+  .then(data => {
+    if (data.success) {
+      showMessage('success', `Field '${fieldName}' updated successfully.`);
+      // Actualizar el valor en la interfaz
+      loadAppraisalDetails();
+    } else {
+      showMessage('error', data.message || 'Error updating field.');
+    }
+  })
+  .catch(err => {
+    hideLoader();
+    console.error('Error updating field:', err);
+    showMessage('error', 'Error updating field.');
+  });
+}
+
 
     // Cargar los detalles al cargar la página
     window.onload = () => {
