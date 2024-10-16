@@ -600,48 +600,49 @@
     });
   }
 
-  // Manejar el logout
-  function logout() {
-    // Mostrar el loader con mensaje
-    showLoader('Logging out...');
-    hideMessage();
+// Manejar el logout
+function logout() {
+  // Mostrar el loader con mensaje
+  showLoader('Logging out...');
+  hideMessage();
 
-    fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
-      method: 'POST',
-      credentials: 'include' // Incluir cookies en la solicitud
-    })
-    .then(res => res.json())
-    .then(data => {
-      // Ocultar el loader después de recibir la respuesta
-      hideLoader();
+  fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
+    method: 'POST',
+    credentials: 'include' // Incluir cookies en la solicitud
+  })
+  .then(res => res.json())
+  .then(data => {
+    // Ocultar el loader después de recibir la respuesta
+    hideLoader();
 
-      if (data.success) {
-        // Mostrar el botón de inicio de sesión y ocultar el de cierre de sesión
-        document.getElementById('g_id_signin').style.display = 'block';
-        document.getElementById('logout-button').style.display = 'none';
+    if (data.success) {
+      // **Remove or comment out the following lines if elements don't exist**
+      // document.getElementById('g_id_signin').style.display = 'block';
+      // document.getElementById('logout-button').style.display = 'none';
 
-        // Eliminar el nombre del usuario del localStorage
-        localStorage.removeItem('userName');
+      // Eliminar el nombre del usuario del localStorage
+      localStorage.removeItem('userName');
 
-        // Ocultar la visualización del nombre del usuario
-        document.getElementById('user-name').style.display = 'none';
+      // Ocultar la visualización del nombre del usuario
+      document.getElementById('user-name').style.display = 'none';
 
-        // Limpiar las apreciaciones
-        document.getElementById('appraisals').innerHTML = '';
-        // Mostrar un mensaje de éxito
-        showMessage('success', 'Successfully logged out.');
-      } else {
-        // Manejar fallo en el logout
-        showMessage('error', 'Error logging out. Please try again.');
-      }
-    })
-    .catch(err => {
-      // Ocultar el loader en caso de error
-      hideLoader();
-      console.error('Error during logout:', err);
+      // **Remove or comment out the following line if 'appraisals' doesn't exist**
+      // document.getElementById('appraisals').innerHTML = '';
+
+      // Mostrar un mensaje de éxito
+      showMessage('success', 'Successfully logged out.');
+    } else {
+      // Manejar fallo en el logout
       showMessage('error', 'Error logging out. Please try again.');
-    });
-  }
+    }
+  })
+  .catch(err => {
+    // Ocultar el loader en caso de error
+    hideLoader();
+    console.error('Error during logout:', err);
+    showMessage('error', 'Error logging out. Please try again.');
+  });
+}
 
   // Añadir event listener al botón de logout
   document.getElementById('logout-button').addEventListener('click', logout);
