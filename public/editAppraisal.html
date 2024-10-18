@@ -149,9 +149,9 @@
 
   const messageDiv = document.getElementById('message');
 
-  // Lista de campos ACF que quieres mostrar
+  // Lista de campos ACF que quieres mostrar (incluyendo 'description')
   const acfFieldsToDisplay = [
-    'value', 'main', 'signature', 'age', 'similar', 'customer_email', 'secondary_email',
+    'value', 'description', 'main', 'signature', 'age', 'similar', 'customer_email', 'secondary_email',
     'customer_name', 'customer_address', 'session_id', 'googlevision', '_gallery_populated',
     'table', 'ad_copy', 'age_text', 'age1', 'condition', 'signature1', 'signature2', 'style',
     'valuation_method', 'authorship', 'conclusion1', 'conclusion2', 'test', 'pdflink', 'doclink',
@@ -161,7 +161,7 @@
   // Campos que requieren <textarea> en lugar de <input>
   const textareaFields = [
     'customer_description', 'iaDescription', 'customer_address', 'ad_copy', 
-    'conclusion1', 'conclusion2', 'glossary'
+    'conclusion1', 'conclusion2', 'glossary', 'description' // Añadimos 'description' si es un textarea
   ];
 
   // Función para mostrar mensajes
@@ -262,6 +262,7 @@
           }
         }
         fieldInput.className = 'field-value';
+        fieldInput.id = fieldName; // Asignar ID para acceso directo
 
         const editButton = document.createElement('button');
         editButton.className = 'edit-button';
