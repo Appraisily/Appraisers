@@ -6,30 +6,58 @@
   <link rel="stylesheet" href="/css/styles.css">
   
   <style>
-    /* ... estilos existentes ... */
-
-    ul#acf-fields-list {
+    /* Estilos mejorados */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #acf-fields-list {
       list-style-type: none;
       padding: 0;
     }
-
-    ul#acf-fields-list li {
+    #acf-fields-list li {
       display: flex;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
-
-    ul#acf-fields-list li span.field-name {
+    .field-name {
       font-weight: bold;
       width: 150px;
     }
-
-    ul#acf-fields-list li span.field-value {
+    .field-value {
       flex-grow: 1;
+      padding: 0 10px;
     }
-
-    ul#acf-fields-list li button.edit-button {
-      margin-left: 10px;
+    .edit-button {
+      padding: 5px 10px;
+      border: none;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .edit-button:hover {
+      background-color: #0056b3;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
   </style>
   
@@ -43,10 +71,9 @@
   </div>
 
   <!-- Loader -->
-  <div id="loader"></div>
+  <div id="loader" style="display:none;">Loading...</div>
 
 <script>
-  // Obtener parámetros de la URL
   const urlParams = new URLSearchParams(window.location.search);
   const appraisalId = urlParams.get('id');
   const wordpressUrl = urlParams.get('wpUrl');
@@ -58,7 +85,6 @@
 
   const messageDiv = document.getElementById('message');
 
-  // Lista de campos ACF que quieres mostrar
   const acfFieldsToDisplay = [
     'value', 'main', 'signature', 'age', 'similar', 'customer_email', 'secondary_email',
     'customer_name', 'customer_address', 'session_id', 'googlevision', '_gallery_populated',
@@ -67,40 +93,26 @@
     'glossary', 'shortcodes_inserted'
   ];
 
-  // Función para mostrar mensajes
   function showMessage(type, text) {
     messageDiv.className = type === 'success' ? 'success' : 'error';
     messageDiv.innerText = text;
     messageDiv.style.display = 'block';
   }
 
-  // Función para ocultar mensajes
   function hideMessage() {
     messageDiv.style.display = 'none';
   }
 
-  // Función para mostrar el loader
   function showLoader() {
     document.getElementById('loader').style.display = 'block';
   }
 
-  // Función para ocultar el loader
   function hideLoader() {
     document.getElementById('loader').style.display = 'none';
   }
 
-  // Función para obtener la URL de una imagen desde su ID
   function getImageUrl(imageId) {
-    // Implementar llamada al backend para obtener la URL de la imagen
-    // Por simplicidad, suponemos que es una URL directa
-    return imageId; // O ajustar según sea necesario
-  }
-
-  // Función para obtener las URLs de imágenes de una galería
-  function getGalleryImageUrls(galleryField) {
-    // Implementar lógica para obtener URLs de imágenes
-    // Por simplicidad, suponemos que es un array de URLs
-    return Array.isArray(galleryField) ? galleryField : [];
+    return imageId;
   }
 
   function loadAppraisalDetails() {
@@ -129,12 +141,11 @@
         throw new Error('Error fetching appraisal details.');
       }
 
-      // Asegúrate de que `data.acfFields` e `data.images` existen
       const acfData = data.acfFields || {};
       const images = data.images || {};
 
       const acfFieldsList = document.getElementById('acf-fields-list');
-      acfFieldsList.innerHTML = ''; // Limpiar lista
+      acfFieldsList.innerHTML = '';
 
       acfFieldsToDisplay.forEach(fieldName => {
         let fieldValue = 'N/A';
@@ -153,17 +164,18 @@
         fieldNameSpan.className = 'field-name';
         fieldNameSpan.innerText = fieldName;
 
-        const fieldValueSpan = document.createElement('span');
-        fieldValueSpan.className = 'field-value';
-        fieldValueSpan.innerHTML = fieldValue; // Usar innerHTML para imágenes
+        const fieldValueInput = document.createElement('input');
+        fieldValueInput.type = 'text';
+        fieldValueInput.className = 'field-value';
+        fieldValueInput.value = fieldValue;
 
         const editButton = document.createElement('button');
         editButton.className = 'edit-button';
-        editButton.innerText = 'Edit';
-        editButton.onclick = () => editField(fieldName, acfData[fieldName]);
+        editButton.innerText = 'Save';
+        editButton.onclick = () => editField(fieldName, fieldValueInput.value);
 
         listItem.appendChild(fieldNameSpan);
-        listItem.appendChild(fieldValueSpan);
+        listItem.appendChild(fieldValueInput);
         listItem.appendChild(editButton);
 
         acfFieldsList.appendChild(listItem);
@@ -175,11 +187,8 @@
     });
   }
 
-  function editField(fieldName, currentValue) {
-    const newValue = prompt(`Enter new value for ${fieldName}:`, currentValue);
-
+  function editField(fieldName, newValue) {
     if (newValue === null) {
-      // Usuario canceló la edición
       return;
     }
 
@@ -206,7 +215,6 @@
     .then(data => {
       if (data.success) {
         showMessage('success', `Field '${fieldName}' updated successfully.`);
-        // Actualizar el valor en la interfaz
         loadAppraisalDetails();
       } else {
         showMessage('error', data.message || 'Error updating field.');
@@ -219,7 +227,6 @@
     });
   }
 
-  // Cargar los detalles al cargar la página
   window.onload = () => {
     loadAppraisalDetails();
   };
