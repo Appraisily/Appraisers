@@ -33,9 +33,9 @@
     }
     #acf-fields-list li {
       display: flex;
-      align-items: flex-start;
+      flex-direction: column;
+      align-items: center;
       margin-bottom: 25px;
-      flex-wrap: wrap;
       border-bottom: 1px solid #e0e0e0;
       padding-bottom: 15px;
     }
@@ -44,15 +44,17 @@
       width: 100%;
       text-align: center;
       margin-bottom: 10px;
+      font-size: 16px;
+      color: #555;
     }
     .field-value {
-      flex-grow: 1;
+      width: 100%;
       margin-bottom: 10px;
     }
     .edit-button {
       padding: 8px 16px;
       border: none;
-      background-color: #007bff;
+      background-color: #007bff; /* Azul del título */
       color: #fff;
       border-radius: 5px;
       cursor: pointer;
@@ -70,13 +72,14 @@
       border-radius: 5px;
       box-sizing: border-box;
       transition: border-color 0.3s ease;
+      resize: none; /* Desactivar el redimensionamiento manual */
+      overflow: hidden; /* Ocultar barras de scroll */
     }
     input[type="text"]:focus, textarea:focus {
       border-color: #007bff;
       outline: none;
     }
     textarea {
-      resize: none;
       min-height: 80px;
       max-height: 300px;
     }
@@ -182,6 +185,12 @@
     document.getElementById('loader').style.display = 'none';
   }
 
+  // Función para ajustar automáticamente la altura de los <textarea>
+  function autoResizeTextarea(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = (textarea.scrollHeight) + 'px';
+  }
+
   // Función para cargar los detalles de la apreciación
   function loadAppraisalDetails() {
     showLoader();
@@ -236,6 +245,10 @@
         if (textareaFields.includes(fieldName)) {
           fieldInput = document.createElement('textarea');
           fieldInput.value = fieldValue;
+          // Añadir evento para ajustar la altura al contenido
+          fieldInput.addEventListener('input', () => autoResizeTextarea(fieldInput));
+          // Ajustar la altura inicialmente
+          autoResizeTextarea(fieldInput);
         } else {
           fieldInput = document.createElement('input');
           fieldInput.type = 'text';
@@ -274,13 +287,23 @@
       return;
     }
 
-    // Opcional: Validaciones adicionales según el campo
+    // Validaciones adicionales según el campo
     if (['main', 'signature', 'age'].includes(fieldName)) {
       // Validar que newValue sea una URL válida si el campo es de imagen
       try {
         new URL(newValue);
       } catch (_) {
         showMessage('error', 'Por favor, ingresa una URL válida para las imágenes.');
+        return;
+      }
+    }
+
+    // Validar correos electrónicos
+    const emailFields = ['customer_email', 'secondary_email'];
+    if (emailFields.includes(fieldName)) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newValue)) {
+        showMessage('error', 'Por favor, ingresa una dirección de correo electrónico válida.');
         return;
       }
     }
