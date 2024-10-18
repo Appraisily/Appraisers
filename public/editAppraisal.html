@@ -106,11 +106,11 @@
 
     
 
- function loadAppraisalDetails() {
+function loadAppraisalDetails() {
   showLoader();
   hideMessage();
 
-  fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list`, {
+  fetch(`https://appraisals-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -129,21 +129,50 @@
       throw new Error('Error fetching appraisal details.');
     }
 
-    const acfData = data.acfFields || {};
+    const acfData = {
+      value: data.value || 'N/A',
+      main: data.images.main || 'N/A',
+      signature: data.images.signature || 'N/A',
+      age: data.images.age || 'N/A',
+      // Añade más campos según sea necesario
+      iaDescription: data.iaDescription || 'N/A',
+      customerDescription: data.customerDescription || 'N/A',
+      // ...
+    };
+
     const acfFieldsList = document.getElementById('acf-fields-list');
     acfFieldsList.innerHTML = ''; // Limpiar lista
 
     acfFieldsToDisplay.forEach(fieldName => {
       const fieldValue = acfData[fieldName] !== undefined ? acfData[fieldName] : 'N/A';
-      // ... código para mostrar los campos ...
-    });
+      const listItem = document.createElement('li');
 
+      const fieldNameSpan = document.createElement('span');
+      fieldNameSpan.className = 'field-name';
+      fieldNameSpan.innerText = fieldName;
+
+      const fieldValueSpan = document.createElement('span');
+      fieldValueSpan.className = 'field-value';
+      fieldValueSpan.innerText = fieldValue;
+
+      const editButton = document.createElement('button');
+      editButton.className = 'edit-button';
+      editButton.innerText = 'Edit';
+      editButton.onclick = () => editField(fieldName, fieldValue);
+
+      listItem.appendChild(fieldNameSpan);
+      listItem.appendChild(fieldValueSpan);
+      listItem.appendChild(editButton);
+
+      acfFieldsList.appendChild(listItem);
+    });
   })
   .catch(err => {
     console.error('Error loading appraisal details:', err);
     showMessage('error', err.message || 'Error loading appraisal details.');
   });
 }
+
 
 
   function editField(fieldName, currentValue) {
