@@ -577,9 +577,9 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              // 'Authorization': 'Bearer YOUR_TOKEN_HERE' // Descomenta y reemplaza si tu servicio requiere autenticación
+  'Authorization': `Bearer ${token}` // Asegúrate de obtener y almacenar el token correctamente
             },
-            // credentials: 'include', // Comenta o elimina si no es necesario
+             credentials: 'include', // Comenta o elimina si no es necesario
             body: JSON.stringify({ 
               appraisalId: appraisalId, // Asegúrate de enviar el ID de la evaluación si es necesario
               appraisalValue: appraisalValue,
