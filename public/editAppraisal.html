@@ -41,25 +41,26 @@
     }
     .field-name {
       font-weight: bold;
-      width: 180px;
-      margin-right: 20px;
-      padding-top: 5px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 10px;
     }
     .field-value {
       flex-grow: 1;
-      margin-right: 20px;
+      margin-bottom: 10px;
     }
     .edit-button {
       padding: 8px 16px;
       border: none;
-      background-color: #28a745;
+      background-color: #007bff;
       color: #fff;
       border-radius: 5px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      align-self: center;
     }
     .edit-button:hover {
-      background-color: #218838;
+      background-color: #0056b3;
     }
     input[type="text"], textarea {
       width: 100%;
@@ -75,25 +76,22 @@
       outline: none;
     }
     textarea {
-      resize: vertical;
+      resize: none;
       min-height: 80px;
       max-height: 300px;
     }
     #loader {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       background: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 10px;
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 9999;
-    }
-    .loader-content {
-      display: flex;
-      align-items: center;
     }
     .spinner {
       border: 6px solid rgba(0, 0, 0, 0.1);
@@ -102,7 +100,6 @@
       border-radius: 50%;
       border-left-color: #007bff;
       animation: spin 1s linear infinite;
-      margin-right: 15px;
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
@@ -132,10 +129,7 @@
 
   <!-- Loader -->
   <div id="loader">
-    <div class="loader-content">
-      <div class="spinner"></div>
-      <span>Loading...</span>
-    </div>
+    <div class="spinner"></div>
   </div>
 
 <script>
@@ -186,20 +180,6 @@
   // Función para ocultar el loader
   function hideLoader() {
     document.getElementById('loader').style.display = 'none';
-  }
-
-  // Función para obtener la URL de una imagen desde su ID
-  function getImageUrl(imageId) {
-    // Implementar llamada al backend para obtener la URL de la imagen si es necesario
-    // Por simplicidad, suponemos que es una URL directa
-    return imageId; // O ajustar según sea necesario
-  }
-
-  // Función para obtener las URLs de imágenes de una galería
-  function getGalleryImageUrls(galleryField) {
-    // Implementar lógica para obtener URLs de imágenes
-    // Por simplicidad, suponemos que es un array de URLs
-    return Array.isArray(galleryField) ? galleryField : [];
   }
 
   // Función para cargar los detalles de la apreciación
@@ -301,16 +281,6 @@
         new URL(newValue);
       } catch (_) {
         showMessage('error', 'Por favor, ingresa una URL válida para las imágenes.');
-        return;
-      }
-    }
-
-    // Validar correos electrónicos
-    const emailFields = ['customer_email', 'secondary_email'];
-    if (emailFields.includes(fieldName)) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(newValue)) {
-        showMessage('error', 'Por favor, ingresa una dirección de correo electrónico válida.');
         return;
       }
     }
