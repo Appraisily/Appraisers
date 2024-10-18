@@ -110,7 +110,7 @@ function loadAppraisalDetails() {
   showLoader();
   hideMessage();
 
-  fetch(`https://appraisals-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list`, {
+  fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
