@@ -30,16 +30,19 @@
     }
     #acf-fields-list li {
       display: flex;
-      align-items: center;
-      margin-bottom: 15px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
     .field-name {
       font-weight: bold;
       width: 150px;
+      margin-bottom: 5px;
     }
     .field-value {
       flex-grow: 1;
       padding: 0 10px;
+      margin-bottom: 5px;
     }
     .edit-button {
       padding: 5px 10px;
@@ -48,25 +51,27 @@
       color: #fff;
       border-radius: 5px;
       cursor: pointer;
+      margin-top: 5px;
     }
     .edit-button:hover {
       background-color: #218838;
     }
     input[type="text"] {
       width: 100%;
-      padding: 5px;
+      padding: 10px;
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
     #loader {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       background: rgba(255, 255, 255, 0.8);
-      display: flex;
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
       align-items: center;
       justify-content: center;
       font-size: 24px;
@@ -94,7 +99,9 @@
   </div>
 
   <!-- Loader -->
-  <div id="loader" style="display:none;">Loading...</div>
+  <div id="loader" style="display:none;">
+    <div class="spinner"></div>Loading...
+  </div>
 
 <script>
   // Obtener parámetros de la URL
