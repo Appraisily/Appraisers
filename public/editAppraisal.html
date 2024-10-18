@@ -45,180 +45,185 @@
   <!-- Loader -->
   <div id="loader"></div>
 
-  <script>
-    // Obtener parámetros de la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const appraisalId = urlParams.get('id');
-    const wordpressUrl = urlParams.get('wpUrl');
+<script>
+  // Obtener parámetros de la URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const appraisalId = urlParams.get('id');
+  const wordpressUrl = urlParams.get('wpUrl');
 
-    if (!appraisalId || !wordpressUrl) {
-      alert('Invalid appraisal parameters.');
-      window.location.href = 'index.html';
-    }
-
-    const messageDiv = document.getElementById('message');
-
-    // Lista de campos ACF que quieres mostrar
-    const acfFieldsToDisplay = [
-      'value', 'main', 'signature', 'age', 'similar', 'customer_email', 'secondary_email',
-      'customer_name', 'customer_address', 'session_id', 'googlevision', '_gallery_populated',
-      'table', 'ad_copy', 'age_text', 'age1', 'condition', 'signature1', 'signature2', 'style',
-      'valuation_method', 'authorship', 'conclusion1', 'conclusion2', 'test', 'pdflink', 'doclink',
-      'glossary', 'shortcodes_inserted'
-    ];
-
-    // Función para mostrar mensajes
-    function showMessage(type, text) {
-      messageDiv.className = type === 'success' ? 'success' : 'error';
-      messageDiv.innerText = text;
-      messageDiv.style.display = 'block';
-    }
-
-    // Función para ocultar mensajes
-    function hideMessage() {
-      messageDiv.style.display = 'none';
-    }
-
-    // Función para mostrar el loader
-    function showLoader() {
-      document.getElementById('loader').style.display = 'block';
-    }
-
-    // Función para ocultar el loader
-    function hideLoader() {
-      document.getElementById('loader').style.display = 'none';
-    }
-
-    // Función para obtener la URL de una imagen desde su ID
-    function getImageUrl(imageId) {
-      // Implementar llamada al backend para obtener la URL de la imagen
-      // Por simplicidad, suponemos que es una URL directa
-      return imageId; // O ajustar según sea necesario
-    }
-
-    // Función para obtener las URLs de imágenes de una galería
-    function getGalleryImageUrls(galleryField) {
-      // Implementar lógica para obtener URLs de imágenes
-      // Por simplicidad, suponemos que es un array de URLs
-      return Array.isArray(galleryField) ? galleryField : [];
-    }
-
-
-    
-
-function loadAppraisalDetails() {
-  showLoader();
-  hideMessage();
-
-  fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-  .then(res => {
-    hideLoader();
-    if (res.status === 401 || res.status === 403) {
-      throw new Error('Unauthorized. Please log in again.');
-    }
-    return res.json();
-  })
-  .then(data => {
-    if (!data) {
-      throw new Error('Error fetching appraisal details.');
-    }
-
-    const acfData = {
-      value: data.value || 'N/A',
-      main: data.images.main || 'N/A',
-      signature: data.images.signature || 'N/A',
-      age: data.images.age || 'N/A',
-      // Añade más campos según sea necesario
-      iaDescription: data.iaDescription || 'N/A',
-      customerDescription: data.customerDescription || 'N/A',
-      // ...
-    };
-
-    const acfFieldsList = document.getElementById('acf-fields-list');
-    acfFieldsList.innerHTML = ''; // Limpiar lista
-
-    acfFieldsToDisplay.forEach(fieldName => {
-      const fieldValue = acfData[fieldName] !== undefined ? acfData[fieldName] : 'N/A';
-      const listItem = document.createElement('li');
-
-      const fieldNameSpan = document.createElement('span');
-      fieldNameSpan.className = 'field-name';
-      fieldNameSpan.innerText = fieldName;
-
-      const fieldValueSpan = document.createElement('span');
-      fieldValueSpan.className = 'field-value';
-      fieldValueSpan.innerText = fieldValue;
-
-      const editButton = document.createElement('button');
-      editButton.className = 'edit-button';
-      editButton.innerText = 'Edit';
-      editButton.onclick = () => editField(fieldName, fieldValue);
-
-      listItem.appendChild(fieldNameSpan);
-      listItem.appendChild(fieldValueSpan);
-      listItem.appendChild(editButton);
-
-      acfFieldsList.appendChild(listItem);
-    });
-  })
-  .catch(err => {
-    console.error('Error loading appraisal details:', err);
-    showMessage('error', err.message || 'Error loading appraisal details.');
-  });
-}
-
-
-
-  function editField(fieldName, currentValue) {
-  const newValue = prompt(`Enter new value for ${fieldName}:`, currentValue);
-
-  if (newValue === null) {
-    // Usuario canceló la edición
-    return;
+  if (!appraisalId || !wordpressUrl) {
+    alert('Invalid appraisal parameters.');
+    window.location.href = 'index.html';
   }
 
-  showLoader();
-  hideMessage();
+  const messageDiv = document.getElementById('message');
 
-  fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/update-acf-field`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include',
-    body: JSON.stringify({ fieldName, fieldValue: newValue })
-  })
-  .then(res => {
-    hideLoader();
-    return res.json();
-  })
-  .then(data => {
-    if (data.success) {
-      showMessage('success', `Field '${fieldName}' updated successfully.`);
-      // Actualizar el valor en la interfaz
-      loadAppraisalDetails();
-    } else {
-      showMessage('error', data.message || 'Error updating field.');
+  // Lista de campos ACF que quieres mostrar
+  const acfFieldsToDisplay = [
+    'value', 'main', 'signature', 'age', 'similar', 'customer_email', 'secondary_email',
+    'customer_name', 'customer_address', 'session_id', 'googlevision', '_gallery_populated',
+    'table', 'ad_copy', 'age_text', 'age1', 'condition', 'signature1', 'signature2', 'style',
+    'valuation_method', 'authorship', 'conclusion1', 'conclusion2', 'test', 'pdflink', 'doclink',
+    'glossary', 'shortcodes_inserted'
+  ];
+
+  // Función para mostrar mensajes
+  function showMessage(type, text) {
+    messageDiv.className = type === 'success' ? 'success' : 'error';
+    messageDiv.innerText = text;
+    messageDiv.style.display = 'block';
+  }
+
+  // Función para ocultar mensajes
+  function hideMessage() {
+    messageDiv.style.display = 'none';
+  }
+
+  // Función para mostrar el loader
+  function showLoader() {
+    document.getElementById('loader').style.display = 'block';
+  }
+
+  // Función para ocultar el loader
+  function hideLoader() {
+    document.getElementById('loader').style.display = 'none';
+  }
+
+  // Función para obtener la URL de una imagen desde su ID
+  function getImageUrl(imageId) {
+    // Implementar llamada al backend para obtener la URL de la imagen
+    // Por simplicidad, suponemos que es una URL directa
+    return imageId; // O ajustar según sea necesario
+  }
+
+  // Función para obtener las URLs de imágenes de una galería
+  function getGalleryImageUrls(galleryField) {
+    // Implementar lógica para obtener URLs de imágenes
+    // Por simplicidad, suponemos que es un array de URLs
+    return Array.isArray(galleryField) ? galleryField : [];
+  }
+
+  function loadAppraisalDetails() {
+    showLoader();
+    hideMessage();
+
+    fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list-edit`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    .then(res => {
+      hideLoader();
+      if (res.status === 401 || res.status === 403) {
+        throw new Error('Unauthorized. Please log in again.');
+      }
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (!data) {
+        throw new Error('Error fetching appraisal details.');
+      }
+
+      // Asegúrate de que `data.acfFields` e `data.images` existen
+      const acfData = data.acfFields || {};
+      const images = data.images || {};
+
+      const acfFieldsList = document.getElementById('acf-fields-list');
+      acfFieldsList.innerHTML = ''; // Limpiar lista
+
+      acfFieldsToDisplay.forEach(fieldName => {
+        let fieldValue = 'N/A';
+
+        if (acfData[fieldName] !== undefined && acfData[fieldName] !== null) {
+          if (fieldName === 'main' || fieldName === 'signature' || fieldName === 'age') {
+            fieldValue = images[fieldName] ? `<img src="${images[fieldName]}" alt="${fieldName}" width="100">` : 'N/A';
+          } else {
+            fieldValue = acfData[fieldName];
+          }
+        }
+
+        const listItem = document.createElement('li');
+
+        const fieldNameSpan = document.createElement('span');
+        fieldNameSpan.className = 'field-name';
+        fieldNameSpan.innerText = fieldName;
+
+        const fieldValueSpan = document.createElement('span');
+        fieldValueSpan.className = 'field-value';
+        fieldValueSpan.innerHTML = fieldValue; // Usar innerHTML para imágenes
+
+        const editButton = document.createElement('button');
+        editButton.className = 'edit-button';
+        editButton.innerText = 'Edit';
+        editButton.onclick = () => editField(fieldName, acfData[fieldName]);
+
+        listItem.appendChild(fieldNameSpan);
+        listItem.appendChild(fieldValueSpan);
+        listItem.appendChild(editButton);
+
+        acfFieldsList.appendChild(listItem);
+      });
+    })
+    .catch(err => {
+      console.error('Error loading appraisal details:', err);
+      showMessage('error', err.message || 'Error loading appraisal details.');
+    });
+  }
+
+  function editField(fieldName, currentValue) {
+    const newValue = prompt(`Enter new value for ${fieldName}:`, currentValue);
+
+    if (newValue === null) {
+      // Usuario canceló la edición
+      return;
     }
-  })
-  .catch(err => {
-    hideLoader();
-    console.error('Error updating field:', err);
-    showMessage('error', 'Error updating field.');
-  });
-}
 
+    showLoader();
+    hideMessage();
 
-    // Cargar los detalles al cargar la página
-    window.onload = () => {
-      loadAppraisalDetails();
-    };
-  </script>
+    fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/update-acf-field`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ fieldName, fieldValue: newValue })
+    })
+    .then(res => {
+      hideLoader();
+      if (!res.ok) {
+        return res.json().then(errData => {
+          throw new Error(errData.message || 'Error updating field.');
+        });
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (data.success) {
+        showMessage('success', `Field '${fieldName}' updated successfully.`);
+        // Actualizar el valor en la interfaz
+        loadAppraisalDetails();
+      } else {
+        showMessage('error', data.message || 'Error updating field.');
+      }
+    })
+    .catch(err => {
+      hideLoader();
+      console.error('Error updating field:', err);
+      showMessage('error', err.message || 'Error updating field.');
+    });
+  }
+
+  // Cargar los detalles al cargar la página
+  window.onload = () => {
+    loadAppraisalDetails();
+  };
+</script>
+
 </body>
 </html>
