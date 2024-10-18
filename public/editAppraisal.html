@@ -11,18 +11,21 @@
       font-family: Arial, sans-serif;
       background-color: #f0f2f5;
       color: #333;
+      margin: 0;
+      padding: 0;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 40px auto;
-      padding: 20px;
+      padding: 30px;
       background-color: #fff;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     h2 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
+      color: #007bff;
     }
     #acf-fields-list {
       list-style-type: none;
@@ -31,61 +34,90 @@
     #acf-fields-list li {
       display: flex;
       align-items: flex-start;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
       flex-wrap: wrap;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 15px;
     }
     .field-name {
       font-weight: bold;
-      width: 150px;
-      margin-bottom: 5px;
+      width: 180px;
+      margin-right: 20px;
+      padding-top: 5px;
     }
     .field-value {
       flex-grow: 1;
-      padding: 0 10px;
-      margin-bottom: 5px;
+      margin-right: 20px;
     }
     .edit-button {
-      padding: 5px 10px;
+      padding: 8px 16px;
       border: none;
       background-color: #28a745;
       color: #fff;
       border-radius: 5px;
       cursor: pointer;
-      margin-top: 5px;
+      transition: background-color 0.3s ease;
     }
     .edit-button:hover {
       background-color: #218838;
     }
-    input[type="text"] {
+    input[type="text"], textarea {
       width: 100%;
-      padding: 10px;
-      font-size: 14px;
+      padding: 10px 12px;
+      font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 5px;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus, textarea:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      max-height: 300px;
     }
     #loader {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(255, 255, 255, 0.8);
-      padding: 20px;
-      border-radius: 10px;
       display: none;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
       z-index: 9999;
+    }
+    .loader-content {
+      display: flex;
+      align-items: center;
+    }
+    .spinner {
+      border: 6px solid rgba(0, 0, 0, 0.1);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border-left-color: #007bff;
+      animation: spin 1s linear infinite;
+      margin-right: 15px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
     .success {
       color: green;
       margin-bottom: 20px;
       text-align: center;
+      font-size: 18px;
     }
     .error {
       color: red;
       margin-bottom: 20px;
       text-align: center;
+      font-size: 18px;
     }
   </style>
   
@@ -99,8 +131,11 @@
   </div>
 
   <!-- Loader -->
-  <div id="loader" style="display:none;">
-    <div class="spinner"></div>Loading...
+  <div id="loader">
+    <div class="loader-content">
+      <div class="spinner"></div>
+      <span>Loading...</span>
+    </div>
   </div>
 
 <script>
@@ -123,6 +158,12 @@
     'table', 'ad_copy', 'age_text', 'age1', 'condition', 'signature1', 'signature2', 'style',
     'valuation_method', 'authorship', 'conclusion1', 'conclusion2', 'test', 'pdflink', 'doclink',
     'glossary', 'shortcodes_inserted'
+  ];
+
+  // Campos que requieren <textarea> en lugar de <input>
+  const textareaFields = [
+    'customer_description', 'iaDescription', 'customer_address', 'ad_copy', 
+    'conclusion1', 'conclusion2', 'glossary'
   ];
 
   // Función para mostrar mensajes
@@ -211,24 +252,30 @@
         fieldNameSpan.className = 'field-name';
         fieldNameSpan.innerText = fieldName;
 
-        const fieldValueInput = document.createElement('input');
-        fieldValueInput.type = 'text';
-        fieldValueInput.className = 'field-value';
-        fieldValueInput.value = fieldName === 'main' || fieldName === 'signature' || fieldName === 'age' ? '' : fieldValue;
-
-        // Si el campo es de imagen, mostrar la URL en lugar de permitir editar directamente
-        if (fieldName === 'main' || fieldName === 'signature' || fieldName === 'age') {
-          fieldValueInput.placeholder = 'URL de la imagen';
-          fieldValueInput.value = images[fieldName] || '';
+        let fieldInput;
+        if (textareaFields.includes(fieldName)) {
+          fieldInput = document.createElement('textarea');
+          fieldInput.value = fieldValue;
+        } else {
+          fieldInput = document.createElement('input');
+          fieldInput.type = 'text';
+          // Si el campo es de imagen, mostrar la URL en lugar de permitir editar directamente
+          if (fieldName === 'main' || fieldName === 'signature' || fieldName === 'age') {
+            fieldInput.placeholder = 'URL de la imagen';
+            fieldInput.value = images[fieldName] || '';
+          } else {
+            fieldInput.value = fieldValue;
+          }
         }
+        fieldInput.className = 'field-value';
 
         const editButton = document.createElement('button');
         editButton.className = 'edit-button';
         editButton.innerText = 'Save';
-        editButton.onclick = () => editField(fieldName, fieldValueInput.value);
+        editButton.onclick = () => editField(fieldName, fieldInput.value);
 
         listItem.appendChild(fieldNameSpan);
-        listItem.appendChild(fieldValueInput);
+        listItem.appendChild(fieldInput);
         listItem.appendChild(editButton);
 
         acfFieldsList.appendChild(listItem);
@@ -242,7 +289,8 @@
 
   // Función para editar un campo ACF
   function editField(fieldName, newValue) {
-    if (newValue === null) {
+    if (newValue === null || newValue.trim() === '') {
+      showMessage('error', 'El valor del campo no puede estar vacío.');
       return;
     }
 
@@ -253,6 +301,16 @@
         new URL(newValue);
       } catch (_) {
         showMessage('error', 'Por favor, ingresa una URL válida para las imágenes.');
+        return;
+      }
+    }
+
+    // Validar correos electrónicos
+    const emailFields = ['customer_email', 'secondary_email'];
+    if (emailFields.includes(fieldName)) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newValue)) {
+        showMessage('error', 'Por favor, ingresa una dirección de correo electrónico válida.');
         return;
       }
     }
