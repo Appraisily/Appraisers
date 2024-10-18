@@ -576,8 +576,8 @@
           const response = await fetch(`https://appraisers-task-queue-856401495068.us-central1.run.app/api/tasks`, { // Actualiza el endpoint
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-  'Authorization': `Bearer ${token}` // Asegúrate de obtener y almacenar el token correctamente
+              'Content-Type': 'application/json'
+//  'Authorization': `Bearer ${token}` // Asegúrate de obtener y almacenar el token correctamente
             },
              credentials: 'include', // Comenta o elimina si no es necesario
             body: JSON.stringify({ 
