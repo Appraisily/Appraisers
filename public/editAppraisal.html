@@ -317,13 +317,17 @@
     showLoader();
     hideMessage();
 
-    fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/update-acf-field-edit`, {
-      method: 'PUT',
+    // Crear un objeto con el campo a actualizar
+    const updateData = {};
+    updateData[fieldName] = newValue;
+
+    fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/set-value`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       credentials: 'include',
-      body: JSON.stringify({ fieldName, fieldValue: newValue })
+      body: JSON.stringify(updateData) // Enviar solo el campo específico
     })
     .then(res => {
       hideLoader();
@@ -349,22 +353,31 @@
     });
   }
 
-  // Función para manejar la actualización del campo "value"
+  // Función para manejar la actualización del campo "value" y/o "description"
   async function updateValueField() {
     const valueInput = document.getElementById('value');
     const appraisalValue = valueInput.value.trim();
     const descriptionInput = document.getElementById('description');
     const description = descriptionInput ? descriptionInput.value.trim() : '';
 
-    // Validación de los campos requeridos
-    if (appraisalValue === '' || description === '') {
-      showMessage('error', 'Appraisal Value and description are required.');
-      return;
+    // Crear un objeto con los campos a actualizar
+    const updateData = {};
+    if (appraisalValue !== '') {
+      // Validar que appraisalValue es un número positivo
+      if (isNaN(appraisalValue) || Number(appraisalValue) <= 0) {
+        showMessage('error', 'Appraisal Value must be a positive number.');
+        return;
+      }
+      updateData.appraisalValue = appraisalValue;
     }
 
-    // Validar que appraisalValue es un número positivo
-    if (isNaN(appraisalValue) || Number(appraisalValue) <= 0) {
-      showMessage('error', 'Appraisal Value must be a positive number.');
+    if (description !== '') {
+      updateData.description = description;
+    }
+
+    // Verificar que al menos un campo esté presente
+    if (Object.keys(updateData).length === 0) {
+      showMessage('error', 'Please provide at least Appraisal Value or description to update.');
       return;
     }
 
@@ -376,13 +389,11 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Incluye encabezados de autenticación si es necesario
-          // 'Authorization': 'Bearer YOUR_TOKEN_HERE'
+          // No es necesario incluir el encabezado 'Authorization' si usas cookies
         },
-        body: JSON.stringify({
-          appraisalValue: appraisalValue,
-          description: description
-        })
+        credentials: 'include', // Incluir cookies en la solicitud
+
+        body: JSON.stringify(updateData)
       });
 
       const responseData = await response.json();
@@ -390,14 +401,14 @@
       hideLoader();
 
       if (response.ok && responseData.success) {
-        showMessage('success', responseData.message || 'Appraisal Value updated successfully.');
+        showMessage('success', responseData.message || 'Appraisal updated successfully.');
         loadAppraisalDetails();
       } else {
-        throw new Error(responseData.message || 'Error updating Appraisal Value.');
+        throw new Error(responseData.message || 'Error updating appraisal.');
       }
     } catch (error) {
       hideLoader();
-      console.error('Error updating Appraisal Value:', error);
+      console.error('Error updating appraisal:', error);
       showMessage('error', error.message || 'An unexpected error occurred.');
     }
   }
