@@ -353,65 +353,71 @@
     });
   }
 
-  // Función para manejar la actualización del campo "value" y/o "description"
-  async function updateValueField() {
-    const valueInput = document.getElementById('value');
-    const appraisalValue = valueInput.value.trim();
-    const descriptionInput = document.getElementById('description');
-    const description = descriptionInput ? descriptionInput.value.trim() : '';
+ // Función para manejar la actualización del campo "value" y/o "description"
+async function updateValueField(isEdit = false) {
+  const valueInput = document.getElementById('value');
+  const appraisalValue = valueInput.value.trim();
+  const descriptionInput = document.getElementById('description');
+  const description = descriptionInput ? descriptionInput.value.trim() : '';
 
-    // Crear un objeto con los campos a actualizar
-    const updateData = {};
-    if (appraisalValue !== '') {
-      // Validar que appraisalValue es un número positivo
-      if (isNaN(appraisalValue) || Number(appraisalValue) <= 0) {
-        showMessage('error', 'Appraisal Value must be a positive number.');
-        return;
-      }
-      updateData.appraisalValue = appraisalValue;
-    }
+  // Crear un objeto con los campos a actualizar
+  const updateData = {};
 
-    if (description !== '') {
-      updateData.description = description;
-    }
-
-    // Verificar que al menos un campo esté presente
-    if (Object.keys(updateData).length === 0) {
-      showMessage('error', 'Please provide at least Appraisal Value or description to update.');
+  if (appraisalValue !== '') {
+    // Validar que appraisalValue es un número positivo
+    if (isNaN(appraisalValue) || Number(appraisalValue) <= 0) {
+      showMessage('error', 'Appraisal Value must be a positive number.');
       return;
     }
-
-    showLoader();
-    hideMessage();
-
-    try {
-      const response = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/set-value`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // No es necesario incluir el encabezado 'Authorization' si usas cookies
-        },
-        credentials: 'include', // Incluir cookies en la solicitud
-
-        body: JSON.stringify(updateData)
-      });
-
-      const responseData = await response.json();
-
-      hideLoader();
-
-      if (response.ok && responseData.success) {
-        showMessage('success', responseData.message || 'Appraisal updated successfully.');
-        loadAppraisalDetails();
-      } else {
-        throw new Error(responseData.message || 'Error updating appraisal.');
-      }
-    } catch (error) {
-      hideLoader();
-      console.error('Error updating appraisal:', error);
-      showMessage('error', error.message || 'An unexpected error occurred.');
-    }
+    updateData.appraisalValue = Number(appraisalValue); // Convertir a número
   }
+
+  if (description !== '') {
+    updateData.description = description;
+  }
+
+  // Añadir isEdit al objeto de actualización si es necesario
+  if (isEdit) {
+    updateData.isEdit = true;
+  }
+
+  // Verificar que al menos un campo esté presente
+  if (Object.keys(updateData).length === 0) {
+    showMessage('error', 'Please provide at least Appraisal Value or description to update.');
+    return;
+  }
+
+  showLoader();
+  hideMessage();
+
+  try {
+    const response = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/set-value`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // No es necesario incluir el encabezado 'Authorization' si usas cookies
+      },
+      credentials: 'include', // Incluir cookies en la solicitud
+
+      body: JSON.stringify(updateData)
+    });
+
+    const responseData = await response.json();
+
+    hideLoader();
+
+    if (response.ok && responseData.success) {
+      showMessage('success', responseData.message || 'Appraisal updated successfully.');
+      loadAppraisalDetails();
+    } else {
+      throw new Error(responseData.message || 'Error updating appraisal.');
+    }
+  } catch (error) {
+    hideLoader();
+    console.error('Error updating appraisal:', error);
+    showMessage('error', error.message || 'An unexpected error occurred.');
+  }
+}
 
   // Cargar los detalles al cargar la página
   window.onload = () => {
