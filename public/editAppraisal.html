@@ -354,7 +354,7 @@
   }
 
  // Función para manejar la actualización del campo "value" y/o "description"
-async function updateValueField(isEdit = false) {
+async function updateValueField(isEdit = true) {
   const valueInput = document.getElementById('value');
   const appraisalValue = valueInput.value.trim();
   const descriptionInput = document.getElementById('description');
