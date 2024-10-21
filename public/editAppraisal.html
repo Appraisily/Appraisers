@@ -150,17 +150,18 @@
     }
 
     .spinner {
-      border: 6px solid rgba(0, 0, 0, 0.1);
-      width: 40px;
-      height: 40px;
+      border: 8px solid #f3f3f3; /* Fondo gris claro */
+      border-top: 8px solid #3498db; /* Azul para el spinner */
       border-radius: 50%;
-      border-left-color: #007bff;
+      width: 60px;
+      height: 60px;
       animation: spin 1s linear infinite;
       margin-right: 10px;
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     /* ACF Fields List */
@@ -280,7 +281,7 @@
   <!-- Loader -->
   <div id="loader">
     <div class="spinner"></div>
-    <div id="loader-message">Processing...</div>
+    <div id="loader-message">Processing appraisal...</div>
   </div>
 
   <script>
@@ -432,6 +433,14 @@
       .catch(err => {
         console.error('Error fetching appraisal details:', err);
         showMessage('error', err.message || 'Error fetching appraisal details.');
+        hideLoader();
+
+        // Redirect to index if not authenticated
+        if (err.message.includes('not authenticated')) {
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+        }
       });
     }
 
