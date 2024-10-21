@@ -1,12 +1,18 @@
+<!-- public/editAppraisal.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Edit Appraisal</title>
-  <link rel="stylesheet" href="/css/styles.css">
-  
+  <!-- Load Google Identity Services library -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Link to the external CSS file -->
   <style>
-    /* Estilos mejorados */
+    @import url('css/styles.css');
+  </style>  
+  <!-- Additional page-specific styles -->
+  <style>
+    /* General Styles */
     body {
       font-family: Arial, sans-serif;
       background-color: #f0f2f5;
@@ -14,6 +20,72 @@
       margin: 0;
       padding: 0;
     }
+
+    /* Dashboard Title */
+    .dashboard-title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      padding: 20px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    /* Logout Button */
+    .logout-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: #ffffff;
+      color: #d9534f;
+      border: 2px solid #d9534f;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      z-index: 1000;
+    }
+
+    .logout-button:hover {
+      background-color: #d9534f;
+      color: #ffffff;
+    }
+
+    /* User Name Display */
+    .user-name {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 10px 20px;
+      background-color: #ffffff;
+      color: #28a745;
+      border: 2px solid #28a745;
+      border-radius: 4px;
+      font-size: 14px;
+      z-index: 1000;
+      display: none;
+    }
+
+    /* Back Button */
+    .back-button {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #007bff;
+      font-size: 16px;
+      margin: 20px;
+    }
+
+    .back-button svg {
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* Container */
     .container {
       max-width: 900px;
       margin: 40px auto;
@@ -21,69 +93,39 @@
       background-color: #fff;
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      position: relative;
     }
+
+    /* Title */
     h2 {
       text-align: center;
       margin-bottom: 30px;
       color: #007bff;
     }
-    #acf-fields-list {
-      list-style-type: none;
-      padding: 0;
-    }
-    #acf-fields-list li {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 25px;
-      border-bottom: 1px solid #e0e0e0;
-      padding-bottom: 15px;
-    }
-    .field-name {
-      font-weight: bold;
-      width: 100%;
-      text-align: center;
-      margin-bottom: 10px;
+
+    /* Messages */
+    #message {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 15px 20px;
+      border-radius: 4px;
+      display: none;
       font-size: 16px;
-      color: #555;
     }
-    .field-value {
-      width: 100%;
-      margin-bottom: 10px;
+
+    #message.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
     }
-    .edit-button {
-      padding: 10px 20px;
-      border: none;
-      background-color: #007bff; /* Azul del título */
-      color: #fff;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      align-self: center;
-      margin-top: 10px; /* Espacio vertical */
+
+    #message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
     }
-    .edit-button:hover {
-      background-color: #0056b3;
-    }
-    input[type="text"], textarea {
-      width: 100%;
-      padding: 10px 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-      transition: border-color 0.3s ease;
-      resize: none; /* Desactivar el redimensionamiento manual */
-      overflow: hidden; /* Ocultar barras de scroll */
-    }
-    input[type="text"]:focus, textarea:focus {
-      border-color: #007bff;
-      outline: none;
-    }
-    textarea {
-      min-height: 80px;
-      max-height: 300px;
-    }
+
+    /* Loader */
     #loader {
       position: fixed;
       top: 50%;
@@ -97,6 +139,7 @@
       justify-content: center;
       z-index: 9999;
     }
+
     .spinner {
       border: 6px solid rgba(0, 0, 0, 0.1);
       width: 40px;
@@ -104,326 +147,515 @@
       border-radius: 50%;
       border-left-color: #007bff;
       animation: spin 1s linear infinite;
+      margin-right: 10px;
     }
+
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    .success {
-      color: green;
-      margin-bottom: 20px;
-      text-align: center;
-      font-size: 18px;
+
+    /* Appraisal Form Styles */
+    #appraisal-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 30px;
     }
-    .error {
-      color: red;
-      margin-bottom: 20px;
+
+    #appraisal-form label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333333;
+      text-align: left;
+      width: 100%;
+    }
+
+    #appraisal-form input,
+    #appraisal-form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    #appraisal-form button.submit-button {
+      background-color: #007bff;
+      color: #ffffff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      align-self: center;
+      transition: background-color 0.3s ease;
+    }
+
+    #appraisal-form button.submit-button:hover {
+      background-color: #0056b3;
+    }
+
+    /* ACF Fields List */
+    #acf-fields-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #acf-fields-list li {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 15px;
+    }
+
+    .field-name {
+      font-weight: bold;
+      width: 100%;
       text-align: center;
-      font-size: 18px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #555;
+    }
+
+    .field-value {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .edit-button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #007bff; /* Azul del título */
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      align-self: center;
+      margin-top: 10px; /* Espacio vertical */
+    }
+
+    .edit-button:hover {
+      background-color: #0056b3;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+      resize: none; /* Desactivar el redimensionamiento manual */
+      overflow: hidden; /* Ocultar barras de scroll */
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 80px;
+      max-height: 300px;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: auto;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #777777;
+    }
+
+    .footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
     }
   </style>
-  
 </head>
 <body>
+
+  <!-- Dashboard Title -->
+  <div class="dashboard-title">Appraiser's Dashboard</div>
+  
+  <!-- Logout Button -->
+  <button id="logout-button" class="logout-button">Logout</button>
+  
+  <!-- Div to display the user's name -->
+  <div id="user-name" class="user-name"></div>
+  
   <div class="container">
+    <!-- Back Button -->
+    <a href="index.html" class="back-button" aria-label="Go back to the list of pending appraisals">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+      </svg>
+      Back
+    </a>
+
+    <!-- Title -->
     <h2>Edit Appraisal</h2>
     <div id="message"></div>
-    <!-- Lista para mostrar los campos ACF -->
+
+    <!-- ACF Fields List -->
     <ul id="acf-fields-list"></ul>
   </div>
 
   <!-- Loader -->
   <div id="loader">
     <div class="spinner"></div>
+    <div id="loader-message">Processing...</div>
   </div>
 
-<script>
-  // Obtener parámetros de la URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const appraisalId = urlParams.get('id');
-  const wordpressUrl = urlParams.get('wpUrl');
+  <script>
+    // Obtener parámetros de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const appraisalId = urlParams.get('id');
+    const wordpressUrl = urlParams.get('wpUrl');
 
-  if (!appraisalId || !wordpressUrl) {
-    alert('Invalid appraisal parameters.');
-    window.location.href = 'index.html';
-  }
+    if (!appraisalId || !wordpressUrl) {
+      alert('Invalid appraisal parameters.');
+      window.location.href = 'index.html';
+    }
 
-  const messageDiv = document.getElementById('message');
+    const messageDiv = document.getElementById('message');
 
-  // Lista de campos ACF que quieres mostrar (incluyendo 'description')
-  const acfFieldsToDisplay = [
-    'value', 'description', 'main', 'signature', 'age', 'similar', 'customer_email', 'secondary_email',
-    'customer_name', 'customer_address', 'session_id', 'googlevision', '_gallery_populated',
-    'table', 'ad_copy', 'age_text', 'age1', 'condition', 'signature1', 'signature2', 'style',
-    'valuation_method', 'authorship', 'conclusion1', 'conclusion2', 'test', 'pdflink', 'doclink',
-    'glossary', 'shortcodes_inserted'
-  ];
+    // Lista de campos ACF que quieres mostrar (incluyendo 'description')
+    const acfFieldsToDisplay = [
+      'value', 'description', 'main', 'signature', 'age', 'similar', 'customer_email', 'secondary_email',
+      'customer_name', 'customer_address', 'session_id', 'googlevision', '_gallery_populated',
+      'table', 'ad_copy', 'age_text', 'age1', 'condition', 'signature1', 'signature2', 'style',
+      'valuation_method', 'authorship', 'conclusion1', 'conclusion2', 'test', 'pdflink', 'doclink',
+      'glossary', 'shortcodes_inserted'
+    ];
 
-  // Campos que requieren <textarea> en lugar de <input>
-  const textareaFields = [
-    'customer_description', 'iaDescription', 'customer_address', 'ad_copy', 
-    'conclusion1', 'conclusion2', 'glossary', 'description' // Añadimos 'description' si es un textarea
-  ];
+    // Campos que requieren <textarea> en lugar de <input>
+    const textareaFields = [
+      'customer_description', 'iaDescription', 'customer_address', 'ad_copy', 
+      'conclusion1', 'conclusion2', 'glossary', 'description' // Añadimos 'description' si es un textarea
+    ];
 
-  // Función para mostrar mensajes
-  function showMessage(type, text) {
-    messageDiv.className = type === 'success' ? 'success' : 'error';
-    messageDiv.innerText = text;
-    messageDiv.style.display = 'block';
-  }
+    // Función para mostrar mensajes
+    function showMessage(type, text) {
+      messageDiv.className = type === 'success' ? 'success' : 'error';
+      messageDiv.innerText = text;
+      messageDiv.style.display = 'block';
+    }
 
-  // Función para ocultar mensajes
-  function hideMessage() {
-    messageDiv.style.display = 'none';
-  }
+    // Función para ocultar mensajes
+    function hideMessage() {
+      messageDiv.style.display = 'none';
+    }
 
-  // Función para mostrar el loader
-  function showLoader() {
-    document.getElementById('loader').style.display = 'flex';
-  }
+    // Función para mostrar el loader
+    function showLoader(message = 'Processing...') {
+      const loaderMessage = document.getElementById('loader-message');
+      loaderMessage.innerText = message;
+      document.getElementById('loader').style.display = 'flex';
+    }
 
-  // Función para ocultar el loader
-  function hideLoader() {
-    document.getElementById('loader').style.display = 'none';
-  }
+    // Función para ocultar el loader
+    function hideLoader() {
+      document.getElementById('loader').style.display = 'none';
+    }
 
-  // Función para ajustar automáticamente la altura de los <textarea>
-  function autoResizeTextarea(textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = (textarea.scrollHeight) + 'px';
-  }
+    // Función para ajustar automáticamente la altura de los <textarea>
+    function autoResizeTextarea(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = (textarea.scrollHeight) + 'px';
+    }
 
-  // Función para cargar los detalles de la apreciación
-  function loadAppraisalDetails() {
-    showLoader();
-    hideMessage();
+    // Función para cargar los detalles de la apreciación
+    function loadAppraisalDetails() {
+      // Mostrar el loader
+      showLoader('Fetching appraisal details...');
+      hideMessage();
 
-    fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list-edit`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    .then(res => {
-      hideLoader();
-      if (res.status === 401 || res.status === 403) {
-        throw new Error('Unauthorized. Please log in again.');
-      }
-      if (!res.ok) {
-        throw new Error(`Server error: ${res.status}`);
-      }
-      return res.json();
-    })
-    .then(data => {
-      if (!data) {
-        throw new Error('Error fetching appraisal details.');
-      }
-
-      const acfData = data.acfFields || {};
-      const images = data.images || {};
-
-      const acfFieldsList = document.getElementById('acf-fields-list');
-      acfFieldsList.innerHTML = ''; // Limpiar lista
-
-      acfFieldsToDisplay.forEach(fieldName => {
-        let fieldValue = 'N/A';
-
-        if (acfData[fieldName] !== undefined && acfData[fieldName] !== null) {
-          if (fieldName === 'main' || fieldName === 'signature' || fieldName === 'age') {
-            fieldValue = images[fieldName] ? `<img src="${images[fieldName]}" alt="${fieldName}" width="100">` : 'N/A';
-          } else {
-            fieldValue = acfData[fieldName];
-          }
+      fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list-edit`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      .then(res => {
+        hideLoader();
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('You are not authenticated. Please log in.');
+        } else if (res.status === 404) {
+          throw new Error('Appraisal not found.');
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (!data || typeof data !== 'object') {
+          throw new Error('Invalid appraisal data received.');
         }
 
-        const listItem = document.createElement('li');
+        const acfData = data.acfFields || {};
+        const images = data.images || {};
 
-        const fieldNameSpan = document.createElement('span');
-        fieldNameSpan.className = 'field-name';
-        fieldNameSpan.innerText = fieldName;
+        const acfFieldsList = document.getElementById('acf-fields-list');
+        acfFieldsList.innerHTML = ''; // Limpiar lista
 
-        let fieldInput;
-        if (textareaFields.includes(fieldName)) {
-          fieldInput = document.createElement('textarea');
-          fieldInput.value = fieldValue;
-          // Añadir evento para ajustar la altura al contenido
-          fieldInput.addEventListener('input', () => autoResizeTextarea(fieldInput));
-          // Ajustar la altura inicialmente
-          autoResizeTextarea(fieldInput);
-        } else {
-          fieldInput = document.createElement('input');
-          fieldInput.type = 'text';
-          // Si el campo es de imagen, mostrar la URL en lugar de permitir editar directamente
-          if (fieldName === 'main' || fieldName === 'signature' || fieldName === 'age') {
-            fieldInput.placeholder = 'URL de la imagen';
-            fieldInput.value = images[fieldName] || '';
-          } else {
+        acfFieldsToDisplay.forEach(fieldName => {
+          let fieldValue = 'N/A';
+
+          if (acfData[fieldName] !== undefined && acfData[fieldName] !== null) {
+            if (fieldName === 'main' || fieldName === 'signature' || fieldName === 'age') {
+              fieldValue = images[fieldName] ? `<img src="${images[fieldName]}" alt="${fieldName}" width="100">` : 'N/A';
+            } else {
+              fieldValue = acfData[fieldName];
+            }
+          }
+
+          const listItem = document.createElement('li');
+
+          const fieldNameSpan = document.createElement('span');
+          fieldNameSpan.className = 'field-name';
+          fieldNameSpan.innerText = fieldName;
+
+          let fieldInput;
+          if (textareaFields.includes(fieldName)) {
+            fieldInput = document.createElement('textarea');
             fieldInput.value = fieldValue;
+            // Añadir evento para ajustar la altura al contenido
+            fieldInput.addEventListener('input', () => autoResizeTextarea(fieldInput));
+            // Ajustar la altura inicialmente
+            autoResizeTextarea(fieldInput);
+          } else {
+            fieldInput = document.createElement('input');
+            fieldInput.type = 'text';
+            // Si el campo es de imagen, mostrar la URL en lugar de permitir editar directamente
+            if (fieldName === 'main' || fieldName === 'signature' || fieldName === 'age') {
+              fieldInput.placeholder = 'URL de la imagen';
+              fieldInput.value = images[fieldName] || '';
+            } else {
+              fieldInput.value = fieldValue;
+            }
           }
-        }
-        fieldInput.className = 'field-value';
-        fieldInput.id = fieldName; // Asignar ID para acceso directo
+          fieldInput.className = 'field-value';
+          fieldInput.id = fieldName; // Asignar ID para acceso directo
 
-        const editButton = document.createElement('button');
-        editButton.className = 'edit-button';
-        editButton.innerText = 'Save';
-        if (fieldName === 'value') {
-          editButton.onclick = () => updateValueField();
-        } else {
-          editButton.onclick = () => editField(fieldName, fieldInput.value);
-        }
+          const editButton = document.createElement('button');
+          editButton.className = 'edit-button';
+          editButton.innerText = 'Save';
+          if (fieldName === 'value' || fieldName === 'description') {
+            editButton.onclick = () => updateValueField(); // Función para campos principales
+          } else {
+            editButton.onclick = () => editField(fieldName, fieldInput.value); // Función para otros campos
+          }
 
-        listItem.appendChild(fieldNameSpan);
-        listItem.appendChild(fieldInput);
-        listItem.appendChild(editButton);
+          listItem.appendChild(fieldNameSpan);
+          listItem.appendChild(fieldInput);
+          listItem.appendChild(editButton);
 
-        acfFieldsList.appendChild(listItem);
-      });
-    })
-    .catch(err => {
-      console.error('Error loading appraisal details:', err);
-      showMessage('error', err.message || 'Error loading appraisal details.');
-    });
-  }
-
-  // Función para editar un campo ACF (para campos que no son "value")
-  function editField(fieldName, newValue) {
-    if (newValue === null || newValue.trim() === '') {
-      showMessage('error', 'El valor del campo no puede estar vacío.');
-      return;
-    }
-
-    // Validaciones adicionales según el campo
-    if (['main', 'signature', 'age'].includes(fieldName)) {
-      // Validar que newValue sea una URL válida si el campo es de imagen
-      try {
-        new URL(newValue);
-      } catch (_) {
-        showMessage('error', 'Por favor, ingresa una URL válida para las imágenes.');
-        return;
-      }
-    }
-
-    // Validar correos electrónicos
-    const emailFields = ['customer_email', 'secondary_email'];
-    if (emailFields.includes(fieldName)) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(newValue)) {
-        showMessage('error', 'Por favor, ingresa una dirección de correo electrónico válida.');
-        return;
-      }
-    }
-
-    showLoader();
-    hideMessage();
-
-    // Crear un objeto con el campo a actualizar
-    const updateData = {};
-    updateData[fieldName] = newValue;
-
-    fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/set-value`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify(updateData) // Enviar solo el campo específico
-    })
-    .then(res => {
-      hideLoader();
-      if (!res.ok) {
-        return res.json().then(errData => {
-          throw new Error(errData.message || 'Error updating field.');
+          acfFieldsList.appendChild(listItem);
         });
-      }
-      return res.json();
-    })
-    .then(data => {
-      if (data.success) {
-        showMessage('success', `Campo '${fieldName}' actualizado exitosamente.`);
-        loadAppraisalDetails();
-      } else {
-        showMessage('error', data.message || 'Error updating field.');
-      }
-    })
-    .catch(err => {
-      hideLoader();
-      console.error('Error updating field:', err);
-      showMessage('error', err.message || 'Error updating field.');
-    });
-  }
-
- // Función para manejar la actualización del campo "value" y/o "description"
-async function updateValueField(isEdit = true) {
-  const valueInput = document.getElementById('value');
-  const appraisalValue = valueInput.value.trim();
-  const descriptionInput = document.getElementById('description');
-  const description = descriptionInput ? descriptionInput.value.trim() : '';
-
-  // Crear un objeto con los campos a actualizar
-  const updateData = {};
-
-  if (appraisalValue !== '') {
-    // Validar que appraisalValue es un número positivo
-    if (isNaN(appraisalValue) || Number(appraisalValue) <= 0) {
-      showMessage('error', 'Appraisal Value must be a positive number.');
-      return;
+      })
+      .catch(err => {
+        console.error('Error fetching appraisal details:', err);
+        showMessage('error', err.message || 'Error fetching appraisal details.');
+      });
     }
-    updateData.appraisalValue = Number(appraisalValue); // Convertir a número
-  }
 
-  if (description !== '') {
-    updateData.description = description;
-  }
+    // Función para editar un campo ACF (para campos que no son "value" o "description")
+    function editField(fieldName, newValue) {
+      if (newValue === null || newValue.trim() === '') {
+        showMessage('error', 'El valor del campo no puede estar vacío.');
+        return;
+      }
 
-  // Añadir isEdit al objeto de actualización si es necesario
-  if (isEdit) {
-    updateData.isEdit = true;
-  }
+      // Validaciones adicionales según el campo
+      if (['main', 'signature', 'age'].includes(fieldName)) {
+        // Validar que newValue sea una URL válida si el campo es de imagen
+        try {
+          new URL(newValue);
+        } catch (_) {
+          showMessage('error', 'Por favor, ingresa una URL válida para las imágenes.');
+          return;
+        }
+      }
 
-  // Verificar que al menos un campo esté presente
-  if (Object.keys(updateData).length === 0) {
-    showMessage('error', 'Please provide at least Appraisal Value or description to update.');
-    return;
-  }
+      // Validar correos electrónicos
+      const emailFields = ['customer_email', 'secondary_email'];
+      if (emailFields.includes(fieldName)) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newValue)) {
+          showMessage('error', 'Por favor, ingresa una dirección de correo electrónico válida.');
+          return;
+        }
+      }
 
-  showLoader();
-  hideMessage();
+      showLoader('Updating field...');
+      hideMessage();
 
-  try {
-    const response = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/set-value`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // No es necesario incluir el encabezado 'Authorization' si usas cookies
-      },
-      credentials: 'include', // Incluir cookies en la solicitud
+      // Crear un objeto con el campo a actualizar
+      const updateData = {};
+      updateData[fieldName] = newValue;
 
-      body: JSON.stringify(updateData)
-    });
+      fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/set-value`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(updateData) // Enviar solo el campo específico
+      })
+      .then(res => {
+        hideLoader();
+        if (!res.ok) {
+          return res.json().then(errData => {
+            throw new Error(errData.message || 'Error updating field.');
+          });
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data.success) {
+          showMessage('success', `Campo '${fieldName}' actualizado exitosamente.`);
+          loadAppraisalDetails();
+        } else {
+          showMessage('error', data.message || 'Error updating field.');
+        }
+      })
+      .catch(err => {
+        hideLoader();
+        console.error('Error updating field:', err);
+        showMessage('error', err.message || 'Error updating field.');
+      });
+    }
 
-    const responseData = await response.json();
+    // Función para manejar la actualización del campo "value" y/o "description"
+    async function updateValueField() {
+      const valueInput = document.getElementById('value');
+      const appraisalValue = valueInput.value.trim();
+      const descriptionInput = document.getElementById('description');
+      const description = descriptionInput ? descriptionInput.value.trim() : '';
 
-    hideLoader();
+      // Crear un objeto con los campos a actualizar
+      const updateData = {};
 
-    if (response.ok && responseData.success) {
-      showMessage('success', responseData.message || 'Appraisal updated successfully.');
+      if (appraisalValue !== '') {
+        // Validar que appraisalValue es un número positivo
+        if (isNaN(appraisalValue) || Number(appraisalValue) <= 0) {
+          showMessage('error', 'Appraisal Value must be a positive number.');
+          return;
+        }
+        updateData.appraisalValue = Number(appraisalValue); // Convertir a número
+      }
+
+      if (description !== '') {
+        updateData.description = description;
+      }
+
+      // Verificar que al menos un campo esté presente
+      if (Object.keys(updateData).length === 0) {
+        showMessage('error', 'Please provide at least Appraisal Value or description to update.');
+        return;
+      }
+
+      showLoader('Submitting updates...');
+      hideMessage();
+
+      try {
+        const response = await fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/set-value`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(updateData)
+        });
+
+        const responseData = await response.json();
+
+        hideLoader();
+
+        if (response.ok && responseData.success) {
+          showMessage('success', responseData.message || 'Appraisal updated successfully.');
+          loadAppraisalDetails();
+        } else {
+          throw new Error(responseData.message || 'Error updating appraisal.');
+        }
+      } catch (error) {
+        hideLoader();
+        console.error('Error updating appraisal:', error);
+        showMessage('error', error.message || 'An unexpected error occurred.');
+      }
+    }
+
+    // Manejar logout
+    function logout() {
+      showLoader('Logging out...');
+      hideMessage();
+
+      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
+        method: 'POST',
+        credentials: 'include'
+      })
+      .then(res => res.json())
+      .then(data => {
+        hideLoader();
+
+        if (data.success) {
+          // Remove user name from localStorage
+          localStorage.removeItem('userName');
+
+          // Hide user name display
+          document.getElementById('user-name').style.display = 'none';
+
+          // Show success message
+          showMessage('success', 'Successfully logged out.');
+
+          // Redirect to login page or index
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+        } else {
+          // Handle logout failure
+          showMessage('error', 'Error logging out. Please try again.');
+        }
+      })
+      .catch(err => {
+        hideLoader();
+        console.error('Error during logout:', err);
+        showMessage('error', 'Error logging out. Please try again.');
+      });
+    }
+
+    // Añadir listener al botón de logout
+    document.getElementById('logout-button').addEventListener('click', logout);
+
+    // Función para mostrar el nombre del usuario
+    function showUserName(name) {
+      const userNameDiv = document.getElementById('user-name');
+      userNameDiv.textContent = `Logged in as ${name}`;
+      userNameDiv.style.display = 'block';
+    }
+
+    // Al cargar la página, cargar los detalles y mostrar el nombre del usuario si está disponible
+    window.onload = () => {
       loadAppraisalDetails();
-    } else {
-      throw new Error(responseData.message || 'Error updating appraisal.');
-    }
-  } catch (error) {
-    hideLoader();
-    console.error('Error updating appraisal:', error);
-    showMessage('error', error.message || 'An unexpected error occurred.');
-  }
-}
-
-  // Cargar los detalles al cargar la página
-  window.onload = () => {
-    loadAppraisalDetails();
-  };
-</script>
+      // Mostrar el nombre del usuario
+      const userName = localStorage.getItem('userName');
+      if (userName) {
+        showUserName(userName);
+      }
+    };
+  </script>
 
 </body>
 </html>
