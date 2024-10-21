@@ -47,7 +47,7 @@
       cursor: pointer;
       font-size: 14px;
       transition: background-color 0.3s ease, color 0.3s ease;
-      z-index: 1000;
+      z-index: 1001; /* Asegurar que esté por encima de otros elementos */
     }
 
     .logout-button:hover {
@@ -66,7 +66,7 @@
       border: 2px solid #28a745;
       border-radius: 4px;
       font-size: 14px;
-      z-index: 1000;
+      z-index: 1001; /* Asegurar que esté por encima de otros elementos */
       display: none;
     }
 
@@ -75,14 +75,23 @@
       display: flex;
       align-items: center;
       text-decoration: none;
-      color: #007bff;
+      background-color: #007bff; /* Fondo azul para contraste */
+      color: #ffffff; /* Texto blanco */
+      padding: 10px 20px;
+      border-radius: 4px;
       font-size: 16px;
       margin: 20px;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #0056b3; /* Azul más oscuro al pasar el cursor */
     }
 
     .back-button svg {
       margin-right: 5px;
       vertical-align: middle;
+      fill: #ffffff; /* Asegurar que el icono SVG sea blanco */
     }
 
     /* Container */
@@ -137,7 +146,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 9999;
+      z-index: 10000; /* Muy alto para asegurar que esté por encima de todo */
     }
 
     .spinner {
@@ -152,51 +161,6 @@
 
     @keyframes spin {
       to { transform: rotate(360deg); }
-    }
-
-    /* Appraisal Form Styles */
-    #appraisal-form {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      max-width: 600px;
-      margin-bottom: 30px;
-    }
-
-    #appraisal-form label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #333333;
-      text-align: left;
-      width: 100%;
-    }
-
-    #appraisal-form input,
-    #appraisal-form textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-
-    #appraisal-form button.submit-button {
-      background-color: #007bff;
-      color: #ffffff;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      align-self: center;
-      transition: background-color 0.3s ease;
-    }
-
-    #appraisal-form button.submit-button:hover {
-      background-color: #0056b3;
     }
 
     /* ACF Fields List */
