@@ -7,272 +7,296 @@
   <!-- Load Google Identity Services library -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Link to the external CSS file -->
- <style>
-  @import url('css/styles.css');
-  
-  /* Namespace: appraisal-page */
-  .appraisal-page {
-    /* Main Content Container */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  <style>
+    @import url('css/styles.css');
+    
+    /* Namespace: appraisal-page */
+    .appraisal-page {
+      /* Main Content Container */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  /* Descriptions Container */
-  .appraisal-page .descriptions-container {
-    max-width: 800px;
-    margin-bottom: 30px;
-    text-align: left; /* Align text to the left for better readability */
-  }
+    /* Descriptions Container */
+    .appraisal-page .descriptions-container {
+      max-width: 800px;
+      margin-bottom: 30px;
+      text-align: left; /* Align text to the left for better readability */
+    }
 
-  .appraisal-page .description-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #333333;
-  }
+    .appraisal-page .description-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333333;
+    }
 
-  .appraisal-page .description-text {
-    font-size: 16px;
-    line-height: 1.5;
-    color: #555555;
-    margin-bottom: 20px;
-    white-space: pre-wrap; /* Preserve line breaks */
-  }
+    .appraisal-page .description-text {
+      font-size: 16px;
+      line-height: 1.5;
+      color: #555555;
+      margin-bottom: 20px;
+      white-space: pre-wrap; /* Preserve line breaks */
+    }
 
-  /* Images Container */
-  .appraisal-page .images-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 30px;
-    gap: 20px;
-    width: 100%;
-  }
+    /* Images Container */
+    .appraisal-page .images-container {
+      display: flex;
+      flex-direction: column; /* Cambiar a columna para apilar imágenes verticalmente */
+      align-items: center;
+      margin-bottom: 30px;
+      gap: 40px; /* Espacio entre cada imagen */
+      width: 100%;
+    }
 
-  .appraisal-page .image-wrapper {
-    text-align: center;
-    flex: 0 0 300px; /* Ensure each image wrapper occupies 300px */
-    position: relative; /* Ensure proper positioning */
-  }
+    .appraisal-page .image-wrapper {
+      text-align: center;
+      width: 300px; /* Ancho fijo para cada contenedor de imagen */
+      position: relative; /* Ensure proper positioning */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  .appraisal-page .image-wrapper img {
-    max-width: 100%;
-    height: auto;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    display: block; /* Ensure images are block elements */
-    cursor: grab;
-  }
+    .appraisal-page .image-wrapper img {
+      max-width: 100%;
+      height: auto;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      display: block; /* Ensure images are block elements */
+      cursor: grab;
+      transition: transform 0.3s ease; /* Suaviza la rotación */
+    }
 
-  .appraisal-page .image-wrapper img:active {
-    cursor: grabbing;
-  }
+    .appraisal-page .image-wrapper img:active {
+      cursor: grabbing;
+    }
 
-  .appraisal-page .image-label {
-    font-size: 14px;
-    color: #333333;
-    margin-top: 5px;
-  }
+    .appraisal-page .image-label {
+      font-size: 14px;
+      color: #333333;
+      margin-top: 5px;
+    }
 
-  /* Logout Button */
-  .appraisal-page .logout-button {
-    /* Inherit styles from global styles.css */
-  }
+    /* Botones de Rotación */
+    .appraisal-page .rotate-buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
 
-  /* Appraisal Form Styles */
-  .appraisal-page #appraisal-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 600px;
-    margin-bottom: 30px;
-  }
+    .appraisal-page .rotate-button {
+      padding: 5px 10px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
 
-  .appraisal-page #appraisal-form label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #333333;
-    text-align: left;
-    width: 100%;
-  }
+    .appraisal-page .rotate-button:hover {
+      background-color: #e0e0e0;
+    }
 
-  .appraisal-page #appraisal-form input,
-  .appraisal-page #appraisal-form textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-  }
+    /* Logout Button */
+    .appraisal-page .logout-button {
+      /* Inherit styles from global styles.css */
+    }
 
-  .appraisal-page #appraisal-form button.submit-button {
-    background-color: #007bff;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    align-self: center;
-  }
+    /* Appraisal Form Styles */
+    .appraisal-page #appraisal-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 30px;
+    }
 
-  .appraisal-page #appraisal-form button.submit-button:hover {
-    background-color: #0056b3;
-  }
+    .appraisal-page #appraisal-form label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333333;
+      text-align: left;
+      width: 100%;
+    }
 
-  /* Success/Error Messages */
-  .appraisal-page #message {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 15px 20px;
-    border-radius: 4px;
-    display: none;
-    font-size: 16px;
-  }
+    .appraisal-page #appraisal-form input,
+    .appraisal-page #appraisal-form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
 
-  .appraisal-page #message.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
+    .appraisal-page #appraisal-form button.submit-button {
+      background-color: #007bff;
+      color: #ffffff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      align-self: center;
+    }
 
-  .appraisal-page #message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-  }
+    .appraisal-page #appraisal-form button.submit-button:hover {
+      background-color: #0056b3;
+    }
 
-  /* Loader and Fetching Message */
-  .appraisal-page #loader-container {
-    display: none; /* Hidden by default */
-    flex-direction: column;
-    align-items: center;
-    margin: 20px 0;
-  }
+    /* Success/Error Messages */
+    .appraisal-page #message {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 15px 20px;
+      border-radius: 4px;
+      display: none;
+      font-size: 16px;
+    }
 
-  .appraisal-page #loader {
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid #3498db;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 10px;
-  }
+    .appraisal-page #message.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
 
-  .appraisal-page #loader-message {
-    font-size: 16px;
-    color: #555555;
-    margin-bottom: 20px;
-  }
+    .appraisal-page #message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
 
-  /* Steps List */
-  .appraisal-page .steps-list {
-    list-style: none;
-    padding: 0;
-    margin-top: 20px; /* Espaciado superior para separarlo del spinner */
-    width: 100%;
-    max-width: 600px;
-    display: none; /* Hidden by default */
-  }
+    /* Loader and Fetching Message */
+    .appraisal-page #loader-container {
+      display: none; /* Hidden by default */
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
 
-  .appraisal-page .steps-list li.step {
-    font-size: 16px;
-    color: #444444; /* Anthracite gray */
-    margin-bottom: 10px;
-  }
+    .appraisal-page #loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    }
 
-  .appraisal-page .steps-list li.step.active {
-    font-weight: bold;
-    color: #000000; /* Black */
-  }
+    .appraisal-page #loader-message {
+      font-size: 16px;
+      color: #555555;
+      margin-bottom: 20px;
+    }
 
-  .appraisal-page .steps-list li.step.completed {
-    color: #000000; /* Black */
-  }
+    /* Steps List */
+    .appraisal-page .steps-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px; /* Espaciado superior para separarlo del spinner */
+      width: 100%;
+      max-width: 600px;
+      display: none; /* Hidden by default */
+    }
 
-  /* Loader Animation */
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+    .appraisal-page .steps-list li.step {
+      font-size: 16px;
+      color: #444444; /* Anthracite gray */
+      margin-bottom: 10px;
+    }
 
-  /* Footer */
-  .appraisal-page .footer {
-    margin-top: auto;
-    padding: 20px;
-    text-align: center;
-    font-size: 12px;
-    color: #777777;
-  }
+    .appraisal-page .steps-list li.step.active {
+      font-weight: bold;
+      color: #000000; /* Black */
+    }
 
-  .appraisal-page .footer a {
-    color: #007bff;
-    text-decoration: none;
-  }
+    .appraisal-page .steps-list li.step.completed {
+      color: #000000; /* Black */
+    }
 
-  .appraisal-page .footer a:hover {
-    text-decoration: underline;
-  }
+    /* Loader Animation */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-  /* Action Button */
-  .appraisal-page .action-button {
-    padding: 8px 16px;
-    background-color: #007bff;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
-    text-decoration: none;
-  }
+    /* Footer */
+    .appraisal-page .footer {
+      margin-top: auto;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #777777;
+    }
 
-  .appraisal-page .action-button:hover {
-    background-color: #0056b3;
-  }
+    .appraisal-page .footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
 
-  /* User Name Display */
-  .appraisal-page .user-name {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    padding: 10px 20px;
-    background-color: #ffffff;
-    color: #28a745;
-    border: 2px solid #28a745;
-    border-radius: 4px;
-    font-size: 14px;
-    z-index: 1000;
-    display: none; /* Hidden by default */
-  }
+    .appraisal-page .footer a:hover {
+      text-decoration: underline;
+    }
 
-  /* Reset Zoom Button */
-  .appraisal-page #reset-zoom {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1001;
-    padding: 8px 16px;
-    background-color: #007bff;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
-  }
+    /* Action Button */
+    .appraisal-page .action-button {
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+      text-decoration: none;
+    }
 
-  .appraisal-page #reset-zoom:hover {
-    background-color: #0056b3;
-  }
-</style>
+    .appraisal-page .action-button:hover {
+      background-color: #0056b3;
+    }
 
+    /* User Name Display */
+    .appraisal-page .user-name {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 10px 20px;
+      background-color: #ffffff;
+      color: #28a745;
+      border: 2px solid #28a745;
+      border-radius: 4px;
+      font-size: 14px;
+      z-index: 1000;
+      display: none; /* Hidden by default */
+    }
+
+    /* Reset Zoom Button */
+    .appraisal-page #reset-zoom {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    .appraisal-page #reset-zoom:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body class="appraisal-page">
   <!-- Dashboard Title -->
@@ -360,6 +384,7 @@
 
   <script>
     let appraisalDataGlobal = null;
+    const rotationState = new Map(); // Almacena el estado de rotación de cada imagen
 
     // Update the year in the footer
     document.getElementById('current-year').textContent = new Date().getFullYear();
@@ -459,14 +484,16 @@
         imagesContainer.innerHTML = '';
 
         if (data.images) {
-          // Function to create each image with Panzoom container
-          function createImageWrapper(src, alt, label) {
+          // Function to create each image with Panzoom container and rotation buttons
+          function createImageWrapper(src, alt, label, id) {
             const imageWrapper = document.createElement('div');
             imageWrapper.className = 'image-wrapper panzoom-container'; // Add classes for styling and Panzoom
+            imageWrapper.setAttribute('data-image-id', id); // Asignar un ID único para cada imagen
 
             const img = document.createElement('img');
             img.src = src;
             img.alt = alt;
+            img.id = `image-${id}`; // Asignar un ID para facilitar la rotación
             imageWrapper.appendChild(img);
 
             const imageLabel = document.createElement('div');
@@ -474,24 +501,62 @@
             imageLabel.innerText = label;
             imageWrapper.appendChild(imageLabel);
 
+            // Crear contenedor para los botones de rotación
+            const rotateButtonsDiv = document.createElement('div');
+            rotateButtonsDiv.className = 'rotate-buttons';
+
+            const rotateLeftBtn = document.createElement('button');
+            rotateLeftBtn.className = 'rotate-button rotate-left';
+            rotateLeftBtn.innerText = '⟲'; // Puedes reemplazar con un ícono si lo deseas
+            rotateLeftBtn.title = 'Rotate Left';
+            rotateLeftBtn.setAttribute('aria-label', 'Rotate Left');
+
+            const rotateRightBtn = document.createElement('button');
+            rotateRightBtn.className = 'rotate-button rotate-right';
+            rotateRightBtn.innerText = '⟳'; // Puedes reemplazar con un ícono si lo deseas
+            rotateRightBtn.title = 'Rotate Right';
+            rotateRightBtn.setAttribute('aria-label', 'Rotate Right');
+
+            rotateButtonsDiv.appendChild(rotateLeftBtn);
+            rotateButtonsDiv.appendChild(rotateRightBtn);
+            imageWrapper.appendChild(rotateButtonsDiv);
+
+            // Inicializar el estado de rotación
+            rotationState.set(id, 0);
+
+            // Agregar event listeners para los botones de rotación
+            rotateLeftBtn.addEventListener('click', () => rotateImage(id, -90));
+            rotateRightBtn.addEventListener('click', () => rotateImage(id, 90));
+
             return imageWrapper;
+          }
+
+          // Función para rotar la imagen
+          function rotateImage(id, angle) {
+            const img = document.getElementById(`image-${id}`);
+            let currentRotation = rotationState.get(id) || 0;
+            currentRotation += angle;
+            // Asegurarse de que la rotación se mantenga entre 0 y 360
+            currentRotation = currentRotation % 360;
+            rotationState.set(id, currentRotation);
+            img.style.transform = `rotate(${currentRotation}deg)`;
           }
 
           // Main Image
           if (data.images.main) {
-            const mainImageWrapper = createImageWrapper(data.images.main, 'Main Image', 'Main Image');
+            const mainImageWrapper = createImageWrapper(data.images.main, 'Main Image', 'Main Image', 'main');
             imagesContainer.appendChild(mainImageWrapper);
           }
 
           // Age Image
           if (data.images.age) {
-            const ageImageWrapper = createImageWrapper(data.images.age, 'Age Image', 'Age Image');
+            const ageImageWrapper = createImageWrapper(data.images.age, 'Age Image', 'Age Image', 'age');
             imagesContainer.appendChild(ageImageWrapper);
           }
 
           // Signature Image
           if (data.images.signature) {
-            const signatureImageWrapper = createImageWrapper(data.images.signature, 'Signature Image', 'Signature Image');
+            const signatureImageWrapper = createImageWrapper(data.images.signature, 'Signature Image', 'Signature Image', 'signature');
             imagesContainer.appendChild(signatureImageWrapper);
           }
         }
@@ -657,5 +722,4 @@
     };
   </script>
 </body>
-
 </html>
