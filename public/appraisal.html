@@ -43,7 +43,7 @@
     /* Images Container */
     .appraisal-page .images-container {
       display: flex;
-      flex-direction: column; /* Cambiar a columna para apilar imágenes verticalmente */
+      flex-direction: column; /* Apilar imágenes verticalmente */
       align-items: center;
       margin-bottom: 30px;
       gap: 40px; /* Espacio entre cada imagen */
@@ -53,7 +53,9 @@
     .appraisal-page .image-wrapper {
       text-align: center;
       width: 300px; /* Ancho fijo para cada contenedor de imagen */
-      position: relative; /* Ensure proper positioning */
+      max-height: 500px; /* Altura máxima para evitar superposición */
+      overflow: hidden; /* Ocultar cualquier parte de la imagen que exceda el contenedor */
+      position: relative; /* Asegurar el posicionamiento correcto */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -65,9 +67,11 @@
       margin: 10px 0;
       border: 1px solid #ddd;
       border-radius: 4px;
-      display: block; /* Ensure images are block elements */
+      display: block; /* Asegurar que las imágenes sean elementos de bloque */
       cursor: grab;
-      transition: transform 0.3s ease; /* Suaviza la rotación */
+      transition: transform 0.3s ease; /* Suavizar la rotación */
+      /* Añadir transición para zoom */
+      transition: transform 0.3s ease;
     }
 
     .appraisal-page .image-wrapper img:active {
@@ -385,6 +389,7 @@
   <script>
     let appraisalDataGlobal = null;
     const rotationState = new Map(); // Almacena el estado de rotación de cada imagen
+    const panzoomInstances = new Map(); // Almacena las instancias de Panzoom
 
     // Update the year in the footer
     document.getElementById('current-year').textContent = new Date().getFullYear();
@@ -432,15 +437,18 @@
 
       containers.forEach(container => {
         const panzoomInstance = Panzoom(container, {
-          maxScale: 5,
+          maxScale: 3, // Reducir el maxScale para evitar que las imágenes se vuelvan demasiado grandes
           minScale: 1,
-          contain: 'outside',
+          contain: 'inside', // Cambiar a 'inside' para evitar que la imagen se desplace fuera del contenedor
           startScale: 1,
           smoothScroll: false,
           zoomDoubleClickSpeed: 1
         });
 
-        // Enable the use of the mouse wheel for zooming
+        // Almacenar la instancia de Panzoom
+        panzoomInstances.set(container, panzoomInstance);
+
+        // Habilitar el uso de la rueda del mouse para hacer zoom
         container.addEventListener('wheel', panzoomInstance.zoomWithWheel);
       });
     }
@@ -494,6 +502,7 @@
             img.src = src;
             img.alt = alt;
             img.id = `image-${id}`; // Asignar un ID para facilitar la rotación
+            img.style.transform = `rotate(0deg)`; // Asegurar que las imágenes comiencen sin rotación
             imageWrapper.appendChild(img);
 
             const imageLabel = document.createElement('div');
@@ -564,6 +573,9 @@
         // Initialize Panzoom after adding the images
         initializePanzoom();
 
+        // Restablecer el zoom al cargar los detalles de la evaluación
+        resetZoom(); // Asegurar que todas las imágenes estén en su escala inicial
+
         showMessage('success', 'Appraisal details loaded successfully.');
       })
       .catch(err => {
@@ -627,8 +639,10 @@
       const containers = document.querySelectorAll('.images-container .panzoom-container');
       
       containers.forEach(container => {
-        const panzoomInstance = Panzoom(container);
-        panzoomInstance.reset();
+        const panzoomInstance = panzoomInstances.get(container);
+        if (panzoomInstance) {
+          panzoomInstance.reset();
+        }
       });
       
       showMessage('success', 'Zoom reset successfully.');
