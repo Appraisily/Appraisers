@@ -134,29 +134,28 @@
       border: 1px solid #f5c6cb;
     }
 
-    /* Loader */
-    #loader {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(255, 255, 255, 0.8);
-      padding: 20px;
-      border-radius: 10px;
-      display: none;
+    /* Loader and Fetching Message */
+    #loader-container {
+      display: none; /* Hidden by default */
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      z-index: 10000; /* Muy alto para asegurar que esté por encima de todo */
+      margin: 20px 0;
     }
 
-    .spinner {
+    #loader {
       border: 8px solid #f3f3f3; /* Fondo gris claro */
       border-top: 8px solid #3498db; /* Azul para el spinner */
       border-radius: 50%;
       width: 60px;
       height: 60px;
       animation: spin 1s linear infinite;
-      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    #loader-message {
+      font-size: 16px;
+      color: #555555;
+      margin-bottom: 20px;
     }
 
     @keyframes spin {
@@ -259,7 +258,7 @@
   <button id="logout-button" class="logout-button">Logout</button>
   
   <!-- Div to display the user's name -->
-  <div id="user-name" class="user-name"></div>
+  <div id="user-name" class="user-name" style="display: none;"></div>
   
   <div class="container">
     <!-- Back Button -->
@@ -278,9 +277,9 @@
     <ul id="acf-fields-list"></ul>
   </div>
 
-  <!-- Loader -->
-  <div id="loader">
-    <div class="spinner"></div>
+  <!-- Loader Container -->
+  <div id="loader-container" style="display: none;">
+    <div id="loader"></div>
     <div id="loader-message">Processing appraisal...</div>
   </div>
 
@@ -328,12 +327,12 @@
     function showLoader(message = 'Processing...') {
       const loaderMessage = document.getElementById('loader-message');
       loaderMessage.innerText = message;
-      document.getElementById('loader').style.display = 'flex';
+      document.getElementById('loader-container').style.display = 'flex';
     }
 
     // Función para ocultar el loader
     function hideLoader() {
-      document.getElementById('loader').style.display = 'none';
+      document.getElementById('loader-container').style.display = 'none';
     }
 
     // Función para ajustar automáticamente la altura de los <textarea>
