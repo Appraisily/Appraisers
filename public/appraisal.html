@@ -272,7 +272,46 @@
     .steps-list li.step.error {
       color: #dc3545; /* Rojo para errores */
     }
-    </style>
+
+    /* Opcional: Ajustes para el contenedor Panzoom */
+    .panzoom-container {
+      overflow: hidden; /* Ocultar partes de la imagen que salen del contenedor */
+      cursor: grab; /* Cambiar cursor para indicar que se puede arrastrar */
+      width: 300px; /* Asegurar que el contenedor tenga el mismo ancho que la imagen */
+      height: auto; /* Ajustar la altura automáticamente */
+      position: relative; /* Necesario para el posicionamiento interno */
+    }
+
+    .panzoom-container:active {
+      cursor: grabbing;
+    }
+
+    .panzoom-container img {
+      transition: transform 0.2s ease;
+      max-width: none; /* Permitir que la imagen se escale más allá del contenedor */
+    }
+
+    /* Botón para restablecer el zoom */
+    #reset-zoom {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    #reset-zoom:hover {
+      background-color: #0056b3;
+    }
+
+  </style>
 </head>
 <body>
 
@@ -331,8 +370,11 @@
 
       <!-- Images Container -->
       <div class="images-container" id="images-container">
-        <!-- Images will be inserted here -->
+        <!-- Imágenes se insertarán aquí -->
       </div>
+
+      <!-- Botón para restablecer el zoom -->
+      <button id="reset-zoom" class="action-button">Reset Zoom</button>
 
       <!-- Form to Complete Appraisal -->
       <form id="appraisal-form">
@@ -350,6 +392,9 @@
     <div class="footer">
       © <span id="current-year"></span> Appraisily. All rights reserved.
     </div>
+
+   <!-- Incluir Panzoom desde CDN -->
+   <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
 
    <script>
       let appraisalDataGlobal = null;
@@ -394,9 +439,28 @@
         loaderContainer.style.display = 'none';
       }
 
-      // Function to load the appraisal details
+      // Función para inicializar Panzoom en las imágenes
+      function initializePanzoom() {
+        const containers = document.querySelectorAll('.panzoom-container');
+        
+        containers.forEach(container => {
+          const panzoomInstance = Panzoom(container, {
+            maxScale: 5,
+            minScale: 1,
+            contain: 'outside',
+            startScale: 1,
+            smoothScroll: false,
+            zoomDoubleClickSpeed: 1
+          });
+
+          // Habilitar el uso del ratón para el zoom
+          container.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
+        });
+      }
+
+      // Función para cargar los detalles de la apreciación
       function loadAppraisalDetails() {
-        // Show the loader
+        // Mostrar el loader
         showLoader('Fetching appraisal details...');
         hideMessage();
 
@@ -418,75 +482,60 @@
             throw new Error('Invalid appraisal data received.');
           }
 
-          // Assign the data to the global variable
+          // Asignar los datos a la variable global
           appraisalDataGlobal = data;
 
-          // Display descriptions
+          // Mostrar descripciones
           const customerDescriptionText = document.getElementById('customer-description-text');
           customerDescriptionText.innerText = data.customerDescription || 'Not available';
 
           const iaDescriptionText = document.getElementById('ia-description-text');
           iaDescriptionText.innerText = data.iaDescription || 'Not available';
 
-          // Display images with labels
+          // Mostrar imágenes con etiquetas
           const imagesContainer = document.getElementById('images-container');
           imagesContainer.innerHTML = '';
 
           if (data.images) {
+            // Función para crear cada imagen con contenedor Panzoom
+            function createImageWrapper(src, alt, label) {
+              const imageWrapper = document.createElement('div');
+              imageWrapper.className = 'image-wrapper panzoom-container'; // Añadir clase para Panzoom
+
+              const img = document.createElement('img');
+              img.src = src;
+              img.alt = alt;
+              imageWrapper.appendChild(img);
+
+              const imageLabel = document.createElement('div');
+              imageLabel.className = 'image-label';
+              imageLabel.innerText = label;
+              imageWrapper.appendChild(imageLabel);
+
+              return imageWrapper;
+            }
+
             // Main Image
             if (data.images.main) {
-              const mainImageWrapper = document.createElement('div');
-              mainImageWrapper.className = 'image-wrapper';
-
-              const mainImage = document.createElement('img');
-              mainImage.src = data.images.main;
-              mainImage.alt = 'Main Image';
-              mainImageWrapper.appendChild(mainImage);
-
-              const mainLabel = document.createElement('div');
-              mainLabel.className = 'image-label';
-              mainLabel.innerText = 'Main Image';
-              mainImageWrapper.appendChild(mainLabel);
-
+              const mainImageWrapper = createImageWrapper(data.images.main, 'Main Image', 'Main Image');
               imagesContainer.appendChild(mainImageWrapper);
             }
 
             // Age Image
             if (data.images.age) {
-              const ageImageWrapper = document.createElement('div');
-              ageImageWrapper.className = 'image-wrapper';
-
-              const ageImage = document.createElement('img');
-              ageImage.src = data.images.age;
-              ageImage.alt = 'Age Image';
-              ageImageWrapper.appendChild(ageImage);
-
-              const ageLabel = document.createElement('div');
-              ageLabel.className = 'image-label';
-              ageLabel.innerText = 'Age Image';
-              ageImageWrapper.appendChild(ageLabel);
-
+              const ageImageWrapper = createImageWrapper(data.images.age, 'Age Image', 'Age Image');
               imagesContainer.appendChild(ageImageWrapper);
             }
 
             // Signature Image
             if (data.images.signature) {
-              const signatureImageWrapper = document.createElement('div');
-              signatureImageWrapper.className = 'image-wrapper';
-
-              const signatureImage = document.createElement('img');
-              signatureImage.src = data.images.signature;
-              signatureImage.alt = 'Signature Image';
-              signatureImageWrapper.appendChild(signatureImage);
-
-              const signatureLabel = document.createElement('div');
-              signatureLabel.className = 'image-label';
-              signatureLabel.innerText = 'Signature Image';
-              signatureImageWrapper.appendChild(signatureLabel);
-
+              const signatureImageWrapper = createImageWrapper(data.images.signature, 'Signature Image', 'Signature Image');
               imagesContainer.appendChild(signatureImageWrapper);
             }
           }
+
+          // Inicializar Panzoom después de añadir las imágenes
+          initializePanzoom();
 
           showMessage('success', 'Appraisal details loaded successfully.');
         })
@@ -546,6 +595,28 @@
       // Add event listener to logout button
       document.getElementById('logout-button').addEventListener('click', logout);
 
+      // Función para restablecer el zoom
+      function resetZoom() {
+        const containers = document.querySelectorAll('.panzoom-container');
+        
+        containers.forEach(container => {
+          const panzoomInstance = Panzoom(container, {
+            maxScale: 5,
+            minScale: 1,
+            contain: 'outside',
+            startScale: 1,
+            smoothScroll: false,
+            zoomDoubleClickSpeed: 1
+          });
+          panzoomInstance.reset();
+        });
+        
+        showMessage('success', 'Zoom reset successfully.');
+      }
+
+      // Añadir event listener al botón de reset zoom
+      document.getElementById('reset-zoom').addEventListener('click', resetZoom);
+
       // Function to handle the form submission and initiate the server-side process
       document.getElementById('appraisal-form').addEventListener('submit', async function(event) {
         event.preventDefault();
@@ -577,7 +648,7 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
-//  'Authorization': `Bearer ${token}` // Asegúrate de obtener y almacenar el token correctamente
+              // 'Authorization': `Bearer ${token}` // Asegúrate de obtener y almacenar el token correctamente
             },
              credentials: 'include', // Comenta o elimina si no es necesario
             body: JSON.stringify({ 
