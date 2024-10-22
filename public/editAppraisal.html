@@ -7,9 +7,8 @@
   <!-- Load Google Identity Services library -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Link to the external CSS file -->
-  <style>
-    @import url('css/styles.css');
-  </style>  
+  <link rel="stylesheet" href="css/styles.css">
+  
   <!-- Additional page-specific styles -->
   <style>
     /* General Styles */
@@ -134,7 +133,6 @@
       border: 1px solid #f5c6cb;
     }
 
- 
     /* ACF Fields List */
     #acf-fields-list {
       list-style-type: none;
@@ -249,10 +247,8 @@
     <ul id="acf-fields-list"></ul>
   </div>
 
-  <!-- Loader Container -->
-
-    <div id="loader"></div>
-    
+  <!-- Loader -->
+  <div id="loader"></div>
 
   <script>
     // Obtener parámetros de la URL
@@ -295,15 +291,13 @@
     }
 
     // Función para mostrar el loader
-    function showLoader(message = 'Processing...') {
-      const loaderMessage = document.getElementById('loader-message');
-      loaderMessage.innerText = message;
-      document.getElementById('loader-container').style.display = 'flex';
+    function showLoader() {
+      document.getElementById('loader').style.display = 'block';
     }
 
     // Función para ocultar el loader
     function hideLoader() {
-      document.getElementById('loader-container').style.display = 'none';
+      document.getElementById('loader').style.display = 'none';
     }
 
     // Función para ajustar automáticamente la altura de los <textarea>
@@ -315,7 +309,7 @@
     // Función para cargar los detalles de la apreciación
     function loadAppraisalDetails() {
       // Mostrar el loader
-      showLoader('Fetching appraisal details...');
+      showLoader();
       hideMessage();
 
       fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}/list-edit`, {
@@ -442,7 +436,7 @@
         }
       }
 
-      showLoader('Updating field...');
+      showLoader();
       hideMessage();
 
       // Crear un objeto con el campo a actualizar
@@ -510,7 +504,7 @@
         return;
       }
 
-      showLoader('Submitting updates...');
+      showLoader();
       hideMessage();
 
       try {
@@ -542,7 +536,7 @@
 
     // Manejar logout
     function logout() {
-      showLoader('Logging out...');
+      showLoader();
       hideMessage();
 
       fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
