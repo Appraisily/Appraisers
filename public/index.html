@@ -232,7 +232,7 @@
     }
 
     // Definir la URL base de la API
-    const API_BASE_URL = '/api'; // Cambia esto si tu backend está en una URL diferente
+    const API_BASE_URL = 'https://appraisers-backend-856401495068.us-central1.run.app/api'; // URL de tu backend
 
     // Manejar la respuesta de Google Sign-In
     function handleCredentialResponse(response) {
@@ -252,7 +252,16 @@
         body: JSON.stringify({ idToken }),
         credentials: 'include' // Incluir cookies en la solicitud
       })
-      .then(res => res.json())
+      .then(res => {
+        // Verificar si la respuesta es JSON
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return res.json();
+        } else {
+          // Si no es JSON, devolver texto para manejo de errores
+          return res.text().then(text => { throw new Error(text); });
+        }
+      })
       .then(data => {
         // Ocultar el loader después de recibir la respuesta
         document.getElementById('loader').style.display = 'none';
@@ -323,7 +332,13 @@
         if (res.status === 401 || res.status === 403) {
           throw new Error('Unauthorized. Please log in again.');
         }
-        return res.json();
+
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return res.json();
+        } else {
+          return res.text().then(text => { throw new Error(text); });
+        }
       })
       .then(data => {
         allAppraisals = data; // Almacenar todos los datos de apreciaciones
@@ -535,7 +550,14 @@
         method: 'POST',
         credentials: 'include' // Incluir cookies en la solicitud
       })
-      .then(res => res.json())
+      .then(res => {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return res.json();
+        } else {
+          return res.text().then(text => { throw new Error(text); });
+        }
+      })
       .then(data => {
         // Ocultar el loader después de recibir la respuesta
         document.getElementById('loader').style.display = 'none';
