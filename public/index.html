@@ -231,6 +231,9 @@
       messageDiv.style.display = 'none';
     }
 
+    // Definir la URL base de la API
+    const API_BASE_URL = '/api'; // Cambia esto si tu backend está en una URL diferente
+
     // Manejar la respuesta de Google Sign-In
     function handleCredentialResponse(response) {
       const idToken = response.credential;
@@ -241,7 +244,7 @@
       hideMessage();
       
       // Enviar el ID token al backend para verificación y emisión de JWT
-      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/authenticate', {
+      fetch(`${API_BASE_URL}/authenticate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -301,9 +304,9 @@
       hideMessage();
 
       // Determinar el endpoint basado en el tipo de apreciación
-      let endpoint = 'https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals';
+      let endpoint = `${API_BASE_URL}/appraisals`;
       if (appraisalType === 'completed') {
-        endpoint = 'https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/completed';
+        endpoint = `${API_BASE_URL}/appraisals/completed`;
       }
 
       fetch(endpoint, {
@@ -448,9 +451,9 @@
           }
 
           tableHTML += `
-              </td>
-            </tr>
-          `;
+            </td>
+          </tr>
+        `;
         });
       }
 
@@ -528,7 +531,7 @@
       document.getElementById('loader').style.display = 'block';
       hideMessage();
 
-      fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/logout', {
+      fetch(`${API_BASE_URL}/logout`, {
         method: 'POST',
         credentials: 'include' // Incluir cookies en la solicitud
       })
